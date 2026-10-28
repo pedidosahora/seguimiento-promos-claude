@@ -30,14 +30,25 @@ export async function crearUsuario(datos: {
   nombre: string
   rol: string
 }): Promise<{ perfilId: string; userId: string }> {
-  const { data, error } = await admin().auth.admin.createUser({
+  const a = admin()
+  const { data, error } = await a.auth.admin.createUser({
     email: datos.email,
     password: PASSWORD,
     email_confirm: true,
   })
   if (error) throw error
-  // TODO(Task 2): insertar fila en perfiles y devolver su id
-  return { perfilId: '', userId: data.user.id }
+  const { data: perfil, error: e } = await a
+    .from('perfiles')
+    .insert({
+      email: datos.email,
+      nombre: datos.nombre,
+      rol: datos.rol,
+      user_id: data.user.id,
+    })
+    .select('id')
+    .single()
+  if (e) throw e
+  return { perfilId: perfil.id, userId: data.user.id }
 }
 
 /** Cliente autenticado como el usuario indicado (respeta RLS). */
@@ -52,9 +63,22 @@ export async function clienteComo(email: string): Promise<SupabaseClient> {
   return cliente
 }
 
-/** Borra los usuarios de prueba. Las tareas siguientes ampliarán esto con TRUNCATE de tablas de dominio. */
+/** Tablas de dominio en orden de borrado (hijas primero). Cada tarea añade las suyas al principio. */
+const TABLAS_DOMINIO: { tabla: string; columna: string }[] = [
+  { tabla: 'permisos_extra', columna: 'id' },
+  { tabla: 'concesiones', columna: 'id' },
+  { tabla: 'perfiles', columna: 'id' },
+  { tabla: 'territorios', columna: 'id' },
+]
+
+/** Vacía las tablas de dominio y borra los usuarios de prueba. */
 export async function resetDatos(): Promise<void> {
   const a = admin()
+  for (const { tabla, columna } of TABLAS_DOMINIO) {
+    // PostgREST exige un filtro en DELETE; not-null equivale a "todas las filas".
+    const { error: e } = await a.from(tabla).delete().not(columna, 'is', null)
+    if (e) throw e
+  }
   const { data, error } = await a.auth.admin.listUsers({ perPage: 1000 })
   if (error) throw error
   for (const u of data.users) {
