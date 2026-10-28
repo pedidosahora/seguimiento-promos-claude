@@ -59,7 +59,6 @@ describe('usos y GSV', () => {
       f(3, 999, '11BJC426', 1, 1, '2026-10-26'),
       f(4, 902, '11BJC426', 1, 1, '2026-10-26'),
       f(5, 900, '11BJC426', 1, 1, '2026-10-01'),
-      f(6, 900, '11BJC426', 12, 120, '2026-10-26'),
       f(7, 901, '11BJC426', 3, 30, '2026-10-26'),
     ]
     const r = await c.rpc('previsualizar_usos', { filas })
@@ -76,9 +75,13 @@ describe('usos y GSV', () => {
       concesion_desconocida: 1,
       no_convocada: 1,
       dato_antiguo: 1,
-      actualiza: 1,
       aviso_no_entra: 1,
     })
+    // la 900 con fecha 2026-10-26 (en un lote aparte, para no duplicar TAG+ID)
+    const act = await c.rpc('previsualizar_usos', {
+      filas: [f(2, 900, '11BJC426', 12, 120, '2026-10-26')],
+    })
+    expect(act.data.conteos).toEqual({ actualiza: 1 })
     // la vista previa no escribe
     expect((await segDe(900))?.usos).toBe(10)
   })
@@ -139,6 +142,33 @@ describe('usos y GSV', () => {
     expect((await c.rpc('aplicar_usos', { filas, incluir_antiguos: false })).error).not.toBeNull()
     expect((await c.rpc('clasificar_usos', { filas })).error).not.toBeNull()
     expect((await segDe(900))?.usos).toBe(10)
+  })
+
+  it('duplicadas: no se aplican y es estable', async () => {
+    const c = await clienteComo('adm@pro.agency')
+    const filas = [f(2, 900, '11BJC426', 50, 500, '2026-10-26'), f(3, 900, ' 11bjc426', 60, 600, '2026-10-26')]
+    for (let i = 0; i < 2; i++) {
+      const r = await c.rpc('aplicar_usos', { filas, incluir_antiguos: true })
+      expect(r.error).toBeNull()
+      expect(r.data).toEqual({ aplicadas: 0, conteos: { duplicada: 2 } })
+    }
+    const p = await c.rpc('previsualizar_usos', { filas })
+    expect(p.data.conteos).toEqual({ duplicada: 2 })
+    expect(p.data.detalle.map((d: { categoria: string }) => d.categoria)).toEqual(['duplicada', 'duplicada'])
+    expect(await segDe(900)).toEqual({ usos: 10, gsv: 100, fecha_dato: '2026-10-20' })
+  })
+
+  it('nombre_comercial solo desde filas aplicadas', async () => {
+    const c = await clienteComo('adm@pro.agency')
+    await c.rpc('aplicar_usos', {
+      filas: [f(2, 902, 'ZZZ', 1, 1, '2026-10-26'), f(3, 900, '11BJC426', 12, 120, '2026-10-26')],
+      incluir_antiguos: false,
+    })
+    const n = await admin().from('concesiones').select('id,nombre_comercial').in('id', [900, 902]).order('id')
+    expect(n.data).toEqual([
+      { id: 900, nombre_comercial: 'Concesión 900' },
+      { id: 902, nombre_comercial: null },
+    ])
   })
 
   it('rendimiento: 7.000 filas', async () => {

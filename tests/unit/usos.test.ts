@@ -39,4 +39,20 @@ describe('parsearUsos', () => {
     expect(r.filas).toEqual([])
     expect(r.errores[0].fila).toBe(1)
   })
+  it('duplicados y límites', () => {
+    const r = parsearUsos([
+      cab,
+      [1, 'A', 'T', 1, 1, '26/10/2026'],
+      [1, 'A', ' t', 2, 2, '26/10/2026'],
+      [2, 'A', 'T', 2147483648, 1, '26/10/2026'],
+      [3, 'A', 'T', 1, 10000000000, '26/10/2026'],
+      [4, 'A', 'T', 2147483647, 9999999999.99, '26/10/2026'],
+    ])
+    expect(r.errores).toEqual([
+      { fila: 3, motivo: 'Fila duplicada (ID + TAG)' },
+      { fila: 4, motivo: 'Usos no numérico' },
+      { fila: 5, motivo: 'GSV no numérico' },
+    ])
+    expect(r.filas.map((x) => x.fila)).toEqual([2, 6])
+  })
 })

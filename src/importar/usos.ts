@@ -12,6 +12,9 @@ export type FilaUsos = {
   fecha: string
 }
 
+const INT4_MAX = 2147483647
+const GSV_MAX = 9999999999.99 // numeric(12,2)
+
 const texto = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim())
 
 export function parsearUsos(aoa: unknown[][]): { filas: FilaUsos[]; errores: ErrorFila[] } {
@@ -34,6 +37,7 @@ export function parsearUsos(aoa: unknown[][]): { filas: FilaUsos[]; errores: Err
       ],
     }
   }
+  const vistos = new Set<string>()
   for (let i = 1; i < aoa.length; i++) {
     const r = aoa[i] ?? []
     const fila = i + 1
@@ -53,12 +57,12 @@ export function parsearUsos(aoa: unknown[][]): { filas: FilaUsos[]; errores: Err
       continue
     }
     const usos = aNumero(r[cUsos])
-    if (usos === null || Number.isNaN(usos) || usos < 0 || !Number.isInteger(usos)) {
+    if (usos === null || Number.isNaN(usos) || usos < 0 || !Number.isInteger(usos) || usos > INT4_MAX) {
       errores.push({ fila, motivo: 'Usos no numérico' })
       continue
     }
     const gsv = aNumero(r[cGsv])
-    if (gsv === null || Number.isNaN(gsv) || gsv < 0) {
+    if (gsv === null || Number.isNaN(gsv) || gsv < 0 || gsv > GSV_MAX) {
       errores.push({ fila, motivo: 'GSV no numérico' })
       continue
     }
@@ -67,6 +71,12 @@ export function parsearUsos(aoa: unknown[][]): { filas: FilaUsos[]; errores: Err
       errores.push({ fila, motivo: 'Fecha no válida' })
       continue
     }
+    const clave = `${tag}|${id}`
+    if (vistos.has(clave)) {
+      errores.push({ fila, motivo: 'Fila duplicada (ID + TAG)' })
+      continue
+    }
+    vistos.add(clave)
     filas.push({ fila, id, concesion: texto(r[cCon]), tag, usos, gsv, fecha })
   }
   return { filas, errores }

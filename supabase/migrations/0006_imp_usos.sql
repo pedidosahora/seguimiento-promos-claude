@@ -1,7 +1,7 @@
 -- Importación de usos y GSV acumulados (solo admin). Los valores SUSTITUYEN a los guardados.
 
 -- Clasificación de cada fila importada. Orden de precedencia:
--- tag_desconocido, concesion_desconocida, no_convocada, dato_antiguo,
+-- duplicada (mismo TAG+ID más de una vez en el lote; nunca se aplica), tag_desconocido, concesion_desconocida, no_convocada, dato_antiguo,
 -- sin_cambios, aviso_no_entra, actualiza.
 create function clasificar_usos(filas jsonb)
 returns table (fila int, categoria text, seguimiento_id uuid, detalle text)
@@ -13,13 +13,15 @@ begin
 
   return query
   with f as (
-    select r.fila, r.id, upper(trim(r.tag)) as tag, r.usos, round(r.gsv, 2) as gsv, r.fecha
+    select r.fila, r.id, upper(trim(r.tag)) as tag, r.usos, round(r.gsv, 2) as gsv, r.fecha,
+      count(*) over (partition by upper(trim(r.tag)), r.id) as veces
     from jsonb_to_recordset(filas)
       as r(fila int, id int, concesion text, tag text, usos int, gsv numeric, fecha date)
   )
   select
     f.fila,
     case
+      when f.veces > 1 then 'duplicada'
       when p.id is null then 'tag_desconocido'
       when c.id is null then 'concesion_desconocida'
       when s.id is null then 'no_convocada'
@@ -32,6 +34,7 @@ begin
     end,
     s.id,
     case
+      when f.veces > 1 then 'TAG ' || f.tag || ' + ID ' || f.id || ' repetido en el archivo'
       when p.id is null then 'TAG ' || f.tag || ' no existe'
       when c.id is null then 'Concesión ' || f.id || ' no está en el catálogo'
       when s.id is null then 'Concesión ' || f.id || ' no está convocada en ' || f.tag
@@ -93,36 +96,32 @@ begin
   select coalesce(jsonb_object_agg(categoria, n), '{}'::jsonb) into v_conteos
   from (select categoria, count(*) as n from tmp_usos group by categoria) t;
 
-  -- Nombre comercial: solo donde está vacío.
+  -- Nombre comercial: solo donde está vacío y solo desde filas realmente aplicadas.
   update concesiones c set nombre_comercial = n.nombre
   from (
     select distinct on (r.id) r.id, trim(r.concesion) as nombre
-    from jsonb_to_recordset(filas) as r(fila int, id int, concesion text)
+    from tmp_usos t
+    join jsonb_to_recordset(filas) as r(fila int, id int, concesion text) on r.fila = t.fila
     where nullif(trim(r.concesion), '') is not null
+      and (t.categoria in ('actualiza', 'aviso_no_entra')
+           or (incluir_antiguos and t.categoria = 'dato_antiguo'))
     order by r.id, r.fila
   ) n
   where c.id = n.id and c.nombre_comercial is null;
 
-  -- Una sola actualización. Si una misma (promoción, concesión) viene repetida,
-  -- gana la fecha más reciente y, a igualdad, la última fila.
-  with datos as (
-    select distinct on (t.seguimiento_id)
-      t.seguimiento_id, r.usos, round(r.gsv, 2) as gsv, r.fecha
-    from tmp_usos t
-    join jsonb_to_recordset(filas)
-      as r(fila int, id int, concesion text, tag text, usos int, gsv numeric, fecha date)
-      on r.fila = t.fila
-    where t.categoria in ('actualiza', 'aviso_no_entra')
-       or (incluir_antiguos and t.categoria = 'dato_antiguo')
-    order by t.seguimiento_id, r.fecha desc, r.fila desc
-  )
+  -- Una sola actualización. Los duplicados ya están excluidos (categoría 'duplicada').
   update seguimiento s
-  set usos = d.usos, gsv = d.gsv, fecha_dato = d.fecha
-  from datos d
-  where s.id = d.seguimiento_id
-    and (s.usos is distinct from d.usos
-         or s.gsv is distinct from d.gsv
-         or s.fecha_dato is distinct from d.fecha);
+  set usos = r.usos, gsv = round(r.gsv, 2), fecha_dato = r.fecha
+  from tmp_usos t
+  join jsonb_to_recordset(filas)
+    as r(fila int, id int, concesion text, tag text, usos int, gsv numeric, fecha date)
+    on r.fila = t.fila
+  where s.id = t.seguimiento_id
+    and (t.categoria in ('actualiza', 'aviso_no_entra')
+         or (incluir_antiguos and t.categoria = 'dato_antiguo'))
+    and (s.usos is distinct from r.usos
+         or s.gsv is distinct from round(r.gsv, 2)
+         or s.fecha_dato is distinct from r.fecha);
   get diagnostics v_aplicadas = row_count;
 
   return jsonb_build_object('aplicadas', v_aplicadas, 'conteos', v_conteos);
