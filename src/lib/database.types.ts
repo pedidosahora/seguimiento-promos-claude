@@ -167,6 +167,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "promociones"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "seguimiento_promocion_id_fkey"
+      columns: ["promocion_id"]
+isOneToOne: false
+      referencedRelation: "v_resumen_promocion"
+      referencedColumns: ["promocion_id"]
     }
                   ]
                 },"territorios": {
@@ -186,7 +192,15 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "v_resumen_promocion": {
+                  Row: {
+                    "aceptadas": number | null,"activas": number | null,"convocadas": number | null,"cupos": number | null,"gsv": number | null,"pct_aceptacion": number | null,"pct_activacion": number | null,"pct_pendientes": number | null,"pct_rechazo": number | null,"pendientes": number | null,"presentadas": number | null,"promocion_id": string,"rechazadas": number | null,"usos": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                }
           }
           Functions: {
             "deshacer_cambio":
