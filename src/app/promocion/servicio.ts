@@ -59,18 +59,25 @@ export interface ResultadoBloque {
 export async function guardarEnBloque(
   ids: string[],
   cambios: Partial<Pick<FilaSeguimiento, 'estado' | 'sms' | 'email'>>,
+  versiones?: Record<string, string>,
   cliente: SupabaseClient = supabase,
 ): Promise<ResultadoBloque> {
   const resultado: ResultadoBloque = { ok: 0, fallidas: [], filas: [] }
   const respuestas = await Promise.all(
     ids.map(async (id) => {
-      const { data, error } = await cliente.from('seguimiento').update(cambios).eq('id', id).select()
-      return { id, data, error }
+      let q = cliente.from('seguimiento').update(cambios).eq('id', id)
+      const version = versiones?.[id]
+      if (version) q = q.eq('actualizado_en', version)
+      const { data, error } = await q.select()
+      return { id, data, error, version }
     }),
   )
-  for (const { id, data, error } of respuestas) {
+  for (const { id, data, error, version } of respuestas) {
     if (error) resultado.fallidas.push({ id, motivo: error.message })
-    else if (!data || data.length === 0) resultado.fallidas.push({ id, motivo: 'Sin permiso para editar esta fila' })
+    else if (!data || data.length === 0) resultado.fallidas.push({
+        id,
+        motivo: version ? 'Esta fila ha cambiado; recarga' : 'Sin permiso para editar esta fila',
+      })
     else {
       resultado.ok += 1
       resultado.filas.push(data[0] as FilaSeguimiento)

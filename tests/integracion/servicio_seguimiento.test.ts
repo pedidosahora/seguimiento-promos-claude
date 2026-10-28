@@ -85,11 +85,33 @@ describe('servicio de seguimiento', () => {
 
   it('guardarEnBloque informa ok y fallidas', async () => {
     const ana = await clienteComo('ana@pro.agency')
-    const r = await guardarEnBloque([fila900, fila901], { estado: 'acepta', sms: 'enviado' }, ana)
+    const r = await guardarEnBloque([fila900, fila901], { estado: 'acepta', sms: 'enviado' }, undefined, ana)
     expect(r.ok).toBe(1)
     expect(r.fallidas).toEqual([{ id: fila901, motivo: 'Sin permiso para editar esta fila' }])
     const { data } = await admin().from('seguimiento').select('estado, sms').eq('id', fila900).single()
     expect(data).toEqual({ estado: 'acepta', sms: 'enviado' })
+  })
+
+  it('guardarEnBloque con versión obsoleta: esa fila va a fallidas y se conserva el valor ajeno', async () => {
+    const bea = await clienteComo('bea@pro.agency')
+    const ana = await clienteComo('ana@pro.agency')
+    const { data: a } = await bea.from('seguimiento').select('actualizado_en').eq('id', fila900).single()
+    const { data: b } = await bea.from('seguimiento').select('actualizado_en').eq('id', fila901).single()
+    // Ana cambia su fila después de que Bea la leyera
+    await guardarFila(fila900, { estado: 'rechaza' }, a!.actualizado_en, ana)
+    const r = await guardarEnBloque(
+      [fila900, fila901],
+      { estado: 'acepta' },
+      { [fila900]: a!.actualizado_en, [fila901]: b!.actualizado_en },
+      bea,
+    )
+    expect(r.ok).toBe(1)
+    expect(r.fallidas).toEqual([{ id: fila900, motivo: 'Esta fila ha cambiado; recarga' }])
+    const { data } = await admin().from('seguimiento').select('id, estado').in('id', [fila900, fila901])
+    expect(Object.fromEntries(data!.map((x) => [x.id, x.estado]))).toEqual({
+      [fila900]: 'rechaza',
+      [fila901]: 'acepta',
+    })
   })
 
   it('concesiones_editables devuelve solo las que puede editar quien llama', async () => {

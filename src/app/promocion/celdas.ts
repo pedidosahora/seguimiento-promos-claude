@@ -80,15 +80,15 @@ export function validarCambio(campo: CampoEditable, valor: unknown): { valor: un
 
 const dos = (n: number) => String(n).padStart(2, '0')
 
-/** ISO (timestamptz) → 'aaaa-mm-ddThh:mm' en hora local, formato del editor de fecha y hora. */
+/** ISO (timestamptz) → 'aaaa-mm-ddThh:mm:ss' en hora local, formato del editor de fecha y hora. */
 export function isoALocal(iso: string | null): string | null {
   if (!iso) return null
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return null
-  return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}T${dos(d.getHours())}:${dos(d.getMinutes())}`
+  return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}T${dos(d.getHours())}:${dos(d.getMinutes())}:${dos(d.getSeconds())}`
 }
 
-/** 'aaaa-mm-ddThh:mm' local → ISO UTC para guardar. */
+/** 'aaaa-mm-ddThh:mm[:ss]' local → ISO UTC para guardar. */
 export function localAIso(local: string | null): string | null {
   if (!local) return null
   const d = new Date(local)
@@ -100,5 +100,5 @@ export function textoFechaHora(iso: string | null): string {
   const l = isoALocal(iso)
   if (!l) return '—'
   const [f, h] = l.split('T')
-  return `${f.split('-').reverse().join('/')} ${h}`
+  return `${f.split('-').reverse().join('/')} ${h.slice(0, 5)}`
 }

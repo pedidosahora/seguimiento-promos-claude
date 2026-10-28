@@ -71,6 +71,7 @@ export default function Promocion() {
   // Versión (actualizado_en) más reciente de cada fila, para encadenar guardados sin falsos conflictos.
   const versiones = useRef(new Map<string, string>())
   const colas = useRef(new Map<string, Promise<unknown>>())
+  const errorTrasRecarga = useRef<string | null>(null)
   const promoId = promo?.id
 
   const cargarIndicadores = useCallback(async (id: string) => {
@@ -93,12 +94,14 @@ export default function Promocion() {
   useEffect(() => {
     let vivo = true
     setCargando(true)
-    setError(null)
+    // Un aviso de conflicto debe sobrevivir a la recarga que él mismo provoca.
+    setError(errorTrasRecarga.current)
+    errorTrasRecarga.current = null
     ;(async () => {
       const { data: p, error: ep } = await supabase
         .from('promociones')
         .select('id, tag, espacio, mecanica, fecha_inicio, fecha_fin, estado, umbral_cupos')
-        .eq('tag', decodeURIComponent(tag).toUpperCase())
+        .eq('tag', tag.toUpperCase())
         .maybeSingle()
       if (ep) throw new Error(ep.message)
       if (!p) throw new Error('Promoción no encontrada')
@@ -167,7 +170,10 @@ export default function Promocion() {
           refrescarIndicadores()
         } catch (e) {
           setError(e instanceof Error ? e.message : 'No se ha podido guardar')
-          if (e instanceof ConflictoError) setRecarga((n) => n + 1)
+          if (e instanceof ConflictoError) {
+            errorTrasRecarga.current = e.message
+            setRecarga((n) => n + 1)
+          }
         }
       })
       colas.current.set(fila.id, tarea)
@@ -186,7 +192,13 @@ export default function Promocion() {
       setError(null)
       setAviso(null)
       try {
-        const r = await guardarEnBloque(propias, cambios as Parameters<typeof guardarEnBloque>[1])
+        // Espera a los guardados de celda pendientes para no pisar versiones.
+        await Promise.all(propias.map((id) => colas.current.get(id)))
+        const r = await guardarEnBloque(
+          propias,
+          cambios as Parameters<typeof guardarEnBloque>[1],
+          Object.fromEntries(versiones.current),
+        )
         aplicarFilas(r.filas)
         refrescarIndicadores()
         const partes = [`${r.ok} ${r.ok === 1 ? 'fila actualizada' : 'filas actualizadas'}`]
@@ -237,6 +249,7 @@ export default function Promocion() {
         pestana={pestana}
         onPestana={(p) => {
           setPestana(p)
+          setSeleccion([])
           setLimpiar((n) => n + 1)
         }}
       />

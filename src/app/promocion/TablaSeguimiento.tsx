@@ -9,7 +9,7 @@ import {
   type ICellRendererParams,
 } from 'ag-grid-community'
 import { ETIQUETA_ENVIO, ETIQUETA_ESTADO } from '../../dominio/etiquetas'
-import { pctCupos } from '../../dominio/calculos'
+import { nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
 import {
   claseCelda,
   esEditable,
@@ -111,6 +111,8 @@ export default function TablaSeguimiento({
       width: 160,
       editable: editable(campo),
       cellClass: clase(campo),
+      // Sin cellDataType el editor devolvería solo la fecha y perdería la hora.
+      cellDataType: 'dateTimeString',
       cellEditor: 'agDateStringCellEditor',
       cellEditorParams: { includeTime: true },
       valueGetter: (p) => isoALocal(p.data?.[campo] ?? null),
@@ -151,7 +153,7 @@ export default function TablaSeguimiento({
         cellRenderer: (p: ICellRendererParams<FilaGrid>) =>
           p.data ? (
             <>
-              {p.data.cupos && p.data.usos != null && p.data.usos >= p.data.cupos ? '⚠ ' : ''}
+              {nivelAlertaCupos(p.data.usos, p.data.cupos, umbral) === 'agotado' ? '⚠ ' : ''}
               {textoPctCupos(p.data.usos, p.data.cupos)}
             </>
           ) : null,

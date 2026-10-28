@@ -80,6 +80,12 @@ describe('lógica de celdas', () => {
     expect(localAIso(null)).toBeNull()
     expect(localAIso('')).toBeNull()
   })
+
+  it('valor de dateTimeString con hora: se interpreta en hora local, no como 00:00Z', () => {
+    // formato que devuelve el editor de fecha y hora con cellDataType dateTimeString
+    expect(localAIso('2026-10-05T09:30:00')).toBe(new Date(2026, 9, 5, 9, 30, 0).toISOString())
+    expect(isoALocal(new Date(2026, 9, 5, 9, 30, 0).toISOString())).toBe('2026-10-05T09:30:00')
+  })
 })
 
 describe('TablaSeguimiento', () => {
