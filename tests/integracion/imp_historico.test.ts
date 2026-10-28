@@ -230,4 +230,25 @@ describe('importación del histórico', () => {
     expect(data!.length).toBeGreaterThan(0)
     expect(data!.every((h) => h.origen === 'importacion_historico')).toBe(true)
   })
+
+  it('una promoción existente de otro espacio se muestra y no se actualiza', async () => {
+    const c = await clienteComo('adm@pro.agency')
+    await c.rpc('aplicar_historico', {
+      datos: datos([promo('SEPT1', [fila(900, { usos: 5 })])]),
+      p_espacio: 'TMICC',
+      tags_actualizar: [],
+    })
+    const antes = await segs('SEPT1')
+    const d2 = datos([promo('SEPT1', [fila(900, { usos: 99, cupos: 50 }), fila(901)])], 'UFS')
+    const prev = await c.rpc('previsualizar_historico', { datos: d2, p_espacio: 'UFS' })
+    expect(prev.error).toBeNull()
+    expect(prev.data.promociones[0]).toMatchObject({ tag: 'SEPT1', accion: 'ya_existe', espacio: 'TMICC' })
+    const r = await c.rpc('aplicar_historico', { datos: d2, p_espacio: 'UFS', tags_actualizar: ['SEPT1'] })
+    expect(r.error).toBeNull()
+    expect(r.data).toMatchObject({ actualizadas: 0, omitidas: 1, concesiones_creadas: 0 })
+    expect(r.data.omitidas_otro_espacio).toEqual([
+      { tag: 'SEPT1', motivo: expect.stringContaining('TMICC') },
+    ])
+    expect(await segs('SEPT1')).toEqual(antes)
+  })
 })

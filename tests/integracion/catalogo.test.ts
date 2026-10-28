@@ -109,4 +109,46 @@ describe('catálogo y permisos base', () => {
       { id: 904, kam_id: null },
     ])
   })
+
+  it('cambiar el email de un perfil lo revincula con el usuario confirmado', async () => {
+    const a = admin()
+    const { data: u } = await a.auth.admin.createUser({
+      email: 'x@pro.agency',
+      password: 'test-local-1234',
+      email_confirm: true,
+    })
+    const { data: creado } = await a
+      .from('perfiles')
+      .insert({ email: 'xx@pro.agency', nombre: 'Typo', rol: 'kam' })
+      .select('id,user_id')
+      .single()
+    expect(creado?.user_id).toBeNull()
+    const { error } = await a.from('perfiles').update({ email: 'X@pro.agency' }).eq('id', creado!.id)
+    expect(error).toBeNull()
+    const { data: p } = await a.from('perfiles').select('user_id').eq('id', creado!.id).single()
+    expect(p?.user_id).toBe(u.user?.id)
+  })
+
+  it('cambiar el email a uno sin usuario desvincula el perfil', async () => {
+    const { perfilId } = await crearUsuario({ email: 'viejo@pro.agency', nombre: 'Viejo', rol: 'kam' })
+    const a = admin()
+    const { error } = await a.from('perfiles').update({ email: 'nadie@pro.agency' }).eq('id', perfilId)
+    expect(error).toBeNull()
+    const { data: p } = await a.from('perfiles').select('user_id').eq('id', perfilId).single()
+    expect(p?.user_id).toBeNull()
+  })
+
+  it('no se puede dejar el sistema sin administrador activo', async () => {
+    const a = admin()
+    const { perfilId } = await crearUsuario({ email: 'adm@pro.agency', nombre: 'Adm', rol: 'admin' })
+    const baja = await a.from('perfiles').update({ activo: false }).eq('id', perfilId)
+    expect(baja.error?.message).toMatch(/al menos un administrador activo/)
+    const rebaja = await a.from('perfiles').update({ rol: 'kam' }).eq('id', perfilId)
+    expect(rebaja.error?.message).toMatch(/al menos un administrador activo/)
+
+    const { perfilId: otro } = await crearUsuario({ email: 'adm2@pro.agency', nombre: 'Adm2', rol: 'admin' })
+    expect((await a.from('perfiles').update({ rol: 'kam' }).eq('id', perfilId)).error).toBeNull()
+    const ultimo = await a.from('perfiles').update({ activo: false }).eq('id', otro)
+    expect(ultimo.error?.message).toMatch(/al menos un administrador activo/)
+  })
 })
