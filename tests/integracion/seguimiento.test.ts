@@ -92,7 +92,46 @@ describe('seguimiento', () => {
       .from('seguimiento')
       .update({ estado: 'acepta' })
       .eq('concesion_id', 901)
-    expect(error).not.toBeNull()
+    expect(error?.message).toContain('Sin permiso')
+  })
+
+  it('kam no puede reasignar concesión de una fila', async () => {
+    const ana = await clienteComo('ana@pro.agency')
+    const { error } = await ana
+      .from('seguimiento')
+      .update({ concesion_id: 900 })
+      .eq('concesion_id', 901)
+    expect(error?.message).toContain('Sin permiso')
+    const { data } = await admin()
+      .from('seguimiento')
+      .select('concesion_id')
+      .eq('promocion_id', promo)
+    expect(data?.map((r) => r.concesion_id).sort()).toEqual([900, 901])
+  })
+
+  it('kam no puede mover fila a otra promoción', async () => {
+    const a = admin()
+    const { data: otra } = await a
+      .from('promociones')
+      .insert({
+        tag: 'T2',
+        espacio: 'TMICC',
+        marca: 'TMICC',
+        mecanica: 'm',
+        fecha_inicio: '2026-01-01',
+        fecha_fin: '2026-02-01',
+        estado: 'publicada',
+      })
+      .select('id')
+      .single()
+    await a.from('promociones').update({ estado: 'cerrada' }).eq('id', promo)
+    const ana = await clienteComo('ana@pro.agency')
+    const { error } = await ana
+      .from('seguimiento')
+      .update({ promocion_id: otra!.id })
+      .eq('promocion_id', promo)
+      .eq('concesion_id', 900)
+    expect(error?.message).toContain('Sin permiso')
   })
 
   it('permiso por espacio', async () => {

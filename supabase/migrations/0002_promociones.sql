@@ -99,10 +99,17 @@ begin
     return new;
   end if;
 
-  select * into v_promo from public.promociones where id = new.promocion_id;
+  -- Un no-admin no puede reasignar la fila (evita tomar filas ajenas o salir de una promoción cerrada)
+  if new.id is distinct from old.id
+     or new.promocion_id is distinct from old.promocion_id
+     or new.concesion_id is distinct from old.concesion_id then
+    raise exception 'Sin permiso para editar esta fila';
+  end if;
+
+  select * into v_promo from public.promociones where id = old.promocion_id;
   if v_promo.id is null
      or v_promo.estado <> 'publicada'
-     or not public.puede_editar_concesion(new.concesion_id, v_promo.espacio) then
+     or not public.puede_editar_concesion(old.concesion_id, v_promo.espacio) then
     raise exception 'Sin permiso para editar esta fila';
   end if;
 
