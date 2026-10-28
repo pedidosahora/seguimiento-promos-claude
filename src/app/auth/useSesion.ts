@@ -11,6 +11,8 @@ export interface EstadoSesion {
   perfil: Perfil | null
   /** true si hay sesión de Auth (con o sin perfil). */
   haySesion?: boolean
+  /** Fallo al cargar sesión o perfil (distinto de "sin acceso"). */
+  error?: string | null
 }
 
 export const SesionContext = createContext<EstadoSesion>({ cargando: true, perfil: null })
@@ -22,12 +24,13 @@ export function usePerfil(): Perfil | null {
 
 async function cargarPerfil(sesion: Session | null): Promise<Perfil | null> {
   if (!sesion) return null
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('perfiles')
     .select('*')
     .eq('user_id', sesion.user.id)
     .eq('activo', true)
     .maybeSingle()
+  if (error) throw new Error(error.message)
   return (data as Perfil | null) ?? null
 }
 
@@ -37,10 +40,33 @@ export function useSesion(): EstadoSesion {
   useEffect(() => {
     let vivo = true
     const aplicar = async (sesion: Session | null) => {
-      const perfil = await cargarPerfil(sesion)
-      if (vivo) setEstado({ cargando: false, perfil, haySesion: !!sesion })
+      try {
+        const perfil = await cargarPerfil(sesion)
+        if (vivo) setEstado({ cargando: false, perfil, haySesion: !!sesion, error: null })
+      } catch (e) {
+        if (vivo) {
+          setEstado({
+            cargando: false,
+            perfil: null,
+            haySesion: !!sesion,
+            error: e instanceof Error ? e.message : 'Error desconocido',
+          })
+        }
+      }
     }
-    supabase.auth.getSession().then(({ data }) => aplicar(data.session))
+    supabase.auth
+      .getSession()
+      .then(({ data }) => aplicar(data.session))
+      .catch((e) => {
+        if (vivo) {
+          setEstado({
+            cargando: false,
+            perfil: null,
+            haySesion: false,
+            error: e instanceof Error ? e.message : 'Error desconocido',
+          })
+        }
+      })
     const { data: sub } = supabase.auth.onAuthStateChange((_evento, sesion) => {
       // Fuera del callback para no bloquear el cliente de Auth con consultas.
       setTimeout(() => void aplicar(sesion), 0)

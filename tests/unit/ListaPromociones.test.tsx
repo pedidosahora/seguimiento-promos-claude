@@ -3,6 +3,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 
+const estadoMock = vi.hoisted(() => ({ rechazar: false }))
+
 const promociones = [
   {
     id: 'p1', tag: 'TMICC-VIEJA', espacio: 'TMICC', marca: 'TMICC', mecanica: '2x1',
@@ -23,7 +25,8 @@ vi.mock('../../src/lib/supabase', () => {
     const resultado = { data: tabla === 'promociones' ? promociones : resumen, error: null }
     const b: Record<string, unknown> = {}
     for (const m of ['select', 'eq', 'order', 'in']) b[m] = () => b
-    b.then = (ok: (r: typeof resultado) => unknown) => Promise.resolve(resultado).then(ok)
+    b.then = (ok: (r: typeof resultado) => unknown, ko?: (e: unknown) => unknown) =>
+      (estadoMock.rechazar ? Promise.reject(new Error('red caída')) : Promise.resolve(resultado)).then(ok, ko)
     return b
   }
   return { supabase: { from: construir } }
@@ -47,7 +50,10 @@ function montar(rol: 'admin' | 'kam', ruta: string) {
 
 describe('ListaPromociones', () => {
   beforeEach(() => vi.clearAllMocks())
-  afterEach(cleanup)
+  afterEach(() => {
+    cleanup()
+    estadoMock.rechazar = false
+  })
 
   it('admin ve la insignia Vencida', async () => {
     montar('admin', '/todos')
@@ -66,5 +72,12 @@ describe('ListaPromociones', () => {
     await waitFor(() => expect(screen.getByText('CAMP-FUTURA')).toBeInTheDocument())
     expect(screen.getByRole('columnheader', { name: 'Espacio' })).toBeInTheDocument()
     expect(screen.getByText('Campañas')).toBeInTheDocument()
+  })
+
+  it('si la carga falla muestra el error y deja de cargar', async () => {
+    estadoMock.rechazar = true
+    montar('kam', '/todos')
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('red caída'))
+    expect(screen.queryByText('Cargando…')).not.toBeInTheDocument()
   })
 })

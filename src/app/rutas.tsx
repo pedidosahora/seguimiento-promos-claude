@@ -15,6 +15,14 @@ function SoloAdmin({ children }: { children: ReactElement }) {
 export default function Rutas() {
   const sesion = useSesion()
   if (sesion.cargando) return <p className="aviso">Cargando…</p>
+  if (sesion.error) {
+    return (
+      <div className="aviso" role="alert">
+        <p>No se ha podido cargar tu perfil.</p>
+        <button className="boton" onClick={() => window.location.reload()}>Reintentar</button>
+      </div>
+    )
+  }
   if (!sesion.haySesion) return <Acceso />
   if (!sesion.perfil) {
     return <p className="aviso">Tu cuenta no tiene acceso. Pide alta a administración</p>

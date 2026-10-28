@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../auth/useSesion'
+import { hoyISO as hoy } from '../../dominio/fechas'
 import {
   ETIQUETA_ESPACIO,
   ETIQUETA_ESTADO_PROMOCION,
@@ -36,7 +37,6 @@ const ESPACIO_RUTA: Record<string, Espacio | undefined> = {
 // La vista puede devolver numeric como string.
 const num = (v: unknown) => Number(v ?? 0)
 const fmtFecha = (f: string | null) => (f ? f.split('-').reverse().join('/') : '—')
-const hoy = () => new Date().toISOString().slice(0, 10)
 
 export default function ListaPromociones() {
   const { espacio: ruta = 'todos' } = useParams()
@@ -79,9 +79,12 @@ export default function ListaPromociones() {
         }
         setPromos((p.data ?? []) as Promo[])
         setResumen(mapa)
-        setCargando(false)
       },
-    )
+    ).catch((e) => {
+      if (vivo) setError(e instanceof Error ? e.message : 'No se han podido cargar las promociones')
+    }).finally(() => {
+      if (vivo) setCargando(false)
+    })
     return () => {
       vivo = false
     }
