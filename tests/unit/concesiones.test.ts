@@ -24,4 +24,18 @@ describe('parsearConcesiones', () => {
     ])
     expect(r.filas).toHaveLength(1)
   })
+  it('ID no válido', () => {
+    const r = parsearConcesiones([
+      cab,
+      [0, 'A', 'G', 'N'],
+      ['1e3', 'A', 'G', 'N'],
+      ['2147483648', 'A', 'G', 'N'],
+    ])
+    expect(r.filas).toEqual([])
+    expect(r.errores.map((e) => e.motivo)).toEqual([
+      'ID no válido: 0',
+      'ID no válido: 1e3',
+      'ID no válido: 2147483648',
+    ])
+  })
 })

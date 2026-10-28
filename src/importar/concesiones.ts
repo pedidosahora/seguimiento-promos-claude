@@ -1,4 +1,4 @@
-import { normalizarCabecera } from './normalizar'
+import { aId, normalizarCabecera } from './normalizar'
 import type { ErrorFila } from './tipos'
 
 export type { ErrorFila }
@@ -33,14 +33,13 @@ export function parsearConcesiones(aoa: unknown[][]): {
     const r = aoa[i] ?? []
     const fila = i + 1
     if (r.every((c) => texto(c) === '')) continue
-    const idTxt = texto(r[cId])
-    if (idTxt === '') {
+    const id = aId(r[cId])
+    if (id === null) {
       errores.push({ fila, motivo: 'ID vacío' })
       continue
     }
-    const id = Number(idTxt)
-    if (!Number.isInteger(id)) {
-      errores.push({ fila, motivo: `ID no válido: ${idTxt}` })
+    if (Number.isNaN(id)) {
+      errores.push({ fila, motivo: `ID no válido: ${texto(r[cId])}` })
       continue
     }
     if (vistos.has(id)) {

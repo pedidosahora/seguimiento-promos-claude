@@ -203,7 +203,15 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "deshacer_cambio":
+            "aplicar_usos":
+{ Args: { "filas": Json,"incluir_antiguos"?: boolean }; Returns: Json
+                           },
+"clasificar_usos":
+{ Args: { "filas": Json }; Returns: {
+              "categoria": string,"detalle": string,"fila": number,"seguimiento_id": string
+            }[]
+                           },
+"deshacer_cambio":
 { Args: { "p_id": number }; Returns: undefined
                            },
 "es_admin":
@@ -230,6 +238,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"previsualizar_usos":
+{ Args: { "filas": Json }; Returns: Json
+                           },
 "puede_editar_concesion":
 { Args: { "p_concesion": number,"p_espacio": Database["public"]['Enums']["espacio"] }; Returns: boolean
                            }
