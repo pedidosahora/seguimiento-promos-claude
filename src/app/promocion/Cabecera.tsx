@@ -12,6 +12,9 @@ export interface PromoCabecera {
 export interface Indicadores {
   convocadas: number
   presentadas: number
+  activas: number
+  pendientes: number
+  cupos: number
   pct_aceptacion: number | null
   pct_pendientes: number | null
   pct_rechazo: number | null
@@ -38,10 +41,13 @@ export default function Cabecera({ promo, indicadores: i, pestana, onPestana, on
     ? [
         ['Convocadas', String(i.convocadas)],
         ['Presentadas', String(i.presentadas)],
+        ['Activas', String(i.activas)],
+        ['Pendientes', String(i.pendientes)],
         ['% aceptación', fmtPct(i.pct_aceptacion)],
         ['% pendientes', fmtPct(i.pct_pendientes)],
         ['% rechazo', fmtPct(i.pct_rechazo)],
         ['% activación', fmtPct(i.pct_activacion)],
+        ['Cupos', i.cupos.toLocaleString('es-ES')],
         ['Usos', i.usos.toLocaleString('es-ES')],
         ['GSV', i.gsv.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })],
       ]

@@ -83,6 +83,9 @@ export default function Promocion() {
     setIndicadores({
       convocadas: Number(d.convocadas ?? 0),
       presentadas: Number(d.presentadas ?? 0),
+      activas: Number(d.activas ?? 0),
+      pendientes: Number(d.pendientes ?? 0),
+      cupos: Number(d.cupos ?? 0),
       pct_aceptacion: numONull(d.pct_aceptacion),
       pct_pendientes: numONull(d.pct_pendientes),
       pct_rechazo: numONull(d.pct_rechazo),
@@ -280,6 +283,7 @@ export default function Promocion() {
             onSeleccion={setSeleccion}
             onAbrirFicha={abrirFicha}
             limpiarSeleccion={limpiar}
+            ocultarKamTerritorio={pestana === 'mis'}
           />
         )}
         {fichaFila && perfil && (

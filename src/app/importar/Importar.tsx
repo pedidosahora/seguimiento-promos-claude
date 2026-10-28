@@ -212,13 +212,20 @@ export default function Importar() {
           datos: preparado.datos, p_espacio: espacio, tags_actualizar: [...actualizar],
         })
         if (err) throw new Error(err.message)
-        const r = data as { creadas: number; actualizadas: number; omitidas: number; concesiones_creadas: number }
+        const r = data as {
+          creadas: number
+          actualizadas: number
+          omitidas: number
+          concesiones_creadas: number
+          omitidas_otro_espacio?: { tag: string; motivo: string }[]
+        }
         setResultado({
           lineas: [
             `${r.creadas} promociones creadas`,
             `${r.actualizadas} actualizadas`,
             `${r.omitidas} omitidas (ya existían)`,
             `${r.concesiones_creadas} concesiones creadas (inactivas)`,
+            ...(r.omitidas_otro_espacio ?? []).map((o) => `Omitida ${o.tag}: ${o.motivo}`),
           ],
           enlaces: [{ to: `/${espacio.toLowerCase()}`, texto: `Ver promociones de ${ETIQUETA_ESPACIO[espacio]}` }],
         })
@@ -299,6 +306,7 @@ export default function Importar() {
             incidencias={previa.incidencias}
             etiquetas={ETIQUETAS_INCIDENCIA}
             promociones={previa.promociones}
+            espacioActual={espacio}
             actualizar={actualizar}
             onActualizar={(tag, marcado) =>
               setActualizar((prev) => {

@@ -25,7 +25,7 @@ Requisitos: acceso admin al Google Workspace `pro.agency`, una cuenta de Supabas
 
 ### Lo que puede romper el coste cero
 
-1. **Pausa de Supabase por inactividad (riesgo real).** Si nadie usa la app en 7 días, el proyecto se pausa y la app deja de funcionar hasta restaurarlo a mano. Mitigación: la copia semanal (sección 6) consulta la base de datos cada lunes, lo que por inferencia cuenta como actividad. La documentación no lo garantiza; compruébalo las primeras semanas. Si se pausara, restaurar es gratis (90 días de margen).
+1. **Pausa de Supabase por inactividad (riesgo real).** Si nadie usa la app en 7 días, el proyecto se pausa y la app deja de funcionar hasta restaurarlo a mano. Mitigación: la copia semanal (sección 6) consulta la base de datos cada lunes y jueves, lo que por inferencia cuenta como actividad. La documentación no lo garantiza; compruébalo las primeras semanas. Si se pausara, restaurar es gratis (90 días de margen).
 2. **Emails de Auth: 2 por hora.** Solo afecta si se usan enlaces mágicos, OTP o confirmaciones por email. El acceso previsto es con Google, que no envía emails. No uses login por email en producción; si hiciera falta, habría que configurar un SMTP propio.
 3. **Sin copias automáticas en Free.** Por eso existe la copia semanal. El artefacto vive 90 días en GitHub; descarga un volcado de vez en cuando a un sitio de la agencia.
 4. **Uso comercial en Cloudflare Pages: sin confirmar.** Es una herramienta interna de una agencia. Lee los términos de Cloudflare; si lo restringieran, la alternativa es otro alojamiento estático gratuito, sin tocar el código.
@@ -45,7 +45,7 @@ Nada de esto obliga a pagar hoy. Los puntos 1 y 4 son los que hay que vigilar.
    - **anon public key** (será `VITE_SUPABASE_ANON_KEY`). Es pública por diseño. Nunca uses la `service_role` en la web.
 5. Apunta el **Project ref** (el código de la URL del dashboard).
 
-## 2. Aplicar las migraciones (0001 a 0009)
+## 2. Aplicar las migraciones (0001 a 0010)
 
 Desde la carpeta del proyecto:
 
@@ -55,7 +55,7 @@ npx supabase link --project-ref <PROJECT_REF>
 npx supabase db push
 ```
 
-`db push` pide la contraseña de la base de datos y aplica las 9 migraciones de `supabase/migrations`. Después, `npx supabase migration list` debe mostrar las 9 aplicadas en local y remoto.
+`db push` pide la contraseña de la base de datos y aplica las 10 migraciones de `supabase/migrations`. Después, `npx supabase migration list` debe mostrar las 10 aplicadas en local y remoto.
 
 No ejecutes `supabase/seed.sql`: son datos de desarrollo.
 
@@ -77,7 +77,7 @@ Los perfiles internos (`admin` y `kam`) deben tener email `@pro.agency`; la base
 Surgen de un hallazgo de seguridad de la revisión del código. En local están en modo pruebas; en producción hay que fijarlos a mano en el dashboard de Supabase > Authentication:
 
 1. **Confirmación de email activada** (proveedor Email > "Confirm email" ON). Sin esto, alguien podría registrarse con el email de otra persona y quedar vinculado a su perfil.
-2. **Registro público por email desactivado** (desactiva "Allow new users to sign up" o el proveedor Email). Solo deben entrar personas con perfil dado de alta.
+2. **Proveedor Email desactivado** (Authentication > Providers > Email: déjalo apagado, o sin registro). **Mantén "Allow new users to sign up" ACTIVADO.** Ese ajuste también afecta a los usuarios de Google (OAuth) y la vinculación del perfil necesita que el usuario de acceso se cree en el primer login; si lo apagas, es probable que ningún KAM pueda entrar por primera vez (inferencia, no verificado en un proyecto real). La restricción de dominio no viene de este ajuste sino de la pantalla de consentimiento "Interno" de Google (paso 3 y sección 5). Un desconocido sin perfil no ve nada: las políticas RLS solo dejan leer a quien tiene un perfil activo.
 3. **Google restringido al Workspace**: pantalla de consentimiento "Interno" (sección 5).
 4. **URL Configuration**:
    - Site URL: `https://<TU-SITIO>.pages.dev`
@@ -96,7 +96,7 @@ Atención: los usuarios con rol `socio` no son del Workspace y no podrían entra
 
 ## 6. Copia de seguridad semanal (GitHub Actions)
 
-El workflow `.github/workflows/copia-seguridad.yml` vuelca datos y esquema cada lunes a las 05:00 UTC y los guarda como artefacto 90 días. Al consultar la base de datos cada semana, probablemente ayuda también a mantener activo el proyecto (inferencia, ver sección 0, punto 1).
+El workflow `.github/workflows/copia-seguridad.yml` vuelca datos y esquema los lunes y jueves a las 05:00 UTC y los guarda como artefacto 90 días. Al consultar la base de datos dos veces por semana, probablemente ayuda también a mantener activo el proyecto (inferencia, ver sección 0, punto 1).
 
 1. Sube el repositorio a GitHub como repositorio **privado** (contiene datos de clientes en las copias).
 2. En Supabase, botón **Connect**, copia la cadena de conexión del *Session pooler* (la conexión directa es IPv6 y los runners de GitHub pueden no soportarlo) con tu contraseña de base de datos.
@@ -146,8 +146,9 @@ Orden obligatorio, desde el asistente de importación de la aplicación, entrand
 2. **Catálogo**.
 3. **Histórico**.
 4. **Usos**.
+5. **Comprobación de vinculación:** un KAM que nunca ha entrado inicia sesión con Google y ve sus concesiones. Si ve la pantalla "Tu cuenta no tiene acceso", revisa que el email de su perfil coincide con el de su cuenta de Google y que "Allow new users to sign up" está activado (sección 4).
 
-No pases al siguiente paso hasta que el anterior esté correcto: el histórico y los usos dependen del catálogo.
+No pases del paso 2 al 4 hasta que el anterior esté correcto: el histórico y los usos dependen del catálogo.
 
 ## 9. Prueba de humo
 

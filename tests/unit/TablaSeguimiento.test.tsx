@@ -118,4 +118,63 @@ describe('TablaSeguimiento', () => {
     expect(filaBeta.querySelector('.no-editable')).not.toBeNull()
     expect(container.querySelector('[row-id="a"] [col-id="estado"].no-editable')).toBeNull()
   })
+
+  const props = {
+    editables: new Set([9100]),
+    esAdmin: false,
+    umbral: 0.8,
+    onEditar: vi.fn(),
+    onSeleccion: vi.fn(),
+    onAbrirFicha: vi.fn(),
+    pruebas: true,
+  }
+
+  it('⚠ en cerca (amarillo) y en agotado (rojo); nada por debajo del umbral', async () => {
+    const filas = [
+      fila({ id: 'a', nombre: 'Alfa', concesion_id: 9100, cupos: 50, usos: 51 }),
+      fila({ id: 'b', nombre: 'Beta', concesion_id: 9101, cupos: 50, usos: 45 }),
+      fila({ id: 'c', nombre: 'Gamma', concesion_id: 9102, cupos: 50, usos: 10 }),
+    ]
+    const { container } = render(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} filas={filas} />
+      </div>,
+    )
+    await waitFor(() => expect(screen.getByText('Alfa')).toBeInTheDocument())
+    const pct = (id: string) => container.querySelector(`[row-id="${id}"] [col-id="pct_cupos"]`)!
+    expect(pct('a').textContent).toContain('⚠')
+    expect(pct('a').className).toMatch(/alerta-agotado/)
+    expect(pct('b').textContent).toContain('⚠')
+    expect(pct('b').className).toMatch(/alerta-cerca/)
+    expect(pct('c').textContent).not.toContain('⚠')
+  })
+
+  it('orden de columnas: selección y Concesión primero; %Cupos, SMS y Email antes de KAM y Territorio', async () => {
+    const { container } = render(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} filas={[fila()]} />
+      </div>,
+    )
+    await waitFor(() => expect(screen.getByText('Alfa')).toBeInTheDocument())
+    const ids = [...container.querySelectorAll('.ag-header-cell[col-id]')].map((h) => h.getAttribute('col-id'))
+    expect(ids.slice(0, 2)).toEqual(['ag-Grid-SelectionColumn', 'concesion'])
+    const pos = (id: string) => ids.indexOf(id)
+    for (const antes of ['pct_cupos', 'sms', 'email']) {
+      expect(pos(antes)).toBeGreaterThan(-1)
+      expect(pos(antes)).toBeLessThan(pos('kam'))
+      expect(pos(antes)).toBeLessThan(pos('territorio'))
+    }
+  })
+
+  it('en Mis concesiones se ocultan KAM y Territorio', async () => {
+    const { container } = render(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} filas={[fila()]} ocultarKamTerritorio />
+      </div>,
+    )
+    await waitFor(() => expect(screen.getByText('Alfa')).toBeInTheDocument())
+    expect(container.querySelector('.ag-header-cell[col-id="kam"]')).toBeNull()
+    expect(container.querySelector('.ag-header-cell[col-id="territorio"]')).toBeNull()
+    expect(container.querySelector('.ag-header-cell[col-id="email"]')).not.toBeNull()
+  })
 })

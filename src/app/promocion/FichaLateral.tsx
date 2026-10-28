@@ -150,7 +150,7 @@ export default function FichaLateral({ fila, umbral, editable, esAdmin, perfilId
         <div className="cupos-texto">
           <span>Cupos usados</span>
           <strong className={nivel ? `alerta-${nivel}-texto` : undefined}>
-            {nivel === 'agotado' ? '⚠ ' : ''}{textoPctCupos(fila.usos, fila.cupos)}
+            {nivel ? '⚠ ' : ''}{textoPctCupos(fila.usos, fila.cupos)}
           </strong>
         </div>
         <div

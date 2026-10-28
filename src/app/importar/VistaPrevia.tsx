@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { ETIQUETA_ESPACIO, type Espacio } from '../../dominio/etiquetas'
 
 export type Incidencia = { fila: number | null; categoria: string; detalle: string }
 
@@ -10,6 +11,8 @@ export type PromoPrevia = {
   filas: number
   concesiones_nuevas: number[]
   aviso?: string | null
+  /** Espacio de la promoción existente (solo en ya_existe). */
+  espacio?: Espacio
 }
 
 interface Props {
@@ -18,6 +21,8 @@ interface Props {
   /** Etiqueta legible de cada categoría de incidencia. */
   etiquetas: Record<string, string>
   promociones?: PromoPrevia[]
+  /** Espacio elegido para la importación: una promoción existente de otro espacio no se actualiza. */
+  espacioActual?: Espacio
   actualizar?: Set<string>
   onActualizar?: (tag: string, marcado: boolean) => void
   antiguos?: { n: number; incluir: boolean; onCambio: (v: boolean) => void }
@@ -26,7 +31,7 @@ interface Props {
 const MAX_FILAS = 500
 
 export default function VistaPrevia({
-  conteos, incidencias, etiquetas, promociones, actualizar, onActualizar, antiguos,
+  conteos, incidencias, etiquetas, promociones, espacioActual, actualizar, onActualizar, antiguos,
 }: Props) {
   const [filtro, setFiltro] = useState('')
   const categorias = useMemo(() => [...new Set(incidencias.map((i) => i.categoria))], [incidencias])
@@ -66,11 +71,20 @@ export default function VistaPrevia({
             {promociones.map((p) => (
               <tr key={p.tag}>
                 <td>{p.tag}</td>
-                <td>{p.accion === 'crear' ? 'Se creará' : 'Ya existe'}</td>
+                <td>
+                  {p.accion === 'crear'
+                    ? 'Se creará'
+                    : p.espacio ? `Ya existe (en ${ETIQUETA_ESPACIO[p.espacio]})` : 'Ya existe'}
+                </td>
                 <td className="num">{p.filas}</td>
                 <td className="num">{p.concesiones_nuevas.length}</td>
                 <td>
-                  {p.accion === 'ya_existe' && (
+                  {p.accion === 'ya_existe' && p.espacio && espacioActual && p.espacio !== espacioActual && (
+                    <span className="nota">
+                      Está en {ETIQUETA_ESPACIO[p.espacio]}: no se actualizará desde {ETIQUETA_ESPACIO[espacioActual]}
+                    </span>
+                  )}
+                  {p.accion === 'ya_existe' && (!p.espacio || !espacioActual || p.espacio === espacioActual) && (
                     <label className="casilla formulario">
                       <input
                         type="checkbox"

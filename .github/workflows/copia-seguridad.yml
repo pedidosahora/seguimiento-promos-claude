@@ -2,7 +2,7 @@ name: Copia de seguridad semanal
 
 on:
   schedule:
-    - cron: '0 5 * * 1' # lunes a las 05:00 UTC
+    - cron: '0 5 * * 1,4' # lunes y jueves a las 05:00 UTC
   workflow_dispatch:
 
 permissions:
