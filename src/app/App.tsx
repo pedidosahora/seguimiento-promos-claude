@@ -1,3 +1,6 @@
+import Rutas from './rutas'
+import './estilos.css'
+
 export default function App() {
-  return <h1>Seguimiento de promociones</h1>
+  return <Rutas />
 }
