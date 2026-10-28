@@ -30,3 +30,7 @@ npm run test:int   # pruebas de integración (requiere Supabase en marcha)
 - `npm run db:reset`: recrea la base de datos y aplica las migraciones.
 - `npm run tipos`: regenera `src/lib/database.types.ts`.
 - `npm run build`: compilación de producción.
+
+## Puesta en producción
+
+Ver [docs/puesta-en-marcha.md](docs/puesta-en-marcha.md): condiciones gratuitas, despliegue, ajustes de autenticación y copia de seguridad semanal.

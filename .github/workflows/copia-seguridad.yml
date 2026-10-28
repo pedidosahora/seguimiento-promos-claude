@@ -1,0 +1,41 @@
+name: Copia de seguridad semanal
+
+on:
+  schedule:
+    - cron: '0 5 * * 1' # lunes a las 05:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  copia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Volcar datos
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: npx --yes supabase db dump --db-url "$SUPABASE_DB_URL" --data-only -f datos.sql
+
+      - name: Volcar esquema
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: npx --yes supabase db dump --db-url "$SUPABASE_DB_URL" -f esquema.sql
+
+      - name: Comprobar que los volcados no están vacíos
+        run: test -s datos.sql && test -s esquema.sql
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: copia-seguridad-${{ github.run_id }}
+          path: |
+            datos.sql
+            esquema.sql
+          retention-days: 90
+          if-no-files-found: error
