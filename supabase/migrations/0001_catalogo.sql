@@ -78,23 +78,44 @@ language sql stable security definer set search_path = public as $$
     )
 $$;
 
-revoke all on function mi_perfil(), es_admin(), es_interno(), puede_editar_concesion(int, espacio) from public;
+revoke all on function mi_perfil(), es_admin(), es_interno(), puede_editar_concesion(int, espacio) from public, anon;
 grant execute on function mi_perfil(), es_admin(), es_interno(), puede_editar_concesion(int, espacio)
   to authenticated, service_role;
 
--- Vinculación de perfil en el primer alta de auth
+-- Vinculación de perfil: solo con email confirmado (evita suplantar admin@pro.agency)
 create function vincular_perfil() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  update public.perfiles set user_id = new.id
-  where lower(email) = lower(new.email) and user_id is null;
+  if new.email_confirmed_at is not null then
+    update public.perfiles set user_id = new.id
+    where lower(email) = lower(new.email) and user_id is null;
+  end if;
   return new;
 end
 $$;
 
 create trigger vincular_perfil_al_crear_usuario
-after insert on auth.users
+after insert or update of email_confirmed_at on auth.users
 for each row execute function vincular_perfil();
+
+-- Invitaciones tardías: perfil creado cuando el usuario ya existe y está confirmado
+create function vincular_usuario_existente() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.user_id is null then
+    select u.id into new.user_id from auth.users u
+    where lower(u.email) = lower(new.email) and u.email_confirmed_at is not null
+    limit 1;
+  end if;
+  return new;
+end
+$$;
+
+create trigger vincular_usuario_existente_al_crear_perfil
+before insert on perfiles
+for each row execute function vincular_usuario_existente();
+
+revoke execute on function vincular_perfil(), vincular_usuario_existente() from public, anon, authenticated;
 
 -- RLS
 alter table territorios enable row level security;
