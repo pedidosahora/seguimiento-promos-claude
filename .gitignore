@@ -6,3 +6,4 @@ dist/
 supabase/.temp/
 *.xlsx
 !tests/fixtures/*.xlsx
+.env.test
