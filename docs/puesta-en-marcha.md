@@ -124,19 +124,18 @@ Si la copia falla no avisa sola: mira la pestaña **Actions** de vez en cuando o
 
 Mantén el repositorio privado: en repos públicos los workflows programados se desactivan tras 60 días sin actividad.
 
-## 7. Cloudflare Pages
+## 7. Cloudflare (Workers & Pages)
 
-1. En https://dash.cloudflare.com > Workers & Pages > Create > Pages > conecta el repositorio de GitHub.
+Producción actual: `https://seguimiento-promos-claude.pedidosahora-pro.workers.dev`, desplegada desde la rama `main` de `pedidosahora/seguimiento-promos-claude`. Cada push a `main` se publica solo.
+
+1. En https://dash.cloudflare.com > Workers & Pages > Create > conecta el repositorio de GitHub.
 2. Configuración de build:
    - Build command: `npm run build`
    - Build output directory: `dist`
    - Variable `NODE_VERSION` = `24`
-3. Variables de entorno (Production):
-   - `VITE_SUPABASE_URL` = Project URL (sección 1)
-   - `VITE_SUPABASE_ANON_KEY` = anon public key (sección 1)
-4. Despliega. Te dará una URL `https://<TU-SITIO>.pages.dev`.
-5. Vuelve a la sección 4 y pon esa URL en Site URL y Redirect URLs de Supabase.
-6. Si la aplicación usa rutas del lado cliente, comprueba que recargar una ruta interna no da 404; si lo da, añade `public/_redirects` con `/* /index.html 200`.
+3. `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` van en el archivo `.env.production` del repositorio, no en el panel. Las variables del panel de un proyecto de Workers no llegan al build de Vite (comprobado: la web daba `supabaseUrl is required`). Los dos valores son públicos; nunca pongas ahí la `service_role` key ni la contraseña.
+4. Vuelve a la sección 4 y pon la URL de producción en Site URL y Redirect URLs de Supabase.
+5. Recargar una ruta interna (p. ej. `/promociones`) devuelve 200 (comprobado).
 
 ## 8. Carga inicial de datos
 
