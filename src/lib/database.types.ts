@@ -203,7 +203,10 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "aplicar_usos":
+            "aplicar_historico":
+{ Args: { "datos": Json,"p_espacio": Database["public"]['Enums']["espacio"],"tags_actualizar"?: (string)[] }; Returns: Json
+                           },
+"aplicar_usos":
 { Args: { "filas": Json,"incluir_antiguos"?: boolean }; Returns: Json
                            },
 "clasificar_usos":
@@ -219,6 +222,19 @@ isOneToOne: false
                            },
 "es_interno":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"historico_filas":
+{ Args: { "datos": Json }; Returns: {
+              "concesion": string,"cupos": number,"email": Database["public"]['Enums']["estado_envio"],"estado": Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion": string,"fecha_activacion": string,"fila": number,"gsv": number,"id": number,"kam": string,"sms": Database["public"]['Enums']["estado_envio"],"tag": string,"territorio": string,"usos": number
+            }[]
+                           },
+"historico_marca":
+{ Args: { "datos": Json,"p_espacio": Database["public"]['Enums']["espacio"] }; Returns: Database["public"]['Enums']["marca"]
+                           },
+"historico_promos":
+{ Args: { "datos": Json }; Returns: {
+              "canal": string,"fecha_fin": string,"fecha_inicio": string,"mecanica": string,"n_filas": number,"objetivo": string,"ord": number,"tag": string
+            }[]
                            },
 "importar_concesiones":
 { Args: { "aplicar": boolean,"filas": Json }; Returns: Json
@@ -238,6 +254,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"previsualizar_historico":
+{ Args: { "datos": Json,"p_espacio": Database["public"]['Enums']["espacio"] }; Returns: Json
+                           },
 "previsualizar_usos":
 { Args: { "filas": Json }; Returns: Json
                            },

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  aFechaHoraISO,
   aFechaISO,
   aId,
   aNumero,
@@ -61,5 +62,18 @@ describe('normalizar', () => {
   it('mapearEnvio acepta tildes', () => {
     expect(mapearEnvio('Sí')).toBe('enviado')
     expect(mapearEnvio(' SÍ ')).toBe('enviado')
+  })
+})
+
+describe('aFechaHoraISO', () => {
+  it('vacío → null, inválido → undefined, válido → ISO', () => {
+    expect(aFechaHoraISO('')).toBeNull()
+    expect(aFechaHoraISO(null)).toBeNull()
+    expect(aFechaHoraISO('basura')).toBeUndefined()
+    expect(aFechaHoraISO('31/02/2026 10:00')).toBeUndefined()
+    expect(aFechaHoraISO(new Date('x'))).toBeUndefined()
+    expect(aFechaHoraISO(-5)).toBeUndefined()
+    expect(aFechaHoraISO('03/09/2026 10:15')).toBe('2026-09-03T10:15:00')
+    expect(aFechaHoraISO(new Date(2026, 8, 3, 10, 15, 0))).toBe('2026-09-03T10:15:00')
   })
 })

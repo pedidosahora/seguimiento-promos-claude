@@ -61,21 +61,27 @@ export function aFechaISO(v: unknown): string | null | undefined {
   return `${m[3]}-${dos(Number(m[2]))}-${dos(Number(m[1]))}`
 }
 
-/** Fecha con hora → ISO completo (partes locales del Date, sin desplazar zona). */
-export function aFechaHoraISO(v: unknown): string | null {
+/**
+ * Fecha con hora → ISO completo (partes locales del Date, sin desplazar zona).
+ * Mismo criterio que aFechaISO: null = vacío; undefined = presente pero no válida.
+ */
+export function aFechaHoraISO(v: unknown): string | null | undefined {
   if (v === null || v === undefined || v === '') return null
   if (v instanceof Date) {
-    if (isNaN(v.getTime())) return null
+    if (isNaN(v.getTime())) return undefined
     return `${v.getFullYear()}-${dos(v.getMonth() + 1)}-${dos(v.getDate())}T${dos(v.getHours())}:${dos(v.getMinutes())}:${dos(v.getSeconds())}`
   }
   if (typeof v === 'number') {
+    if (!Number.isFinite(v) || v < 1 || v > 2958465) return undefined
     const p = desdeSerie(v)
     return `${p.y}-${dos(p.m)}-${dos(p.d)}T${dos(p.h)}:${dos(p.mi)}:${dos(p.s)}`
   }
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(
     String(v).trim(),
   )
-  if (!m) return null
+  if (!m) return String(v).trim() === '' ? null : undefined
+  if (!fechaReal(Number(m[3]), Number(m[2]), Number(m[1]))) return undefined
+  if (Number(m[4] ?? 0) > 23 || Number(m[5] ?? 0) > 59 || Number(m[6] ?? 0) > 59) return undefined
   return `${m[3]}-${dos(Number(m[2]))}-${dos(Number(m[1]))}T${dos(Number(m[4] ?? 0))}:${m[5] ?? '00'}:${m[6] ?? '00'}`
 }
 
