@@ -102,7 +102,8 @@ export default function Convocatoria() {
             `No se puede desconvocar la concesión ${lista}: ya tiene seguimiento. Pásala a "No entra" en su ficha.`,
           )
         }
-        const { error: ed } = await supabase.from('seguimiento').delete().in('id', quitadas.map((f) => f.id))
+        // Atómico en la BD: borra todas o ninguna, y solo filas aún sin tocar.
+        const { error: ed } = await supabase.rpc('desconvocar', { p_ids: quitadas.map((f) => f.id) })
         if (ed) return setError(ed.message)
       }
       if (nuevas.length) {
@@ -111,11 +112,12 @@ export default function Convocatoria() {
         if (ei) return setError(ei.message)
       }
       setAviso(`Convocatoria guardada: ${nuevas.length} nuevas, ${quitadas.length} retiradas`)
-      await cargar()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se ha podido guardar')
     } finally {
       setGuardando(false)
+      // Recarga siempre (también tras un error) para no operar sobre datos obsoletos.
+      void cargar()
     }
   }
 

@@ -30,6 +30,14 @@ describe('FormPromocion', () => {
     expect(marca.value).toBe('TMICC')
     fireEvent.change(screen.getByLabelText('Espacio'), { target: { value: 'CAMPANAS' } })
     expect(marca).toBeEnabled()
+    fireEvent.change(marca, { target: { value: 'UFS' } })
+    expect(marca.value).toBe('UFS')
+    fireEvent.change(screen.getByLabelText('Espacio'), { target: { value: 'TMICC' } })
+    expect(marca.value).toBe('TMICC')
+    expect(marca).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('Espacio'), { target: { value: 'UFS' } })
+    expect(marca.value).toBe('UFS')
+    expect(marca).toBeDisabled()
   })
 
   it('publicar sin fechas muestra qué falta y no llama al cliente', () => {

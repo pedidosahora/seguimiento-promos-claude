@@ -78,13 +78,14 @@ export default function FormPromocion() {
     const destino = nuevoEstado ?? estado
     if (!d.tag.trim()) return setError('El TAG es obligatorio')
     const umbral = Number(d.umbral)
-    if (!(umbral > 0 && umbral <= 100)) return setError('El umbral debe estar entre 1 y 100 %')
+    if (!Number.isInteger(umbral) || umbral < 1 || umbral > 100) return setError('El umbral debe estar entre 1 y 100 %')
     if (destino !== 'borrador') {
+      const accion = nuevoEstado === 'publicada' && estado === 'borrador' ? 'publicar' : 'cambiar el estado'
       const faltan: string[] = []
       if (!d.mecanica.trim()) faltan.push('mecánica')
       if (!d.fecha_inicio) faltan.push('fecha de inicio')
       if (!d.fecha_fin) faltan.push('fecha de fin')
-      if (faltan.length) return setError(`Para publicar faltan: ${faltan.join(', ')}`)
+      if (faltan.length) return setError(`Para ${accion} faltan: ${faltan.join(', ')}`)
       if (d.fecha_fin < d.fecha_inicio) return setError('La fecha de fin no puede ser anterior a la de inicio')
     }
     const fila = {
@@ -181,7 +182,7 @@ export default function FormPromocion() {
           {estado === 'cerrada' && (
             <button type="button" className="boton secundario" disabled={guardando} onClick={() => void guardar('publicada')}>Reabrir</button>
           )}
-          {!nueva && estado !== 'archivada' && (
+          {estado === 'cerrada' && (
             <button type="button" className="boton secundario" disabled={guardando} onClick={() => void guardar('archivada')}>Archivar</button>
           )}
         </div>

@@ -214,6 +214,9 @@ isOneToOne: false
               "categoria": string,"detalle": string,"fila": number,"seguimiento_id": string
             }[]
                            },
+"desconvocar":
+{ Args: { "p_ids": (string)[] }; Returns: number
+                           },
 "deshacer_cambio":
 { Args: { "p_id": number }; Returns: undefined
                            },
