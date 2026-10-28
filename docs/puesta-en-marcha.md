@@ -96,7 +96,7 @@ Atención: los usuarios con rol `socio` no son del Workspace y no podrían entra
 
 ## 6. Copia de seguridad semanal (GitHub Actions)
 
-El workflow `.github/workflows/copia-seguridad.yml` vuelca datos y esquema cada lunes a las 05:00 UTC y los guarda como artefacto 90 días. Al consultar la base de datos cada semana, ayuda además a mantener activo el proyecto (ver sección 0, punto 1).
+El workflow `.github/workflows/copia-seguridad.yml` vuelca datos y esquema cada lunes a las 05:00 UTC y los guarda como artefacto 90 días. Al consultar la base de datos cada semana, probablemente ayuda también a mantener activo el proyecto (inferencia, ver sección 0, punto 1).
 
 1. Sube el repositorio a GitHub como repositorio **privado** (contiene datos de clientes en las copias).
 2. En Supabase, botón **Connect**, copia la cadena de conexión del *Session pooler* (la conexión directa es IPv6 y los runners de GitHub pueden no soportarlo) con tu contraseña de base de datos.
@@ -105,6 +105,10 @@ El workflow `.github/workflows/copia-seguridad.yml` vuelca datos y esquema cada 
    - Valor: la cadena `postgresql://postgres.<ref>:<CONTRASEÑA>@...`
 4. Prueba: pestaña **Actions** > "Copia de seguridad semanal" > **Run workflow**. Debe terminar en verde y mostrar el artefacto `copia-seguridad-<id>` con `datos.sql` y `esquema.sql`.
 5. **Restaurar** (si hiciera falta): crea un proyecto Supabase nuevo, aplica `npx supabase db push` y carga solo los datos con `psql "<URL>" -f datos.sql`.
+
+El volcado no incluye `auth`: tras restaurar en un proyecto nuevo, `perfiles.user_id` queda huérfano hasta que cada usuario vuelva a iniciar sesión, momento en que se revincula por email.
+
+Si la copia falla no avisa sola: mira la pestaña **Actions** de vez en cuando o activa los emails de fallo en GitHub (Settings > Notifications > Actions).
 
 Mantén el repositorio privado: en repos públicos los workflows programados se desactivan tras 60 días sin actividad.
 

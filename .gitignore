@@ -8,3 +8,5 @@ supabase/.temp/
 !tests/fixtures/*.xlsx
 .env.test
 *.tsbuildinfo
+/datos.sql
+/esquema.sql

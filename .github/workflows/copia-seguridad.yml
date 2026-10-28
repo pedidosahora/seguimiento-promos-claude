@@ -21,12 +21,12 @@ jobs:
       - name: Volcar datos
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: npx --yes supabase db dump --db-url "$SUPABASE_DB_URL" --data-only -f datos.sql
+        run: npx --yes supabase@2.122.0 db dump --db-url "$SUPABASE_DB_URL" --data-only -f datos.sql
 
       - name: Volcar esquema
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: npx --yes supabase db dump --db-url "$SUPABASE_DB_URL" -f esquema.sql
+        run: npx --yes supabase@2.122.0 db dump --db-url "$SUPABASE_DB_URL" -f esquema.sql
 
       - name: Comprobar que los volcados no están vacíos
         run: test -s datos.sql && test -s esquema.sql
