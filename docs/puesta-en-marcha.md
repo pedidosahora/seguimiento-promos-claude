@@ -80,8 +80,8 @@ Surgen de un hallazgo de seguridad de la revisión del código. En local están 
 2. **Proveedor Email desactivado** (Authentication > Providers > Email: déjalo apagado, o sin registro). **Mantén "Allow new users to sign up" ACTIVADO.** Ese ajuste también afecta a los usuarios de Google (OAuth) y la vinculación del perfil necesita que el usuario de acceso se cree en el primer login; si lo apagas, es probable que ningún KAM pueda entrar por primera vez (inferencia, no verificado en un proyecto real). La restricción de dominio no viene de este ajuste sino de la pantalla de consentimiento "Interno" de Google (paso 3 y sección 5). Un desconocido sin perfil no ve nada: las políticas RLS solo dejan leer a quien tiene un perfil activo.
 3. **Google restringido al Workspace**: pantalla de consentimiento "Interno" (sección 5).
 4. **URL Configuration**:
-   - Site URL: `https://<TU-SITIO>.pages.dev`
-   - Redirect URLs: `https://<TU-SITIO>.pages.dev/**` (y `http://localhost:5173/**` si quieres seguir probando en local).
+   - Site URL: `https://seguimiento-promos-claude.pedidosahora-pro.workers.dev`
+   - Redirect URLs: `https://seguimiento-promos-claude.pedidosahora-pro.workers.dev/**` (y `http://localhost:5173/**` si quieres seguir probando en local).
 
 ## 5. Google OAuth (Workspace interno)
 
