@@ -212,6 +212,9 @@ isOneToOne: false
 "es_interno":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"importar_concesiones":
+{ Args: { "aplicar": boolean,"filas": Json }; Returns: Json
+                           },
 "mi_perfil":
 { Args: Record<PropertyKey, never>; Returns: {
               "activo": boolean,
