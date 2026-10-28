@@ -4,39 +4,50 @@ import { config } from 'dotenv'
 config({ path: '.env.test' })
 
 const URL = process.env.API_URL ?? 'http://127.0.0.1:54421'
+const PASSWORD = "test-local-1234"
 const ANON_KEY = process.env.ANON_KEY ?? ''
 const SERVICE_ROLE_KEY = process.env.SERVICE_ROLE_KEY ?? ''
 
 const opciones = { auth: { persistSession: false, autoRefreshToken: false } }
 
+function exigirEntorno(): void {
+  if (!ANON_KEY || !SERVICE_ROLE_KEY) {
+    throw new Error(
+      'Falta .env.test: ejecuta npm run env:test con Supabase local arrancado',
+    )
+  }
+}
+
 /** Cliente con service role: salta RLS. */
 export function admin(): SupabaseClient {
+  exigirEntorno()
   return createClient(URL, SERVICE_ROLE_KEY, opciones)
 }
 
-/** Crea un usuario de prueba confirmado y devuelve su id. */
-export async function crearUsuario(
-  email: string,
-  password = 'prueba-1234',
-  metadata: Record<string, unknown> = {},
-): Promise<string> {
+/** Crea un usuario de prueba confirmado (contraseña local de pruebas). */
+export async function crearUsuario(datos: {
+  email: string
+  nombre: string
+  rol: string
+}): Promise<{ perfilId: string; userId: string }> {
   const { data, error } = await admin().auth.admin.createUser({
-    email,
-    password,
+    email: datos.email,
+    password: PASSWORD,
     email_confirm: true,
-    user_metadata: metadata,
   })
   if (error) throw error
-  return data.user.id
+  // TODO(Task 2): insertar fila en perfiles y devolver su id
+  return { perfilId: '', userId: data.user.id }
 }
 
 /** Cliente autenticado como el usuario indicado (respeta RLS). */
-export async function clienteComo(
-  email: string,
-  password = 'prueba-1234',
-): Promise<SupabaseClient> {
+export async function clienteComo(email: string): Promise<SupabaseClient> {
+  exigirEntorno()
   const cliente = createClient(URL, ANON_KEY, opciones)
-  const { error } = await cliente.auth.signInWithPassword({ email, password })
+  const { error } = await cliente.auth.signInWithPassword({
+    email,
+    password: PASSWORD,
+  })
   if (error) throw error
   return cliente
 }
