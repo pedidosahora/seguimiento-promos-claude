@@ -49,3 +49,41 @@ h2 { font-size: 1.15rem; margin: 0 0 12px; }
 label.casilla { flex-direction: row; align-items: center; gap: 6px; }
 .acciones { display: flex; gap: 8px; align-items: center; }
 a.boton { display: inline-block; text-decoration: none; }
+.insignia.neutra { background: var(--color-fondo); color: var(--color-suave); border: 1px solid var(--color-borde); }
+.promo-cabecera h1 { display: flex; align-items: center; }
+.indicadores { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; padding: 0; }
+.indicadores > div { background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); padding: 8px 14px; min-width: 110px; }
+.indicadores dt { font-size: 11px; color: var(--color-suave); }
+.indicadores dd { margin: 2px 0 0; font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pestana { padding: 8px 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-suave); font: inherit; cursor: pointer; }
+.pestana.activa { color: var(--color-primario); border-bottom-color: var(--color-primario); }
+.barra-bloque { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 10px 14px; margin-bottom: 12px; background: var(--color-superficie); border: 1px solid var(--color-primario); border-radius: var(--radio); }
+.barra-bloque label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--color-suave); }
+.barra-bloque select { padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
+.promo-cuerpo { display: flex; gap: 16px; align-items: flex-start; }
+.promo-cuerpo > :first-child { flex: 1; min-width: 0; }
+.tabla-grid { height: calc(100vh - 360px); min-height: 420px; }
+.tabla-grid .ag-cell .enlace { padding: 0; border: 0; background: none; color: var(--color-primario); font: inherit; cursor: pointer; text-decoration: underline; }
+.tabla-grid .no-editable, .ag-cell.no-editable { background: var(--color-fondo); color: var(--color-suave); }
+.tabla-grid .alerta-cerca, .ag-cell.alerta-cerca { background: var(--color-alerta-fondo); color: var(--color-alerta); font-weight: 600; }
+.tabla-grid .alerta-agotado, .ag-cell.alerta-agotado { background: #fee2e2; color: var(--color-error); font-weight: 600; }
+.ficha { width: 360px; flex: none; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); padding: 16px; max-height: calc(100vh - 160px); overflow-y: auto; }
+.ficha-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ficha-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin: 12px 0; }
+.ficha-datos dt { font-size: 11px; color: var(--color-suave); }
+.ficha-datos dd { margin: 2px 0 0; }
+.ficha h3 { font-size: 1rem; margin: 16px 0 8px; }
+.cupos-texto { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-suave); margin-bottom: 4px; }
+.alerta-cerca-texto { color: var(--color-alerta); }
+.alerta-agotado-texto { color: var(--color-error); }
+.barra { height: 8px; border-radius: 999px; background: var(--color-borde); overflow: hidden; }
+.barra-relleno { height: 100%; background: var(--color-primario); }
+.barra-relleno.alerta-cerca-barra { background: var(--color-alerta); }
+.barra-relleno.alerta-agotado-barra { background: var(--color-error); }
+.comentar { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; margin-bottom: 12px; }
+.comentar textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; resize: vertical; }
+.lista-ficha { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.lista-ficha li { padding-bottom: 10px; border-bottom: 1px solid var(--color-borde); }
+.lista-ficha .meta { font-size: 11px; color: var(--color-suave); margin-bottom: 2px; }
+.lista-ficha .deshecho { opacity: 0.55; }
+.boton.pequeno { padding: 3px 10px; font-size: 12px; margin-top: 4px; }

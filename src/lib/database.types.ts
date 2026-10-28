@@ -214,6 +214,9 @@ isOneToOne: false
               "categoria": string,"detalle": string,"fila": number,"seguimiento_id": string
             }[]
                            },
+"concesiones_editables":
+{ Args: { "p_promocion": string }; Returns: (number)[]
+                           },
 "desconvocar":
 { Args: { "p_ids": (string)[] }; Returns: number
                            },
