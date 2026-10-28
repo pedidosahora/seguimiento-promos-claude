@@ -104,9 +104,13 @@ El workflow `.github/workflows/copia-seguridad.yml` vuelca datos y esquema cada 
    - Nombre: `SUPABASE_DB_URL`
    - Valor: la cadena `postgresql://postgres.<ref>:<CONTRASEÑA>@...`
 4. Prueba: pestaña **Actions** > "Copia de seguridad semanal" > **Run workflow**. Debe terminar en verde y mostrar el artefacto `copia-seguridad-<id>` con `datos.sql` y `esquema.sql`.
-5. **Restaurar** (si hiciera falta): crea un proyecto Supabase nuevo, aplica `npx supabase db push` y carga solo los datos con `psql "<URL>" -f datos.sql`.
+5. **Restaurar** (si hiciera falta): crea un proyecto Supabase nuevo, aplica `npx supabase db push` y carga los datos como se explica a continuación.
 
-El volcado no incluye `auth`: tras restaurar en un proyecto nuevo, `perfiles.user_id` queda huérfano hasta que cada usuario vuelva a iniciar sesión, momento en que se revincula por email.
+`datos.sql` incluye también los datos del esquema `auth` (comprobado en local: con un usuario de prueba aparece su `INSERT INTO "auth"."users"`), además de `supabase_functions`. Por eso:
+
+- Restaurar en el **mismo proyecto** es seguro.
+- No cargues `datos.sql` entero en un proyecto **nuevo**: traería los usuarios de `auth` y podría chocar con objetos que Supabase ya gestiona.
+- Para un proyecto nuevo, restaura solo `public`: haz el volcado con `npx supabase db dump --db-url "<URL>" --data-only --schema public -f datos-public.sql` (comprobado: sin datos de `auth`) y cárgalo. Después ejecuta `update perfiles set user_id = null;`, porque los `user_id` guardados apuntarían a usuarios que ya no existen y el sistema solo revincula perfiles con `user_id` vacío. Cada usuario se relinka por email al volver a iniciar sesión.
 
 Si la copia falla no avisa sola: mira la pestaña **Actions** de vez en cuando o activa los emails de fallo en GitHub (Settings > Notifications > Actions).
 
