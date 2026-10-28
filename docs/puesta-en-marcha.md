@@ -108,9 +108,17 @@ El workflow `.github/workflows/copia-seguridad.yml` vuelca datos y esquema cada 
 
 `datos.sql` incluye también los datos del esquema `auth` (comprobado en local: con un usuario de prueba aparece su `INSERT INTO "auth"."users"`), además de `supabase_functions`. Por eso:
 
-- Restaurar en el **mismo proyecto** es seguro.
+- Restaurar en el **mismo proyecto** debería funcionar, pero **no se ha probado contra un proyecto real**. Pruébalo antes en un proyecto Supabase desechable.
 - No cargues `datos.sql` entero en un proyecto **nuevo**: traería los usuarios de `auth` y podría chocar con objetos que Supabase ya gestiona.
-- Para un proyecto nuevo, restaura solo `public`: haz el volcado con `npx supabase db dump --db-url "<URL>" --data-only --schema public -f datos-public.sql` (comprobado: sin datos de `auth`) y cárgalo. Después ejecuta `update perfiles set user_id = null;`, porque los `user_id` guardados apuntarían a usuarios que ya no existen y el sistema solo revincula perfiles con `user_id` vacío. Cada usuario se relinka por email al volver a iniciar sesión.
+- Para un proyecto nuevo, restaura solo `public`:
+  1. Haz el volcado: `npx supabase db dump --db-url "<URL_ORIGEN>" --data-only --schema public -f datos-public.sql` (comprobado: sin datos de `auth`).
+  2. Con el esquema ya creado en el proyecto nuevo (`npx supabase db push`), carga los datos: `psql "<URL_NUEVO>" -f datos-public.sql`.
+  3. Ejecuta `update perfiles set user_id = null;`. Los `user_id` guardados apuntan a usuarios que ya no existen y el sistema solo vincula perfiles con `user_id` vacío.
+  4. Cada usuario se vincula por email en su primer inicio de sesión en el proyecto nuevo (la vinculación ocurre al crearse o confirmarse su cuenta de acceso, no en cada login).
+
+  Comprobado en local con una base de datos de prueba que emula el proyecto nuevo (`auth.users` vacío): la carga termina sin errores y las 12 filas de `seguimiento` se restauran. El archivo empieza con `SET session_replication_role = replica`, por eso la clave foránea de `perfiles.user_id` hacia `auth.users` no rechaza la carga aunque el usuario no exista. No se ha probado que el rol `postgres` de Supabase en la nube permita ese `SET`; si `psql` da error de permisos o de clave foránea, borra de `datos-public.sql` los valores de `user_id` de `perfiles` (ponlos a `NULL`) y repite.
+
+Los artefactos de copia contienen datos personales y hashes de contraseña (`auth.users`) y se conservan 90 días: limita quién tiene acceso al repositorio y a su pestaña Actions.
 
 Si la copia falla no avisa sola: mira la pestaña **Actions** de vez en cuando o activa los emails de fallo en GitHub (Settings > Notifications > Actions).
 
