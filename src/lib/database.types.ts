@@ -23,7 +23,33 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "concesiones": {
+            "comentarios": {
+                  Row: {
+                    "autor_id": string | null,"creado_en": string,"id": string,"seguimiento_id": string,"texto": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "autor_id"?: string | null,"creado_en"?: string,"id"?: string,"seguimiento_id": string,"texto": string
+                  }
+                  Update: {
+                    "autor_id"?: string | null,"creado_en"?: string,"id"?: string,"seguimiento_id"?: string,"texto"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "comentarios_autor_id_fkey"
+      columns: ["autor_id"]
+isOneToOne: false
+      referencedRelation: "perfiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "comentarios_seguimiento_id_fkey"
+      columns: ["seguimiento_id"]
+isOneToOne: false
+      referencedRelation: "seguimiento"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"concesiones": {
                   Row: {
                     "activa": boolean,"actualizado_en": string,"id": number,"kam_id": string | null,"nombre_comercial": string | null,"razon_social": string,"territorio_id": number | null
                   }
@@ -89,6 +115,46 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"promociones": {
+                  Row: {
+                    "actualizado_en": string,"canal": string | null,"espacio": Database["public"]['Enums']["espacio"],"estado": Database["public"]['Enums']["estado_promocion"],"fecha_fin": string | null,"fecha_inicio": string | null,"id": string,"marca": Database["public"]['Enums']["marca"],"mecanica": string | null,"objetivo": string | null,"revision_cupos": Database["public"]['Enums']["revision_cupos"],"tag": string,"umbral_cupos": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actualizado_en"?: string,"canal"?: string | null,"espacio": Database["public"]['Enums']["espacio"],"estado"?: Database["public"]['Enums']["estado_promocion"],"fecha_fin"?: string | null,"fecha_inicio"?: string | null,"id"?: string,"marca": Database["public"]['Enums']["marca"],"mecanica"?: string | null,"objetivo"?: string | null,"revision_cupos"?: Database["public"]['Enums']["revision_cupos"],"tag": string,"umbral_cupos"?: number
+                  }
+                  Update: {
+                    "actualizado_en"?: string,"canal"?: string | null,"espacio"?: Database["public"]['Enums']["espacio"],"estado"?: Database["public"]['Enums']["estado_promocion"],"fecha_fin"?: string | null,"fecha_inicio"?: string | null,"id"?: string,"marca"?: Database["public"]['Enums']["marca"],"mecanica"?: string | null,"objetivo"?: string | null,"revision_cupos"?: Database["public"]['Enums']["revision_cupos"],"tag"?: string,"umbral_cupos"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"seguimiento": {
+                  Row: {
+                    "actualizado_en": string,"concesion_id": number,"cupos": number | null,"email": Database["public"]['Enums']["estado_envio"],"estado": Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion": string | null,"fecha_activacion": string | null,"fecha_dato": string | null,"gsv": number | null,"id": string,"promocion_id": string,"sms": Database["public"]['Enums']["estado_envio"],"usos": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actualizado_en"?: string,"concesion_id": number,"cupos"?: number | null,"email"?: Database["public"]['Enums']["estado_envio"],"estado"?: Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion"?: string | null,"fecha_activacion"?: string | null,"fecha_dato"?: string | null,"gsv"?: number | null,"id"?: string,"promocion_id": string,"sms"?: Database["public"]['Enums']["estado_envio"],"usos"?: number | null
+                  }
+                  Update: {
+                    "actualizado_en"?: string,"concesion_id"?: number,"cupos"?: number | null,"email"?: Database["public"]['Enums']["estado_envio"],"estado"?: Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion"?: string | null,"fecha_activacion"?: string | null,"fecha_dato"?: string | null,"gsv"?: number | null,"id"?: string,"promocion_id"?: string,"sms"?: Database["public"]['Enums']["estado_envio"],"usos"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "seguimiento_concesion_id_fkey"
+      columns: ["concesion_id"]
+isOneToOne: false
+      referencedRelation: "concesiones"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "seguimiento_promocion_id_fkey"
+      columns: ["promocion_id"]
+isOneToOne: false
+      referencedRelation: "promociones"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"territorios": {
                   Row: {
                     "id": number,"nombre": string
@@ -135,7 +201,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "espacio": "TMICC"|"UFS"|"CAMPANAS","marca": "TMICC"|"UFS","rol_usuario": "admin"|"kam"|"socio"
+            "espacio": "TMICC"|"UFS"|"CAMPANAS","estado_envio": "enviado"|"pending"|"no_hay","estado_promocion": "borrador"|"publicada"|"cerrada"|"archivada","estado_seguimiento": "no_entra"|"pendiente"|"acepta"|"rechaza"|"activa","marca": "TMICC"|"UFS","revision_cupos": "ninguna"|"semanal"|"quincenal","rol_usuario": "admin"|"kam"|"socio"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -255,7 +321,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "espacio": ["TMICC", "UFS", "CAMPANAS"],"marca": ["TMICC", "UFS"],"rol_usuario": ["admin", "kam", "socio"]
+            "espacio": ["TMICC", "UFS", "CAMPANAS"],"estado_envio": ["enviado", "pending", "no_hay"],"estado_promocion": ["borrador", "publicada", "cerrada", "archivada"],"estado_seguimiento": ["no_entra", "pendiente", "acepta", "rechaza", "activa"],"marca": ["TMICC", "UFS"],"revision_cupos": ["ninguna", "semanal", "quincenal"],"rol_usuario": ["admin", "kam", "socio"]
           }
         }
 } as const

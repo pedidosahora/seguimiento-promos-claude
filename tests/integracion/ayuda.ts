@@ -65,6 +65,9 @@ export async function clienteComo(email: string): Promise<SupabaseClient> {
 
 /** Tablas de dominio en orden de borrado (hijas primero). Cada tarea añade las suyas al principio. */
 const TABLAS_DOMINIO: { tabla: string; columna: string }[] = [
+  { tabla: 'comentarios', columna: 'id' },
+  { tabla: 'seguimiento', columna: 'id' },
+  { tabla: 'promociones', columna: 'id' },
   { tabla: 'permisos_extra', columna: 'id' },
   { tabla: 'concesiones', columna: 'id' },
   { tabla: 'perfiles', columna: 'id' },
