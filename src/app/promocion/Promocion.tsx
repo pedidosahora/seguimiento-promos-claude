@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../auth/useSesion'
 import BarraBloque, { type CambiosBloque } from './BarraBloque'
 import Cabecera, { type Indicadores, type Pestana, type PromoCabecera } from './Cabecera'
+import { descargar, exportarSeguimiento, nombreArchivoSeguimiento } from '../../exportar/seguimiento'
 import { localAIso, validarCambio, type CampoEditable } from './celdas'
 import FichaLateral from './FichaLateral'
 import {
@@ -247,6 +248,7 @@ export default function Promocion() {
         promo={promo}
         indicadores={indicadores}
         pestana={pestana}
+        onExportar={() => descargar(exportarSeguimiento(promo, filas), nombreArchivoSeguimiento(promo.tag))}
         onPestana={(p) => {
           setPestana(p)
           setSeleccion([])

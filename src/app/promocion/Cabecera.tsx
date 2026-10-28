@@ -30,9 +30,10 @@ interface Props {
   indicadores: Indicadores | null
   pestana: Pestana
   onPestana: (p: Pestana) => void
+  onExportar?: () => void
 }
 
-export default function Cabecera({ promo, indicadores: i, pestana, onPestana }: Props) {
+export default function Cabecera({ promo, indicadores: i, pestana, onPestana, onExportar }: Props) {
   const datos: [string, string][] = i
     ? [
         ['Convocadas', String(i.convocadas)],
@@ -55,6 +56,11 @@ export default function Cabecera({ promo, indicadores: i, pestana, onPestana }: 
       <p className="nota">
         {promo.mecanica ?? 'Sin mecánica'} · {fmtFecha(promo.fecha_inicio)} – {fmtFecha(promo.fecha_fin)}
       </p>
+      {onExportar && (
+        <button type="button" className="boton secundario" onClick={onExportar}>
+          Exportar a Excel
+        </button>
+      )}
       <dl className="indicadores">
         {datos.map(([k, v]) => (
           <div key={k}>
