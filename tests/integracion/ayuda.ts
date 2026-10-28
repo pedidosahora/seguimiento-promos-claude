@@ -72,6 +72,8 @@ const TABLAS_DOMINIO: { tabla: string; columna: string }[] = [
   { tabla: 'concesiones', columna: 'id' },
   { tabla: 'perfiles', columna: 'id' },
   { tabla: 'territorios', columna: 'id' },
+  // Último: los borrados anteriores también generan historial.
+  { tabla: 'historial', columna: 'id' },
 ]
 
 /** Vacía las tablas de dominio y borra los usuarios de prueba. */

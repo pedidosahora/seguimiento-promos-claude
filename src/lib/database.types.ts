@@ -75,6 +75,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"historial": {
+                  Row: {
+                    "accion": string,"autor_id": string | null,"cambios": NonNullable<Json>,"deshecho": boolean,"fecha": string,"fila_id": string,"id": number,"origen": string,"tabla": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accion": string,"autor_id"?: string | null,"cambios": NonNullable<Json>,"deshecho"?: boolean,"fecha"?: string,"fila_id": string,"id"?: number,"origen"?: string,"tabla": string
+                  }
+                  Update: {
+                    "accion"?: string,"autor_id"?: string | null,"cambios"?: NonNullable<Json>,"deshecho"?: boolean,"fecha"?: string,"fila_id"?: string,"id"?: number,"origen"?: string,"tabla"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"perfiles": {
                   Row: {
                     "activo": boolean,"email": string,"id": string,"nombre": string,"rol": Database["public"]['Enums']["rol_usuario"],"user_id": string | null
@@ -175,7 +189,10 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "es_admin":
+            "deshacer_cambio":
+{ Args: { "p_id": number }; Returns: undefined
+                           },
+"es_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "es_interno":
