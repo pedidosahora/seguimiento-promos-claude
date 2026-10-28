@@ -156,7 +156,7 @@ Principio común: **subir → vista previa (qué se crea, qué se actualiza, qu�
 - **Las concesiones que no están en el catálogo se crean como inactivas.** El KAM y el territorio del bloque no sobrescriben el catálogo **[decisión de Claude]**.
 - Si los usos o el GSV del Excel de carga son más recientes, prevalecen sobre los del histórico.
 - Una promoción importada ya terminada se crea como `Cerrada` **[decisión de Claude]**.
-- **Fecha del dato** de los usos y el GSV que vienen del histórico: la fecha de fin de la promoción. Así, cualquier dato del Excel de carga posterior a esa fecha prevalece **[decisión de Claude]**.
+- **Fecha del dato** de los usos y el GSV que vienen del histórico: vacía: el histórico no fija fecha del dato, así que cualquier importación de Carga de Datos prevalece **[decisión de Claude, ajustada tras probar con datos reales]**.
 - **TAG que ya existe en la plataforma** (porque se importa el mismo archivo otra vez, porque el TAG aparece en otro archivo o porque se creó a mano): la vista previa lo muestra como "ya existe". Por defecto se omite. El administrador puede elegir actualizarlo, y en ese caso solo se rellenan los campos vacíos, sin pisar los datos ya introducidos en la web **[decisión de Claude]**.
 
 ### 6.3 Plantilla de promociones (doc. de partida §7)

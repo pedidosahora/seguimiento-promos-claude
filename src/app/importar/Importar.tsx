@@ -135,7 +135,7 @@ export default function Importar() {
         setIncluirAntiguos(false)
       } else {
         const { promociones, errores } = parsearHistorico(aoa)
-        const datos = { marca: marca || null, promociones }
+        const datos = { marca: necesitaMarca ? marca || null : null, promociones }
         const { data, error: err } = await supabase.rpc('previsualizar_historico', { datos, p_espacio: espacio })
         if (err) throw new Error(err.message)
         const r = data as {

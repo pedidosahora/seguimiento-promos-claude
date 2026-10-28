@@ -66,7 +66,7 @@ describe('importación del histórico', () => {
     const s = await segs('SEPT1')
     expect(s).toHaveLength(1)
     expect(s[0]).toMatchObject({
-      concesion_id: 900, estado: 'activa', usos: 18, gsv: 250.5, fecha_dato: '2026-09-30',
+      concesion_id: 900, estado: 'activa', usos: 18, gsv: 250.5, fecha_dato: null,
       sms: 'enviado', email: 'enviado',
     })
   })
@@ -196,12 +196,16 @@ describe('importación del histórico', () => {
     const f = (fecha: string, usos: number) => ({
       fila: 2, id: 900, concesion: 'Auto 900', tag: 'SEPT1', usos, gsv: 99, fecha,
     })
+    // Tras el histórico (fecha_dato vacía) cualquier carga prevalece, también una de fecha anterior al fin
+    const previa = await c.rpc('previsualizar_usos', { filas: [f('2026-09-01', 1)] })
+    expect(previa.data.detalle).toEqual([])
+    expect(previa.data.conteos).toEqual({ actualiza: 1 })
     const nuevo = await c.rpc('aplicar_usos', { filas: [f('2026-10-26', 30)] })
     expect(nuevo.error).toBeNull()
     expect(nuevo.data.aplicadas).toBe(1)
     expect((await segs('SEPT1'))[0]).toMatchObject({ usos: 30, fecha_dato: '2026-10-26' })
 
-    // Un dato anterior al guardado (fecha_dato = fin de la promoción) se clasifica como antiguo
+    // Ahora sí hay fecha guardada: un dato anterior es antiguo
     const prev = await c.rpc('previsualizar_usos', { filas: [f('2026-09-01', 1)] })
     expect(prev.data.detalle[0].categoria).toBe('dato_antiguo')
   })

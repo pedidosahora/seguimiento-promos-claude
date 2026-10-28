@@ -167,11 +167,12 @@ begin
   where not p.existe;
   get diagnostics v_creadas = row_count;
 
-  -- Filas de las promociones nuevas
+  -- Filas de las promociones nuevas. fecha_dato queda vacía: la hoja es una foto sin fecha fiable
+  -- y los datos de la carga de usos deben prevalecer siempre.
   insert into seguimiento (promocion_id, concesion_id, estado, fecha_aceptacion, fecha_activacion,
                            cupos, usos, gsv, fecha_dato, sms, email)
   select pr.id, f.id, f.estado, f.fecha_aceptacion, f.fecha_activacion, f.cupos, f.usos, f.gsv,
-    p.fecha_fin, coalesce(f.sms, 'pending'), coalesce(f.email, 'pending')
+    null, coalesce(f.sms, 'pending'), coalesce(f.email, 'pending')
   from tmp_hf f
   join tmp_hp p on p.tag = f.tag and not p.existe
   join promociones pr on pr.tag = p.tag;
@@ -196,8 +197,7 @@ begin
       fecha_activacion = coalesce(s.fecha_activacion, f.fecha_activacion),
       cupos = coalesce(s.cupos, f.cupos),
       usos = coalesce(s.usos, f.usos),
-      gsv = coalesce(s.gsv, f.gsv),
-      fecha_dato = coalesce(s.fecha_dato, p.fecha_fin)
+      gsv = coalesce(s.gsv, f.gsv)
   from tmp_hf f
   join tmp_hp p on p.tag = f.tag and p.existe and p.tag in (select tag from tmp_act)
   where s.promocion_id = p.promo_id and s.concesion_id = f.id
@@ -205,13 +205,12 @@ begin
       or s.fecha_activacion is null and f.fecha_activacion is not null
       or s.cupos is null and f.cupos is not null
       or s.usos is null and f.usos is not null
-      or s.gsv is null and f.gsv is not null
-      or s.fecha_dato is null and p.fecha_fin is not null);
+      or s.gsv is null and f.gsv is not null);
 
   insert into seguimiento (promocion_id, concesion_id, estado, fecha_aceptacion, fecha_activacion,
                            cupos, usos, gsv, fecha_dato, sms, email)
   select p.promo_id, f.id, f.estado, f.fecha_aceptacion, f.fecha_activacion, f.cupos, f.usos, f.gsv,
-    p.fecha_fin, coalesce(f.sms, 'pending'), coalesce(f.email, 'pending')
+    null, coalesce(f.sms, 'pending'), coalesce(f.email, 'pending')
   from tmp_hf f
   join tmp_hp p on p.tag = f.tag and p.existe and p.tag in (select tag from tmp_act)
   on conflict (promocion_id, concesion_id) do nothing;
