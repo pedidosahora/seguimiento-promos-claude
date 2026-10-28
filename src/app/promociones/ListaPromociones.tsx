@@ -93,7 +93,8 @@ export default function ListaPromociones() {
   const visibles = useMemo(() => {
     const h = hoy()
     return promos.filter((p) => {
-      if (fCiclo && p.estado !== fCiclo) return false
+      // Con el ciclo en "Todos" las archivadas no se muestran; solo si se elige "Archivada".
+      if (fCiclo ? p.estado !== fCiclo : p.estado === 'archivada') return false
       if (fMarca && p.marca !== fMarca) return false
       if (fVigencia === 'vigentes' && !(p.fecha_fin && p.fecha_fin >= h)) return false
       if (fVigencia === 'terminadas' && !(p.fecha_fin && p.fecha_fin < h)) return false

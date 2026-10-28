@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
@@ -13,6 +13,10 @@ const promociones = [
   {
     id: 'p2', tag: 'CAMP-FUTURA', espacio: 'CAMPANAS', marca: 'UFS', mecanica: '10% dto',
     fecha_inicio: '2090-01-01', fecha_fin: '2099-12-31', estado: 'publicada',
+  },
+  {
+    id: 'p3', tag: 'TMICC-ARCHIVADA', espacio: 'TMICC', marca: 'TMICC', mecanica: '3x2',
+    fecha_inicio: '2020-01-01', fecha_fin: '2020-02-01', estado: 'archivada',
   },
 ]
 const resumen = [
@@ -72,6 +76,15 @@ describe('ListaPromociones', () => {
     await waitFor(() => expect(screen.getByText('CAMP-FUTURA')).toBeInTheDocument())
     expect(screen.getByRole('columnheader', { name: 'Espacio' })).toBeInTheDocument()
     expect(screen.getByText('Campañas')).toBeInTheDocument()
+  })
+
+  it('las archivadas solo se ven al elegir el ciclo Archivada', async () => {
+    montar('admin', '/todos')
+    await waitFor(() => expect(screen.getByText('TMICC-VIEJA')).toBeInTheDocument())
+    expect(screen.queryByText('TMICC-ARCHIVADA')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Ciclo'), { target: { value: 'archivada' } })
+    expect(screen.getByText('TMICC-ARCHIVADA')).toBeInTheDocument()
+    expect(screen.queryByText('TMICC-VIEJA')).not.toBeInTheDocument()
   })
 
   it('si la carga falla muestra el error y deja de cargar', async () => {

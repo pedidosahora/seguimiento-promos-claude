@@ -48,7 +48,7 @@ describe('parsearHistorico', () => {
     const [a] = parsearHistorico(construirHojaHistorico([bloqueA])).promociones
     expect(a.filas[0]).toEqual({
       fila: 12, id: 900, concesion: 'Auto A', kam: 'Ana', territorio: 'Norte', estado: 'activa',
-      fechaAceptacion: '2026-09-03T10:15:00', fechaActivacion: null,
+      fechaAceptacion: '2026-09-03T08:15:00.000Z', fechaActivacion: null,
       cupos: null, usos: 18, gsv: null, sms: 'enviado', email: 'enviado',
     })
     expect(a.filas[1]).toMatchObject({ estado: 'pendiente', sms: 'pending', usos: null })

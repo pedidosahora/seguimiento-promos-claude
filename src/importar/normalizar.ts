@@ -62,19 +62,22 @@ export function aFechaISO(v: unknown): string | null | undefined {
 }
 
 /**
- * Fecha con hora → ISO completo (partes locales del Date, sin desplazar zona).
+ * Fecha con hora → instante UTC en ISO ('...Z'). Los textos y series de Excel son hora local
+ * del usuario; se convierten a UTC para que timestamptz no desplace la hora.
  * Mismo criterio que aFechaISO: null = vacío; undefined = presente pero no válida.
  */
 export function aFechaHoraISO(v: unknown): string | null | undefined {
   if (v === null || v === undefined || v === '') return null
   if (v instanceof Date) {
     if (isNaN(v.getTime())) return undefined
-    return `${v.getFullYear()}-${dos(v.getMonth() + 1)}-${dos(v.getDate())}T${dos(v.getHours())}:${dos(v.getMinutes())}:${dos(v.getSeconds())}`
+    return v.toISOString()
   }
+  const local = (y: number, mo: number, d: number, h: number, mi: number, s: number) =>
+    new Date(y, mo - 1, d, h, mi, s).toISOString()
   if (typeof v === 'number') {
     if (!Number.isFinite(v) || v < 1 || v > 2958465) return undefined
     const p = desdeSerie(v)
-    return `${p.y}-${dos(p.m)}-${dos(p.d)}T${dos(p.h)}:${dos(p.mi)}:${dos(p.s)}`
+    return local(p.y, p.m, p.d, p.h, p.mi, p.s)
   }
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(
     String(v).trim(),
@@ -82,7 +85,10 @@ export function aFechaHoraISO(v: unknown): string | null | undefined {
   if (!m) return String(v).trim() === '' ? null : undefined
   if (!fechaReal(Number(m[3]), Number(m[2]), Number(m[1]))) return undefined
   if (Number(m[4] ?? 0) > 23 || Number(m[5] ?? 0) > 59 || Number(m[6] ?? 0) > 59) return undefined
-  return `${m[3]}-${dos(Number(m[2]))}-${dos(Number(m[1]))}T${dos(Number(m[4] ?? 0))}:${m[5] ?? '00'}:${m[6] ?? '00'}`
+  return local(
+    Number(m[3]), Number(m[2]), Number(m[1]),
+    Number(m[4] ?? 0), Number(m[5] ?? 0), Number(m[6] ?? 0),
+  )
 }
 
 const INT4_MAX = 2147483647

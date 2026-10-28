@@ -73,7 +73,14 @@ describe('aFechaHoraISO', () => {
     expect(aFechaHoraISO('31/02/2026 10:00')).toBeUndefined()
     expect(aFechaHoraISO(new Date('x'))).toBeUndefined()
     expect(aFechaHoraISO(-5)).toBeUndefined()
-    expect(aFechaHoraISO('03/09/2026 10:15')).toBe('2026-09-03T10:15:00')
-    expect(aFechaHoraISO(new Date(2026, 8, 3, 10, 15, 0))).toBe('2026-09-03T10:15:00')
+  })
+
+  it('devuelve el instante UTC real (Europe/Madrid, verano UTC+2, invierno UTC+1)', () => {
+    expect(new Date(2026, 8, 10, 9, 30).getTimezoneOffset()).toBe(-120)
+    expect(aFechaHoraISO('10/09/2026 09:30')).toBe('2026-09-10T07:30:00.000Z')
+    expect(aFechaHoraISO('10/01/2026 09:30')).toBe('2026-01-10T08:30:00.000Z')
+    expect(aFechaHoraISO(new Date(Date.UTC(2026, 8, 10, 7, 30)))).toBe('2026-09-10T07:30:00.000Z')
+    // Serie de Excel: 46275.395833... = 2026-09-10 09:30 local
+    expect(aFechaHoraISO(46275 + 9.5 / 24)).toBe('2026-09-10T07:30:00.000Z')
   })
 })

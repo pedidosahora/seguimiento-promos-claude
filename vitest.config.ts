@@ -11,6 +11,7 @@ export default defineConfig({
           name: 'unit',
           include: ['tests/unit/**/*.test.{ts,tsx}'],
           environment: 'jsdom',
+          env: { TZ: 'Europe/Madrid' },
         },
       },
       {
