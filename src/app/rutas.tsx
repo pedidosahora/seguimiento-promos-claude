@@ -1,11 +1,12 @@
 import type { ReactElement } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import Admin from './admin/Admin'
 import Acceso from './auth/Acceso'
 import { SesionContext, useSesion, usePerfil } from './auth/useSesion'
 import Layout from './Layout'
 import ListaPromociones from './promociones/ListaPromociones'
 
-// Marcadores de posición: las tareas 10, 11 y 12 sustituyen estos elementos.
+// Marcadores de posición: las tareas 11 y 12 sustituyen estos elementos.
 const Pendiente = ({ titulo }: { titulo: string }) => <p>{titulo}: próximamente.</p>
 
 function SoloAdmin({ children }: { children: ReactElement }) {
@@ -32,7 +33,7 @@ export default function Rutas() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Navigate to="/todos" replace />} />
-          <Route path="/admin/*" element={<SoloAdmin><Pendiente titulo="Administración" /></SoloAdmin>} />
+          <Route path="/admin/*" element={<SoloAdmin><Admin /></SoloAdmin>} />
           <Route path="/importar" element={<SoloAdmin><Pendiente titulo="Importar" /></SoloAdmin>} />
           <Route path="/concesion/:id" element={<Pendiente titulo="Concesión" />} />
           <Route path="/:espacio" element={<ListaPromociones />} />

@@ -37,3 +37,15 @@ a { color: var(--color-primario); }
 .aviso { margin: 15vh auto; text-align: center; color: var(--color-suave); }
 .nota { color: var(--color-suave); }
 .error { color: var(--color-error); }
+.subnav { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--color-borde); }
+.subnav a { padding: 8px 14px; text-decoration: none; color: var(--color-suave); border-bottom: 2px solid transparent; }
+.subnav a.active { color: var(--color-primario); border-bottom-color: var(--color-primario); }
+h2 { font-size: 1.15rem; margin: 0 0 12px; }
+.formulario { display: flex; flex-direction: column; gap: 12px; max-width: 520px; margin-bottom: 16px; }
+.formulario.en-linea { flex-direction: row; flex-wrap: wrap; align-items: flex-end; max-width: none; }
+.formulario label { display: flex; flex-direction: column; gap: 4px; color: var(--color-suave); font-size: 12px; }
+.formulario input, .formulario select { padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); color: var(--color-texto); }
+.formulario select:disabled { background: var(--color-fondo); }
+label.casilla { flex-direction: row; align-items: center; gap: 6px; }
+.acciones { display: flex; gap: 8px; align-items: center; }
+a.boton { display: inline-block; text-decoration: none; }
