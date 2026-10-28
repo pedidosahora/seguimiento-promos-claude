@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { usePerfil } from '../auth/useSesion'
 
 type Rol = 'admin' | 'kam' | 'socio'
 interface Usuario { id: string; email: string; nombre: string; rol: Rol; activo: boolean }
@@ -7,11 +8,14 @@ interface Usuario { id: string; email: string; nombre: string; rol: Rol; activo:
 const VACIO = { email: '', nombre: '', rol: 'kam' as Rol, activo: true }
 
 export default function Usuarios() {
+  const yo = usePerfil()
   const [lista, setLista] = useState<Usuario[]>([])
   const [f, setF] = useState(VACIO)
   const [editando, setEditando] = useState<string | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Un administrador no puede quitarse a sí mismo el rol de admin ni desactivarse.
+  const esYo = editando != null && editando === yo?.id
 
   const cargar = useCallback(async () => {
     setCargando(true)
@@ -59,20 +63,21 @@ export default function Usuarios() {
           <input value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />
         </label>
         <label>Rol
-          <select value={f.rol} onChange={(e) => setF({ ...f, rol: e.target.value as Rol })}>
+          <select value={f.rol} disabled={esYo} onChange={(e) => setF({ ...f, rol: e.target.value as Rol })}>
             <option value="admin">Admin</option>
             <option value="kam">KAM</option>
             <option value="socio">Socio</option>
           </select>
         </label>
         <label className="casilla">
-          <input type="checkbox" checked={f.activo} onChange={(e) => setF({ ...f, activo: e.target.checked })} /> Activo
+          <input type="checkbox" checked={f.activo} disabled={esYo} onChange={(e) => setF({ ...f, activo: e.target.checked })} /> Activo
         </label>
         <button className="boton" type="submit">{editando == null ? 'Añadir' : 'Guardar cambios'}</button>
         {editando != null && (
           <button className="boton secundario" type="button" onClick={() => { setEditando(null); setF(VACIO) }}>Cancelar</button>
         )}
       </form>
+      {esYo && <p className="nota">No puedes cambiar tu propio rol ni desactivarte: pídeselo a otro administrador.</p>}
       {error && <p role="alert" className="error">{error}</p>}
       {cargando ? <p className="nota">Cargando…</p> : lista.length === 0 ? <p className="nota">No hay usuarios.</p> : (
         <table className="tabla">

@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import Admin from './admin/Admin'
 import Acceso from './auth/Acceso'
 import { SesionContext, useSesion, usePerfil } from './auth/useSesion'
@@ -21,12 +22,18 @@ export default function Rutas() {
       <div className="aviso" role="alert">
         <p>No se ha podido cargar tu perfil.</p>
         <button className="boton" onClick={() => window.location.reload()}>Reintentar</button>
+        <button className="boton secundario" onClick={() => void supabase.auth.signOut()}>Salir</button>
       </div>
     )
   }
   if (!sesion.haySesion) return <Acceso />
   if (!sesion.perfil) {
-    return <p className="aviso">Tu cuenta no tiene acceso. Pide alta a administración</p>
+    return (
+      <div className="aviso">
+        <p>Tu cuenta no tiene acceso. Pide alta a administración</p>
+        <button className="boton secundario" onClick={() => void supabase.auth.signOut()}>Salir</button>
+      </div>
+    )
   }
   return (
     <SesionContext.Provider value={sesion}>
