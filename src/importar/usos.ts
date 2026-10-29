@@ -1,3 +1,4 @@
+import { parsearHistorico } from './historico'
 import { aFechaISO, aId, aNumero, normalizarCabecera, normalizarTag } from './normalizar'
 import type { ErrorFila } from './tipos'
 
@@ -30,10 +31,16 @@ export function parsearUsos(aoa: unknown[][]): { filas: FilaUsos[]; errores: Err
     'fechaactualizacion',
   ].map((n) => cab.indexOf(n))
   if ([cId, cCon, cTag, cUsos, cGsv, cFecha].some((c) => c < 0)) {
+    const esHistorico = parsearHistorico(aoa).promociones.length > 0
     return {
       filas,
       errores: [
-        { fila: 1, motivo: 'Faltan columnas: ID, CONCESION, TAG, USOS, GSV, FECHA ACTUALIZACION' },
+        {
+          fila: 1,
+          motivo: esHistorico
+            ? 'Este archivo es un histórico de seguimiento (bloques por promoción). Elige «Histórico de seguimiento» en Tipo de importación.'
+            : 'Faltan columnas: ID, CONCESION, TAG, USOS, GSV, FECHA ACTUALIZACION',
+        },
       ],
     }
   }

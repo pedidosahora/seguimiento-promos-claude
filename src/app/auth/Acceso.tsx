@@ -1,9 +1,28 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../../lib/supabase'
+
+// Si Google o Supabase rechazan el acceso, vuelven a la web con el error en la query o en el fragmento.
+function errorDeVuelta(): string | null {
+  for (const p of [
+    new URLSearchParams(window.location.search),
+    new URLSearchParams(window.location.hash.slice(1)),
+  ]) {
+    if (p.get('error')) {
+      const detalle = p.get('error_description') ?? p.get('error')
+      return `No se ha podido entrar con Google (${detalle}). Vuelve a intentarlo y, si sigue fallando, avisa a administración.`
+    }
+  }
+  return null
+}
 
 export default function Acceso() {
   const [email, setEmail] = useState('')
-  const [mensaje, setMensaje] = useState<string | null>(null)
+  const [mensaje, setMensaje] = useState<string | null>(errorDeVuelta)
+
+  // Solo se limpia la dirección si trae un error: un #access_token correcto lo procesa Supabase.
+  useEffect(() => {
+    if (errorDeVuelta()) window.history.replaceState(null, '', window.location.pathname)
+  }, [])
 
   const entrarConGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({

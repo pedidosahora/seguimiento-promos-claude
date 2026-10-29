@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parsearUsos } from '../../src/importar/usos'
+import { construirHojaHistorico } from '../fixtures/historico'
 
 const cab = ['Id', 'Concesión', 'Tag', 'Usos', 'GSV', 'Fecha actualización']
 
@@ -38,6 +39,20 @@ describe('parsearUsos', () => {
     const r = parsearUsos([['Id', 'Tag']])
     expect(r.filas).toEqual([])
     expect(r.errores[0].fila).toBe(1)
+  })
+  it('una hoja de histórico por bloques avisa de que el tipo es otro', () => {
+    const hoja = construirHojaHistorico([
+      { tag: 'XYZ1', mecanica: 'M', inicio: '01/09/2026', fin: '30/09/2026', filas: [{ id: 900, estado: 'Activa' }] },
+    ])
+    const r = parsearUsos(hoja)
+    expect(r.filas).toEqual([])
+    expect(r.errores).toEqual([
+      {
+        fila: 1,
+        motivo:
+          'Este archivo es un histórico de seguimiento (bloques por promoción). Elige «Histórico de seguimiento» en Tipo de importación.',
+      },
+    ])
   })
   it('duplicados y límites', () => {
     const r = parsearUsos([
