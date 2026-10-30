@@ -23,7 +23,7 @@ export class ConflictoError extends Error {
 export type Cambios = Partial<
   Pick<
     FilaSeguimiento,
-    'estado' | 'sms' | 'email' | 'cupos' | 'usos' | 'gsv' | 'fecha_aceptacion' | 'fecha_activacion'
+    'estado' | 'sms' | 'email' | 'cupos' | 'usos' | 'gsv' | 'fecha_aceptacion' | 'fecha_activacion' | 'cupos_revisado_en'
   >
 >
 

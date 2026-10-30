@@ -87,3 +87,15 @@ a.boton { display: inline-block; text-decoration: none; }
 .lista-ficha .meta { font-size: 11px; color: var(--color-suave); margin-bottom: 2px; }
 .lista-ficha .deshecho { opacity: 0.55; }
 .boton.pequeno { padding: 3px 10px; font-size: 12px; margin-top: 4px; }
+.contadores { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.contadores button { margin: 0; padding: 8px 14px; border: 1px solid var(--color-borde); border-radius: var(--radio); background: var(--color-superficie); color: var(--color-suave); font: inherit; cursor: pointer; text-align: left; }
+.contadores button strong { font-size: 1.1rem; margin-right: 4px; }
+.contadores button.aviso { color: var(--color-alerta); background: var(--color-alerta-fondo); border-color: var(--color-alerta); }
+.contadores button.peligro { color: var(--color-error); background: #fee2e2; border-color: var(--color-error); }
+.contadores button[aria-pressed="true"] { outline: 2px solid var(--color-primario); }
+.lista-tareas td input[type="number"] { width: 90px; padding: 4px 6px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; }
+.lista-tareas td select { padding: 4px 6px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
+.lista-tareas .error { margin: 4px 0 0; }
+button.etiqueta-estado { padding: 0; border: 0; background: none; font: inherit; color: var(--color-primario); cursor: pointer; text-decoration: underline; }
+.etiqueta-estado .cerca { color: var(--color-alerta); font-weight: 600; }
+.etiqueta-estado .agotado { color: var(--color-error); font-weight: 600; }
