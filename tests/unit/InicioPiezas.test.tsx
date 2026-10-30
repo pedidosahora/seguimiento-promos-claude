@@ -161,6 +161,58 @@ describe('ListaTareas', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('sin permiso')
   })
 
+  it('fila no editable: solo lectura, sin controles', () => {
+    montar(
+      <ListaTareas
+        tarea="revision"
+        filas={[fila({ editable: false, estado: 'activa', revision_cupos: 'semanal', cupos_revisado_en: null })]}
+        ahora={ahora}
+        onCambio={() => {}}
+      />,
+    )
+    expect(screen.getByText('PROMO1')).toBeInTheDocument()
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('doble envío: un segundo clic con el guardado en curso no vuelve a guardar', async () => {
+    let resolver: (f: FilaInicio) => void = () => {}
+    mocks.guardarDesdeInicio.mockReturnValue(new Promise<FilaInicio>((r) => (resolver = r)))
+    const f = fila({ estado: 'activa', revision_cupos: 'semanal', cupos_revisado_en: null })
+    const onCambio = vi.fn()
+    montar(<ListaTareas tarea="revision" filas={[f]} ahora={ahora} onCambio={onCambio} />)
+    const boton = screen.getByRole('button', { name: 'Revisado, sin cambios' })
+    fireEvent.click(boton)
+    fireEvent.click(boton)
+    expect(mocks.guardarDesdeInicio).toHaveBeenCalledTimes(1)
+    expect(boton).toBeDisabled()
+    resolver(f)
+    await waitFor(() => expect(onCambio).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(boton).toBeEnabled())
+  })
+
+  it('el input de cupos se resincroniza cuando la fila se recarga', () => {
+    const f = fila({ estado: 'activa', cupos: 10, usos: 9 })
+    const props = { tarea: 'cupos' as const, ahora, onCambio: () => {} }
+    const { rerender } = montar(<ListaTareas {...props} filas={[f]} />)
+    const input = screen.getByRole('spinbutton')
+    fireEvent.change(input, { target: { value: '15' } })
+    expect(input).toHaveValue(15)
+    const recargada = fila({
+      estado: 'activa',
+      cupos: 11,
+      usos: 9,
+      actualizado_en: '2026-10-30T10:05:00Z',
+    })
+    rerender(
+      <MemoryRouter>
+        <ListaTareas {...props} filas={[recargada]} />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('spinbutton')).toHaveValue(11)
+  })
+
   it('mostrarKam añade la columna KAM', () => {
     montar(
       <ListaTareas

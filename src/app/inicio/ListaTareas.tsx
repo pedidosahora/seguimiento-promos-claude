@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ETIQUETA_ENVIO,
@@ -13,7 +13,12 @@ import { guardarDesdeInicio, recargarFila, rutaPromocion } from './datos'
 /** Guardado de una fila con el manejo común de errores y conflictos. */
 export function useGuardar(fila: FilaInicio, onCambio: (f: FilaInicio) => void) {
   const [error, setError] = useState<string | null>(null)
+  const [guardando, setGuardando] = useState(false)
+  const enCurso = useRef(false)
   async function guardar(cambios: Cambios) {
+    if (enCurso.current) return
+    enCurso.current = true
+    setGuardando(true)
     setError(null)
     try {
       onCambio(await guardarDesdeInicio(fila, cambios))
@@ -25,9 +30,12 @@ export function useGuardar(fila: FilaInicio, onCambio: (f: FilaInicio) => void) 
       } else {
         setError(e instanceof Error ? e.message : String(e))
       }
+    } finally {
+      enCurso.current = false
+      setGuardando(false)
     }
   }
-  return { error, setError, guardar }
+  return { error, setError, guardar, guardando }
 }
 
 interface Props {
@@ -72,8 +80,13 @@ function FilaTarea({
   onCambio,
   mostrarKam,
 }: Omit<Props, 'filas' | 'ahora'> & { fila: FilaInicio }) {
-  const { error, setError, guardar } = useGuardar(fila, onCambio)
+  const { error, setError, guardar, guardando } = useGuardar(fila, onCambio)
   const [cupos, setCupos] = useState(fila.cupos == null ? '' : String(fila.cupos))
+  // Si la fila cambia (p. ej. recarga tras un conflicto), el input refleja el valor guardado.
+  useEffect(() => {
+    setCupos(fila.cupos == null ? '' : String(fila.cupos))
+  }, [fila.cupos, fila.actualizado_en])
+  const soloLectura = !fila.editable
 
   function guardarCupos() {
     if (cupos.trim() === '') return
@@ -90,6 +103,7 @@ function FilaTarea({
       {etiqueta}{' '}
       <select
         value={fila[campo]}
+        disabled={guardando}
         onChange={(e) => void guardar({ [campo]: e.target.value as EstadoEnvio })}
       >
         {Object.entries(ETIQUETA_ENVIO).map(([k, v]) => (
@@ -107,6 +121,7 @@ function FilaTarea({
       <select
         aria-label="Estado"
         value={fila.estado}
+        disabled={guardando}
         onChange={(e) => void guardar({ estado: e.target.value as EstadoSeguimiento })}
       >
         {Object.entries(ETIQUETA_ESTADO).map(([k, v]) => (
@@ -130,9 +145,10 @@ function FilaTarea({
           aria-label="Cupos"
           min={0}
           value={cupos}
+          disabled={guardando}
           onChange={(e) => setCupos(e.target.value)}
         />{' '}
-        <button type="button" className="boton pequeno" onClick={guardarCupos}>
+        <button type="button" className="boton pequeno" disabled={guardando} onClick={guardarCupos}>
           Guardar
         </button>
         {tarea === 'revision' && (
@@ -141,6 +157,7 @@ function FilaTarea({
             <button
               type="button"
               className="boton pequeno secundario"
+              disabled={guardando}
               onClick={() => void guardar({ cupos_revisado_en: new Date().toISOString() })}
             >
               Revisado, sin cambios
@@ -158,7 +175,7 @@ function FilaTarea({
       <td><Link to={rutaPromocion(fila.espacio, fila.tag)}>{fila.tag}</Link></td>
       <td>{dato}</td>
       <td>
-        {accion}
+        {soloLectura ? <span className="suave">Solo lectura</span> : accion}
         {error && <p role="alert" className="error">{error}</p>}
       </td>
     </tr>

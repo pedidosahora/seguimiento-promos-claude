@@ -97,5 +97,11 @@ a.boton { display: inline-block; text-decoration: none; }
 .lista-tareas td select { padding: 4px 6px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
 .lista-tareas .error { margin: 4px 0 0; }
 button.etiqueta-estado { padding: 0; border: 0; background: none; font: inherit; color: var(--color-primario); cursor: pointer; text-decoration: underline; }
+.estado-activa { color: #15803d; }
+.estado-acepta { color: #1d4ed8; }
+.estado-pendiente { color: var(--color-alerta); }
+.estado-rechaza { color: var(--color-error); }
+.estado-no_entra { color: var(--color-suave); }
+.lista-tareas .suave { color: var(--color-suave); }
 .etiqueta-estado .cerca { color: var(--color-alerta); font-weight: 600; }
 .etiqueta-estado .agotado { color: var(--color-error); font-weight: 600; }
