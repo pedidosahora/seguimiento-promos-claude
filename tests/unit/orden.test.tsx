@@ -21,6 +21,17 @@ describe('ordenar', () => {
     const r = vals(ordenar(filas(['2026-03-01', '2025-12-31', '2026-01-15']), col, { clave: 'v', dir: 'asc' }));
     expect(r).toEqual(['2025-12-31', '2026-01-15', '2026-03-01']);
   });
+  it('timestamps ISO completos', () => {
+    const r = vals(ordenar(filas(['2026-10-30T10:00:00Z', '2026-10-29T23:00:00Z']), col, { clave: 'v', dir: 'asc' }));
+    expect(r).toEqual(['2026-10-29T23:00:00Z', '2026-10-30T10:00:00Z']);
+  });
+  it('strings numéricos se ordenan numéricamente', () => {
+    expect(vals(ordenar(filas(['120.50', '9.00', '10']), col, { clave: 'v', dir: 'asc' }))).toEqual(['9.00', '10', '120.50']);
+  });
+  it('número frente a string numérico', () => {
+    expect(vals(ordenar(filas([9, '10.5']), col, { clave: 'v', dir: 'asc' }))).toEqual([9, '10.5']);
+    expect(vals(ordenar(filas(['10.5', 9]), col, { clave: 'v', dir: 'asc' }))).toEqual([9, '10.5']);
+  });
   it('Date', () => {
     const a = new Date('2026-01-01'), b = new Date('2025-01-01');
     expect(vals(ordenar(filas([a, b]), col, { clave: 'v', dir: 'asc' }))).toEqual([b, a]);
@@ -81,5 +92,30 @@ describe('useOrden + CabeceraOrdenable', () => {
     fireEvent.click(btn);
     expect(th.hasAttribute('aria-sort')).toBe(false);
     expect(orden()).toEqual(['3', '1', '2']);
+  });
+});
+
+describe('useOrden reactividad', () => {
+  function Prueba({ fs, ext }: { fs: F[]; ext: number }) {
+    const cols: Columna<F>[] = [{ clave: 'v', valor: (f) => (ext ? -(f.v as number) : (f.v as number)) }];
+    const { filas: r, alternar } = useOrden(fs, cols);
+    return (
+      <div>
+        <button onClick={() => alternar('v')}>ord</button>
+        <span data-testid="r">{r.map((f) => f.v).join(',')}</span>
+      </div>
+    );
+  }
+  it('reordena con nuevas filas y con columnas que leen estado externo', () => {
+    const a = filas([3, 1, 2]);
+    const { rerender } = render(<Prueba fs={a} ext={0} />);
+    fireEvent.click(screen.getByText('ord'));
+    expect(screen.getByTestId('r').textContent).toBe('1,2,3');
+    rerender(<Prueba fs={filas([5, 4, 6])} ext={0} />);
+    expect(screen.getByTestId('r').textContent).toBe('4,5,6');
+    rerender(<Prueba fs={filas([5, 4, 6])} ext={1} />);
+    expect(screen.getByTestId('r').textContent).toBe('6,5,4');
+    rerender(<Prueba fs={a} ext={1} />);
+    expect(screen.getByTestId('r').textContent).toBe('3,2,1');
   });
 });
