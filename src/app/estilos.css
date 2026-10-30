@@ -21,17 +21,18 @@ a { color: var(--color-primario); }
 .cabecera nav a { padding: 6px 12px; border-radius: var(--radio); text-decoration: none; color: var(--color-suave); }
 .cabecera nav a.active { background: var(--color-primario); color: var(--color-primario-texto); }
 .usuario { display: flex; align-items: center; gap: 8px; color: var(--color-suave); }
-.contenido { padding: 24px; max-width: 1280px; margin: 0 auto; }
+.contenido { width: 100%; padding: 24px; max-width: 1280px; margin: 0 auto; }
+.contenido > section { width: 100%; }
 .boton { padding: 8px 14px; border: 0; border-radius: var(--radio); background: var(--color-primario); color: var(--color-primario-texto); cursor: pointer; font: inherit; }
 .boton.secundario { background: transparent; color: var(--color-primario); border: 1px solid var(--color-borde); }
 .acceso { max-width: 360px; margin: 15vh auto; display: flex; flex-direction: column; gap: 16px; }
 .acceso-dev { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--color-borde); padding-top: 16px; }
 .acceso-dev input, .filtros select { display: block; padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
 .filtros { display: flex; gap: 16px; margin-bottom: 16px; }
-.filtros label { color: var(--color-suave); font-size: 12px; }
+.filtros label { color: var(--color-suave); font-size: 13px; }
 .tabla { width: 100%; border-collapse: collapse; background: var(--color-superficie); border: 1px solid var(--color-borde); }
 .tabla th, .tabla td { padding: 8px 12px; border-bottom: 1px solid var(--color-borde); text-align: left; }
-.tabla th { background: var(--color-fondo); font-size: 12px; color: var(--color-suave); }
+.tabla th { background: var(--color-fondo); font-size: 13px; color: var(--color-suave); }
 .tabla th .th-orden { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
 .tabla th .th-orden:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .tabla .num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -45,7 +46,7 @@ a { color: var(--color-primario); }
 h2 { font-size: 1.15rem; margin: 0 0 12px; }
 .formulario { display: flex; flex-direction: column; gap: 12px; max-width: 520px; margin-bottom: 16px; }
 .formulario.en-linea { flex-direction: row; flex-wrap: wrap; align-items: flex-end; max-width: none; }
-.formulario label { display: flex; flex-direction: column; gap: 4px; color: var(--color-suave); font-size: 12px; }
+.formulario label { display: flex; flex-direction: column; gap: 4px; color: var(--color-suave); font-size: 13px; }
 .formulario input, .formulario select { padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); color: var(--color-texto); }
 .formulario select:disabled { background: var(--color-fondo); }
 label.casilla { flex-direction: row; align-items: center; gap: 6px; }
@@ -60,7 +61,7 @@ a.boton { display: inline-block; text-decoration: none; }
 .pestana { padding: 8px 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-suave); font: inherit; cursor: pointer; }
 .pestana.activa { color: var(--color-primario); border-bottom-color: var(--color-primario); }
 .barra-bloque { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 10px 14px; margin-bottom: 12px; background: var(--color-superficie); border: 1px solid var(--color-primario); border-radius: var(--radio); }
-.barra-bloque label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--color-suave); }
+.barra-bloque label { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--color-suave); }
 .barra-bloque select { padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
 .promo-cuerpo { display: flex; gap: 16px; align-items: flex-start; }
 .promo-cuerpo > :first-child { flex: 1; min-width: 0; }
@@ -72,7 +73,7 @@ a.boton { display: inline-block; text-decoration: none; }
 .ficha { width: 360px; flex: none; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); padding: 16px; max-height: calc(100vh - 160px); overflow-y: auto; }
 .ficha-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .ficha-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin: 12px 0; }
-.ficha-datos dt { font-size: 11px; color: var(--color-suave); }
+.ficha-datos dt { font-size: 12px; color: var(--color-suave); }
 .ficha-datos dd { margin: 2px 0 0; }
 .ficha h3 { font-size: 1rem; margin: 16px 0 8px; }
 .cupos-texto { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-suave); margin-bottom: 4px; }
@@ -117,3 +118,16 @@ button.etiqueta-estado:focus-visible { outline: 2px solid var(--color-primario);
 .panel { border: 1px solid var(--color-borde); border-radius: var(--radio); background: var(--color-superficie); padding: 12px 16px; margin-bottom: 16px; }
 .panel h3 { margin: 0 0 12px; font-size: 14px; }
 .panel .formulario { margin-bottom: 0; }
+.volver { display: inline-block; margin-bottom: 8px; font-size: 13px; color: var(--color-suave); text-decoration: none; }
+.volver:hover { color: var(--color-primario); text-decoration: underline; }
+.formulario.formulario-ancho { max-width: 880px; }
+.grupos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grupos fieldset { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 12px 16px 16px; border: 1px solid var(--color-borde); border-radius: var(--radio); background: var(--color-superficie); min-width: 0; }
+.grupos legend { padding: 0 6px; font-weight: 600; color: var(--color-texto); }
+.fila-campos { display: flex; gap: 12px; }
+.fila-campos label { flex: 1; }
+.ayuda { margin: -4px 0 0; font-size: 13px; }
+.zona-archivo { position: relative; display: flex; align-items: center; justify-content: center; padding: 28px 16px; border: 2px dashed var(--color-borde); border-radius: var(--radio); background: var(--color-superficie); color: var(--color-suave); cursor: pointer; text-align: center; }
+.zona-archivo:hover, .zona-archivo:focus-within { border-color: var(--color-primario); color: var(--color-primario); }
+.zona-archivo input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+@media (max-width: 720px) { .grupos { grid-template-columns: 1fr; } }

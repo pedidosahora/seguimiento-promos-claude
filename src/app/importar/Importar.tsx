@@ -18,6 +18,12 @@ const TIPOS: Record<Tipo, string> = {
   historico: 'Histórico de seguimiento',
 }
 
+const AYUDA: Record<Tipo, string> = {
+  concesiones: 'Excel con columnas ID, CONCESION, KAM PRO, TERRITORIO',
+  usos: 'Exportación de la plataforma con Id, Concesión, Tag, Usos, GSV y Fecha actualización',
+  historico: 'Hoja de seguimiento por bloques (una promoción por bloque). Solo se lee la primera hoja del libro',
+}
+
 const ETIQUETAS_INCIDENCIA: Record<string, string> = {
   archivo: 'Error en el archivo',
   servidor: 'Error de datos',
@@ -268,6 +274,7 @@ export default function Importar() {
               ))}
             </select>
           </label>
+          <p className="nota ayuda">{AYUDA[tipo]}</p>
           {tipo === 'historico' && (
             <label>
               Espacio
@@ -288,8 +295,15 @@ export default function Importar() {
               </select>
             </label>
           )}
-          <label>
-            Archivo
+          <label
+            className="zona-archivo"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault()
+              setArchivo(e.dataTransfer.files?.[0] ?? null)
+            }}
+          >
+            <span>{archivo ? archivo.name : 'Arrastra el Excel aquí o pulsa para elegirlo'}</span>
             <input type="file" accept=".xlsx,.xls" onChange={(e) => setArchivo(e.target.files?.[0] ?? null)} />
           </label>
           <div className="acciones">

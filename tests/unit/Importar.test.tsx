@@ -32,7 +32,7 @@ describe('Importar', () => {
     rpc.mockReturnValue(new Promise((r) => (resolver = r)))
     render(<MemoryRouter><Importar /></MemoryRouter>)
     expect(screen.queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument()
-    fireEvent.change(screen.getByLabelText('Archivo'), { target: { files: [archivo()] } })
+    fireEvent.change(screen.getByLabelText(/Arrastra el Excel/), { target: { files: [archivo()] } })
     fireEvent.click(screen.getByRole('button', { name: 'Previsualizar' }))
     await screen.findByText(/Analizando/)
     expect(screen.queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument()
@@ -43,9 +43,36 @@ describe('Importar', () => {
   it('muestra el error de la base de datos tal cual', async () => {
     rpc.mockResolvedValue({ data: null, error: { message: 'Solo un administrador puede importar' } })
     render(<MemoryRouter><Importar /></MemoryRouter>)
-    fireEvent.change(screen.getByLabelText('Archivo'), { target: { files: [archivo()] } })
+    fireEvent.change(screen.getByLabelText(/Arrastra el Excel/), { target: { files: [archivo()] } })
     fireEvent.click(screen.getByRole('button', { name: 'Previsualizar' }))
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Solo un administrador puede importar'))
     expect(screen.queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument()
+  })
+
+  it('muestra la ayuda del tipo elegido', () => {
+    render(<MemoryRouter><Importar /></MemoryRouter>)
+    expect(screen.getByText('Excel con columnas ID, CONCESION, KAM PRO, TERRITORIO')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Tipo de importación'), { target: { value: 'usos' } })
+    expect(
+      screen.getByText('Exportación de la plataforma con Id, Concesión, Tag, Usos, GSV y Fecha actualización'),
+    ).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Tipo de importación'), { target: { value: 'historico' } })
+    expect(
+      screen.getByText('Hoja de seguimiento por bloques (una promoción por bloque). Solo se lee la primera hoja del libro'),
+    ).toBeInTheDocument()
+  })
+
+  it('muestra el nombre del archivo elegido y admite soltarlo', () => {
+    render(<MemoryRouter><Importar /></MemoryRouter>)
+    expect(screen.getByText('Arrastra el Excel aquí o pulsa para elegirlo')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/Arrastra el Excel/), { target: { files: [archivo()] } })
+    expect(screen.getByText('x.xlsx')).toBeInTheDocument()
+    cleanup()
+    render(<MemoryRouter><Importar /></MemoryRouter>)
+    const zona = screen.getByText('Arrastra el Excel aquí o pulsa para elegirlo').closest('label')!
+    const f = new File([new Uint8Array([1])], 'soltado.xlsx')
+    fireEvent.drop(zona, { dataTransfer: { files: [f] } })
+    expect(screen.getByText('soltado.xlsx')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previsualizar' })).toBeEnabled()
   })
 })

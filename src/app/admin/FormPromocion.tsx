@@ -129,46 +129,63 @@ export default function FormPromocion() {
           <Link to={`/admin/promociones/${id}/convocatoria`}>Convocatoria</Link>
         </p>
       )}
-      <form className="formulario" onSubmit={(e) => { e.preventDefault(); void guardar() }}>
-        <label>TAG
-          <input value={d.tag} onChange={(e) => cambiar('tag', e.target.value)} />
-        </label>
-        <label>Espacio
-          <select value={d.espacio} onChange={(e) => cambiar('espacio', e.target.value)}>
-            {Object.entries(ETIQUETA_ESPACIO).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </label>
-        <label>Marca
-          <select value={d.marca} disabled={d.espacio !== 'CAMPANAS'} onChange={(e) => cambiar('marca', e.target.value)}>
-            <option value="TMICC">TMICC</option>
-            <option value="UFS">UFS</option>
-          </select>
-        </label>
-        <label>Mecánica
-          <input value={d.mecanica} onChange={(e) => cambiar('mecanica', e.target.value)} />
-        </label>
-        <label>Objetivo
-          <input value={d.objetivo} onChange={(e) => cambiar('objetivo', e.target.value)} />
-        </label>
-        <label>Canal
-          <input value={d.canal} onChange={(e) => cambiar('canal', e.target.value)} />
-        </label>
-        <label>Fecha de inicio
-          <input type="date" value={d.fecha_inicio} onChange={(e) => cambiar('fecha_inicio', e.target.value)} />
-        </label>
-        <label>Fecha de fin
-          <input type="date" value={d.fecha_fin} onChange={(e) => cambiar('fecha_fin', e.target.value)} />
-        </label>
-        <label>Umbral de cupos (%)
-          <input type="number" min={1} max={100} value={d.umbral} onChange={(e) => cambiar('umbral', e.target.value)} />
-        </label>
-        <label>Revisión de cupos
-          <select value={d.revision_cupos} onChange={(e) => cambiar('revision_cupos', e.target.value)}>
-            <option value="ninguna">Ninguna</option>
-            <option value="semanal">Semanal</option>
-            <option value="quincenal">Quincenal</option>
-          </select>
-        </label>
+      <form className="formulario formulario-ancho" onSubmit={(e) => { e.preventDefault(); void guardar() }}>
+        <div className="grupos">
+          <fieldset>
+            <legend>Identificación</legend>
+            <label>TAG *
+              <input value={d.tag} onChange={(e) => cambiar('tag', e.target.value)} />
+            </label>
+            <label>Espacio
+              <select value={d.espacio} onChange={(e) => cambiar('espacio', e.target.value)}>
+                {Object.entries(ETIQUETA_ESPACIO).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </label>
+            <label>Marca
+              <select value={d.marca} disabled={d.espacio !== 'CAMPANAS'} onChange={(e) => cambiar('marca', e.target.value)}>
+                <option value="TMICC">TMICC</option>
+                <option value="UFS">UFS</option>
+              </select>
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Contenido</legend>
+            <label>Mecánica *
+              <input value={d.mecanica} onChange={(e) => cambiar('mecanica', e.target.value)} />
+            </label>
+            <label>Objetivo
+              <input value={d.objetivo} onChange={(e) => cambiar('objetivo', e.target.value)} />
+            </label>
+            <label>Canal
+              <input value={d.canal} onChange={(e) => cambiar('canal', e.target.value)} />
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Fechas</legend>
+            <div className="fila-campos">
+              <label>Fecha de inicio *
+                <input type="date" value={d.fecha_inicio} onChange={(e) => cambiar('fecha_inicio', e.target.value)} />
+              </label>
+              <label>Fecha de fin *
+                <input type="date" value={d.fecha_fin} onChange={(e) => cambiar('fecha_fin', e.target.value)} />
+              </label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Cupos</legend>
+            <label>Umbral de cupos (%)
+              <input type="number" min={1} max={100} value={d.umbral} onChange={(e) => cambiar('umbral', e.target.value)} />
+            </label>
+            <label>Revisión de cupos
+              <select value={d.revision_cupos} onChange={(e) => cambiar('revision_cupos', e.target.value)}>
+                <option value="ninguna">Ninguna</option>
+                <option value="semanal">Semanal</option>
+                <option value="quincenal">Quincenal</option>
+              </select>
+            </label>
+          </fieldset>
+        </div>
+        <p className="nota">* Necesario para publicar</p>
         {error && <p role="alert" className="error">{error}</p>}
         {aviso && <p className="nota">{aviso}</p>}
         <div className="acciones">
