@@ -1,3 +1,4 @@
+import { fmtEntero, fmtImporte } from '../../dominio/formato'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -107,9 +108,9 @@ export default function FichaConcesion() {
                 </td>
                 <td>{f.promociones ? ETIQUETA_ESPACIO[f.promociones.espacio] : '—'}</td>
                 <td>{ETIQUETA_ESTADO[f.estado]}</td>
-                <td className="num">{(f.usos ?? 0).toLocaleString('es-ES')}</td>
+                <td className="num">{fmtEntero(f.usos ?? 0)}</td>
                 <td className="num">
-                  {(f.gsv ?? 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  {fmtImporte(f.gsv ?? 0)}
                 </td>
               </tr>
             ))}

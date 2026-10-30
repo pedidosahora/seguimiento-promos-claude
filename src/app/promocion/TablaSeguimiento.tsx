@@ -1,3 +1,4 @@
+import { fmtEntero, fmtImporte } from '../../dominio/formato'
 import { useEffect, useMemo, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import {
@@ -51,9 +52,6 @@ export interface PropsTabla {
   pruebas?: boolean
 }
 
-const fmtEntero = (v: number | null) => (v == null ? '—' : v.toLocaleString('es-ES'))
-const fmtEuro = (v: number | null) =>
-  v == null ? '—' : Number(v).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
 
 export default function TablaSeguimiento({
   filas,
@@ -142,7 +140,7 @@ export default function TablaSeguimiento({
       fecha('fecha_activacion', 'F. activación'),
       numero('cupos', 'Cupos', fmtEntero),
       numero('usos', 'Usos', fmtEntero),
-      numero('gsv', 'GSV', fmtEuro),
+      numero('gsv', 'GSV', fmtImporte),
       {
         colId: 'pct_cupos',
         headerName: '% Cupos',

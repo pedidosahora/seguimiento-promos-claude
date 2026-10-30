@@ -22,7 +22,7 @@ describe('Cabecera', () => {
     const valor = (k: string) => screen.getByText(k).nextElementSibling?.textContent
     expect(valor('Activas')).toBe('3')
     expect(valor('Pendientes')).toBe('2')
-    expect(valor('Cupos')).toBe((1500).toLocaleString('es-ES'))
+    expect(valor('Cupos')).toBe('1.500')
     expect(valor('Convocadas')).toBe('10')
     expect(valor('% activación')).toBe('38 %')
   })

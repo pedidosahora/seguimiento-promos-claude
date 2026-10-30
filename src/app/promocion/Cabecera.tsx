@@ -1,3 +1,4 @@
+import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { ETIQUETA_ESPACIO, ETIQUETA_ESTADO_PROMOCION, type Espacio, type EstadoPromocion } from '../../dominio/etiquetas'
 
 export interface PromoCabecera {
@@ -26,7 +27,6 @@ export interface Indicadores {
 export type Pestana = 'mis' | 'todas' | 'pendientes'
 
 const fmtFecha = (f: string | null) => (f ? f.split('-').reverse().join('/') : '—')
-const fmtPct = (v: number | null) => (v == null ? '—' : `${Math.round(v * 100)} %`)
 
 interface Props {
   promo: PromoCabecera
@@ -47,9 +47,9 @@ export default function Cabecera({ promo, indicadores: i, pestana, onPestana, on
         ['% pendientes', fmtPct(i.pct_pendientes)],
         ['% rechazo', fmtPct(i.pct_rechazo)],
         ['% activación', fmtPct(i.pct_activacion)],
-        ['Cupos', i.cupos.toLocaleString('es-ES')],
-        ['Usos', i.usos.toLocaleString('es-ES')],
-        ['GSV', i.gsv.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })],
+        ['Cupos', fmtEntero(i.cupos)],
+        ['Usos', fmtEntero(i.usos)],
+        ['GSV', fmtImporte(i.gsv)],
       ]
     : []
   return (

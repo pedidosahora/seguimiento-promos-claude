@@ -1,7 +1,6 @@
+import { fmtEntero, fmtPct } from '../../dominio/formato'
 import { Link } from 'react-router-dom'
 import { rutaPromocion, type FilaRanking } from './datos'
-
-const nf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 })
 
 export default function RankingPromociones({ filas }: { filas: FilaRanking[] }) {
   const orden = [...filas].sort(
@@ -33,17 +32,17 @@ export default function RankingPromociones({ filas }: { filas: FilaRanking[] }) 
                 '—'
               ) : (
                 <div className="pct-cupos">
-                  <span>{Math.round(f.pct * 100)}%</span>
+                  <span>{fmtPct(f.pct)}</span>
                   <div className="barra" aria-hidden="true">
                     <div className="barra-relleno" style={{ width: `${Math.min(f.pct, 1) * 100}%` }} />
                   </div>
                 </div>
               )}
             </td>
-            <td className="num">{nf.format(f.usos)}</td>
-            <td className="num">{nf.format(f.cupos)}</td>
-            <td className="num">{nf.format(f.gsv)}</td>
-            <td className="num">{nf.format(f.activas)}</td>
+            <td className="num">{fmtEntero(f.usos)}</td>
+            <td className="num">{fmtEntero(f.cupos)}</td>
+            <td className="num">{fmtEntero(f.gsv)}</td>
+            <td className="num">{fmtEntero(f.activas)}</td>
           </tr>
         ))}
       </tbody>

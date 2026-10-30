@@ -1,3 +1,4 @@
+import { fmtPct } from '../../dominio/formato'
 import { useState } from 'react'
 import { nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
 import { ETIQUETA_ESTADO, type EstadoSeguimiento } from '../../dominio/etiquetas'
@@ -19,7 +20,7 @@ export default function EtiquetaEstado({ fila, onCambio }: Props) {
   const texto = (
     <>
       {fila.tag} · {ETIQUETA_ESTADO[fila.estado]}
-      {nivel && pct != null && <span className={nivel}> ⚠ {Math.round(pct * 100)} %</span>}
+      {nivel && pct != null && <span className={nivel}> ⚠ {fmtPct(pct)}</span>}
     </>
   )
   const clase = `etiqueta-estado estado-${fila.estado}`

@@ -1,3 +1,4 @@
+import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -175,12 +176,12 @@ export default function ListaPromociones() {
                   <td>{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
                   <td className="num">{r?.presentadas ?? 0}</td>
                   <td className="num">
-                    {r?.pct_aceptacion == null ? '—' : `${Math.round(r.pct_aceptacion * 100)} %`}
+                    {fmtPct(r?.pct_aceptacion)}
                   </td>
                   <td className="num">{r?.activas ?? 0}</td>
-                  <td className="num">{(r?.usos ?? 0).toLocaleString('es-ES')}</td>
+                  <td className="num">{fmtEntero(r?.usos ?? 0)}</td>
                   <td className="num">
-                    {(r?.gsv ?? 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                    {fmtImporte(r?.gsv ?? 0)}
                   </td>
                 </tr>
               )

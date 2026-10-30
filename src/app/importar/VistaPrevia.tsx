@@ -1,3 +1,4 @@
+import { fmtEntero } from '../../dominio/formato'
 import { useMemo, useState } from 'react'
 import { ETIQUETA_ESPACIO, type Espacio } from '../../dominio/etiquetas'
 
@@ -44,7 +45,7 @@ export default function VistaPrevia({
         {conteos.map((c) => (
           <div key={c.clave}>
             <dt>{c.etiqueta}</dt>
-            <dd>{c.n.toLocaleString('es-ES')}</dd>
+            <dd>{fmtEntero(c.n)}</dd>
           </div>
         ))}
       </dl>

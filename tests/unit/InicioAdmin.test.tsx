@@ -183,8 +183,8 @@ describe('RankingPromociones', () => {
       'MEDIA',
       'SINCUPOS',
     ])
-    expect(filas[0]).toHaveTextContent('100%')
-    expect(filas[1]).toHaveTextContent('50%')
+    expect(filas[0]).toHaveTextContent('100 %')
+    expect(filas[1]).toHaveTextContent('50 %')
     expect(within(filas[2]).getAllByRole('cell')[2]).toHaveTextContent('—')
     expect(within(filas[0]).getByRole('link')).toHaveAttribute('href', '/tmicc/LLENA')
   })

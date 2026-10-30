@@ -1,3 +1,4 @@
+import { fmtImporte, fmtPct } from '../../dominio/formato'
 import { gsvPorUso, nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
 import type { FilaGrid } from './servicio'
 
@@ -24,12 +25,12 @@ const EDITABLES: CampoGrid[] = ['estado', 'sms', 'email', 'cupos', 'usos', 'gsv'
 
 export function textoPctCupos(usos: number | null, cupos: number | null): string {
   const p = pctCupos(usos, cupos)
-  return p == null ? '—' : `${Math.round(p * 100)} %`
+  return fmtPct(p)
 }
 
 export function textoGsvUso(gsv: number | null, usos: number | null): string {
   const v = gsvPorUso(gsv, usos)
-  return v == null ? '—' : v.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
+  return fmtImporte(v)
 }
 
 export function esEditable(campo: CampoGrid, ctx: Pick<ContextoCelda, 'editable' | 'esAdmin'>): boolean {
