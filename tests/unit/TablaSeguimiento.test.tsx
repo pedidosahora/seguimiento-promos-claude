@@ -17,7 +17,7 @@ function fila(extra: Partial<FilaGrid> = {}): FilaGrid {
   return {
     id: 'f1', promocion_id: 'p1', concesion_id: 9100, estado: 'pendiente',
     fecha_aceptacion: null, fecha_activacion: null, cupos: 50, usos: 0, gsv: 0,
-    fecha_dato: null, sms: 'pending', email: 'pending', actualizado_en: '2026-10-01T10:00:00Z',
+    fecha_dato: null, sms: 'pending', email: 'pending', actualizado_en: '2026-10-01T10:00:00Z', cupos_revisado_en: null,
     nombre: 'Alfa', kam_id: 'k1', kam_nombre: 'Ana', territorio: 'Norte',
     ...extra,
   }
