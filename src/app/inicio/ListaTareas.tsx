@@ -60,6 +60,11 @@ export default function ListaTareas({ tarea, filas, ahora, onCambio, mostrarKam 
         </tr>
       </thead>
       <tbody>
+        {propias.length === 0 && (
+          <tr>
+            <td colSpan={mostrarKam ? 5 : 4} className="suave">No hay tareas pendientes</td>
+          </tr>
+        )}
         {propias.map((f) => (
           <FilaTarea
             key={f.seguimiento_id}

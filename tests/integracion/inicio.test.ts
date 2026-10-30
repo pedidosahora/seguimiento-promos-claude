@@ -103,6 +103,68 @@ describe('inicio: campos, triggers y vista', () => {
     expect(h.some((r) => 'cupos_revisado_en' in r.cambios)).toBe(true)
   })
 
+  describe('cupos_revisado_en: valores del cliente', () => {
+    async function nueva() {
+      const p = await promo('P1', 'TMICC', 'publicada')
+      const { data, error } = await admin()
+        .from('seguimiento')
+        .insert({ promocion_id: p.id, concesion_id: 9100 })
+        .select('id, cupos_revisado_en')
+        .single()
+      if (error) throw error
+      return data
+    }
+
+    it('un UPDATE con null conserva el valor anterior', async () => {
+      const s = await nueva()
+      const ana = await clienteComo('ana@pro.agency')
+      const { data, error } = await ana
+        .from('seguimiento')
+        .update({ cupos_revisado_en: null })
+        .eq('id', s.id)
+        .select('cupos_revisado_en')
+        .single()
+      if (error) throw error
+      expect(data.cupos_revisado_en).toBe(s.cupos_revisado_en)
+    })
+
+    it('un UPDATE con fecha futura se guarda como máximo now()', async () => {
+      const s = await nueva()
+      const futuro = new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString()
+      const ana = await clienteComo('ana@pro.agency')
+      const { data, error } = await ana
+        .from('seguimiento')
+        .update({ cupos_revisado_en: futuro })
+        .eq('id', s.id)
+        .select('cupos_revisado_en')
+        .single()
+      if (error) throw error
+      expect(new Date(data.cupos_revisado_en).getTime()).toBeLessThanOrEqual(Date.now() + 1000)
+    })
+
+    it('«revisado, sin cambios» con valor actual lo actualiza', async () => {
+      const s = await nueva()
+      await new Promise((r) => setTimeout(r, 20))
+      const ahora = new Date().toISOString()
+      const ana = await clienteComo('ana@pro.agency')
+      const { error } = await ana
+        .from('seguimiento')
+        .update({ cupos_revisado_en: ahora })
+        .eq('id', s.id)
+      expect(error).toBeNull()
+      const { data, error: e2 } = await admin()
+        .from('seguimiento')
+        .select('cupos_revisado_en')
+        .eq('id', s.id)
+        .single()
+      if (e2) throw e2
+      expect(new Date(data.cupos_revisado_en).getTime()).toBe(new Date(ahora).getTime())
+      expect(new Date(data.cupos_revisado_en).getTime()).toBeGreaterThan(
+        new Date(s.cupos_revisado_en).getTime(),
+      )
+    })
+  })
+
   it('fila nueva nace revisada', async () => {
     const p = await promo('P1', 'TMICC', 'publicada')
     const { data, error } = await admin()

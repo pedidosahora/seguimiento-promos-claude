@@ -83,12 +83,12 @@ describe('InicioKam', () => {
     datos([fila({ estado: 'pendiente' })])
     montar()
     const b = await boton(/Sin respuesta/)
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    const lista = () => document.querySelector('table.lista-tareas') as HTMLElement | null
+    expect(lista()).toBeNull()
     fireEvent.click(b)
-    const tabla = screen.getByRole('table')
-    expect(within(tabla).getByText('Bar Pepe')).toBeInTheDocument()
+    expect(within(lista()!).getByText('Bar Pepe')).toBeInTheDocument()
     fireEvent.click(b)
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    expect(lista()).toBeNull()
   })
 
   it('Mis concesiones: concesión sin filas al final sin etiquetas; con filas, una etiqueta por promoción', async () => {
@@ -101,17 +101,26 @@ describe('InicioKam', () => {
     )
     montar()
     expect(await screen.findByText('Mis concesiones (2)')).toBeInTheDocument()
-    const items = screen.getAllByRole('listitem')
-    expect(items).toHaveLength(2)
-    expect(items[0]).toHaveTextContent('Zeta')
-    expect(items[1]).toHaveTextContent('Alfa vacía')
-    const etiquetas = within(items[0]).getAllByRole('button')
+    const tabla = document.querySelector('table.mis-concesiones') as HTMLElement
+    expect(within(tabla).getAllByRole('columnheader').map((h) => h.textContent)).toEqual([
+      'Concesión',
+      'Promociones publicadas',
+    ])
+    const filasTabla = within(tabla).getAllByRole('row').slice(1)
+    expect(filasTabla).toHaveLength(2)
+    expect(filasTabla[0]).toHaveTextContent('Zeta')
+    expect(filasTabla[1]).toHaveTextContent('Alfa vacía')
+    const etiquetas = within(filasTabla[0]).getAllByRole('button')
     expect(etiquetas.map((e) => e.textContent)).toEqual([
       expect.stringContaining('A1'),
       expect.stringContaining('B2'),
     ])
-    expect(within(items[1]).queryByRole('button')).not.toBeInTheDocument()
-    expect(within(items[0]).getByRole('link', { name: 'Zeta' })).toHaveAttribute('href', '/concesion/2')
+    // Cada chip es un elemento propio dentro de .etiquetas
+    const contenedor = filasTabla[0].querySelector('.etiquetas')!
+    expect(Array.from(contenedor.children)).toEqual(etiquetas)
+    expect(filasTabla[1].querySelector('.etiquetas')!.children).toHaveLength(0)
+    expect(within(filasTabla[1]).queryByRole('button')).not.toBeInTheDocument()
+    expect(within(filasTabla[0]).getByRole('link', { name: 'Zeta' })).toHaveAttribute('href', '/concesion/2')
   })
 
   it('permiso por espacio: fila editable de concesión ajena aparece en contadores y en Mis concesiones; no aparecen otras del espacio', async () => {

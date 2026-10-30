@@ -96,12 +96,15 @@ a.boton { display: inline-block; text-decoration: none; }
 .lista-tareas td input[type="number"] { width: 90px; padding: 4px 6px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; }
 .lista-tareas td select { padding: 4px 6px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
 .lista-tareas .error { margin: 4px 0 0; }
-button.etiqueta-estado { padding: 0; border: 0; background: none; font: inherit; color: var(--color-primario); cursor: pointer; text-decoration: underline; }
-.etiqueta-estado.estado-activa { color: #15803d; }
-.etiqueta-estado.estado-acepta { color: #1d4ed8; }
-.etiqueta-estado.estado-pendiente { color: var(--color-alerta); }
-.etiqueta-estado.estado-rechaza { color: var(--color-error); }
-.etiqueta-estado.estado-no_entra { color: var(--color-suave); }
+.etiqueta-estado { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+button.etiqueta-estado { border: 0; font: inherit; font-size: 12px; cursor: pointer; }
+button.etiqueta-estado:focus-visible { outline: 2px solid var(--color-primario); outline-offset: 2px; }
+.mis-concesiones .etiquetas { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.etiqueta-estado.estado-activa { color: #15803d; background: #dcfce7; }
+.etiqueta-estado.estado-acepta { color: #1d4ed8; background: #dbeafe; }
+.etiqueta-estado.estado-pendiente { color: var(--color-alerta); background: var(--color-alerta-fondo); }
+.etiqueta-estado.estado-rechaza { color: var(--color-error); background: #fee2e2; }
+.etiqueta-estado.estado-no_entra { color: var(--color-suave); background: #f1f5f9; }
 .lista-tareas .suave { color: var(--color-suave); }
 .etiqueta-estado .cerca { color: var(--color-alerta); font-weight: 600; }
 .etiqueta-estado .agotado { color: var(--color-error); font-weight: 600; }

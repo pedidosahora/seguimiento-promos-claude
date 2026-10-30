@@ -86,16 +86,28 @@ export default function InicioKam() {
         {concesiones.length === 0 ? (
           <p>Todavía no tienes concesiones asignadas</p>
         ) : (
-          <ul>
-            {concesiones.map((c) => (
-              <li key={c.id}>
-                <Link to={`/concesion/${c.id}`}>{c.nombre}</Link>{' '}
-                {c.filas.map((f) => (
-                  <EtiquetaEstado key={f.seguimiento_id} fila={f} ahora={ahora} onCambio={cambiar} />
-                ))}
-              </li>
-            ))}
-          </ul>
+          <table className="tabla mis-concesiones">
+            <thead>
+              <tr>
+                <th>Concesión</th>
+                <th>Promociones publicadas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {concesiones.map((c) => (
+                <tr key={c.id}>
+                  <td><Link to={`/concesion/${c.id}`}>{c.nombre}</Link></td>
+                  <td>
+                    <div className="etiquetas">
+                      {c.filas.map((f) => (
+                        <EtiquetaEstado key={f.seguimiento_id} fila={f} ahora={ahora} onCambio={cambiar} />
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </section>
     </>

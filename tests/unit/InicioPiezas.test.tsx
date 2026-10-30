@@ -99,6 +99,11 @@ describe('Contadores', () => {
 })
 
 describe('ListaTareas', () => {
+  it('sin filas para la tarea muestra «No hay tareas pendientes»', () => {
+    montar(<ListaTareas tarea="sin_respuesta" filas={[fila({ estado: 'activa' })]} ahora={ahora} onCambio={() => {}} />)
+    expect(screen.getByText('No hay tareas pendientes')).toBeInTheDocument()
+  })
+
   it("sin_respuesta: elegir 'acepta' guarda { estado } y luego llama onCambio", async () => {
     const nueva = fila({ estado: 'acepta' })
     mocks.guardarDesdeInicio.mockResolvedValue(nueva)

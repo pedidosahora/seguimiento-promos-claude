@@ -12,9 +12,14 @@ create function seg_cupos_revisado() returns trigger
 language plpgsql set search_path = public as $$
 begin
   if tg_op = 'INSERT' then
-    new.cupos_revisado_en := coalesce(new.cupos_revisado_en, now());
+    new.cupos_revisado_en := least(coalesce(new.cupos_revisado_en, now()), now());
   elsif new.cupos is distinct from old.cupos then
     new.cupos_revisado_en := now();
+  else
+    -- Valor explícito (p. ej. «revisado, sin cambios» o deshacer_cambio): nunca
+    -- nulo ni futuro, para que el reloj del navegador no oculte la tarea.
+    new.cupos_revisado_en :=
+      least(coalesce(new.cupos_revisado_en, old.cupos_revisado_en), now());
   end if;
   return new;
 end
@@ -70,3 +75,4 @@ join concesiones c on c.id = s.concesion_id
 left join perfiles k on k.id = c.kam_id;
 
 grant select on v_inicio_filas to authenticated;
+revoke all on v_inicio_filas from anon;
