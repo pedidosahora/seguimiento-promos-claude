@@ -28,6 +28,8 @@ vi.mock('../../src/app/inicio/datos', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../src/app/inicio/datos')>()),
   cargarFilasInicio: () => Promise.resolve([]),
   cargarMisConcesiones: () => Promise.resolve([]),
+  cargarKams: () => Promise.resolve([]),
+  cargarRanking: () => Promise.resolve([]),
 }))
 
 import Rutas from '../../src/app/rutas'
@@ -86,5 +88,14 @@ describe('Rutas / sesión', () => {
     }
     montar()
     expect(await screen.findByText('Todavía no tienes concesiones asignadas')).toBeInTheDocument()
+  })
+
+  it('la ruta / con perfil admin muestra el inicio de administración', async () => {
+    estado.resultadoPerfil = {
+      data: { id: 'a1', nombre: 'Adm', rol: 'admin', email: 'adm@pro.agency' },
+      error: null,
+    }
+    montar()
+    expect(await screen.findByText('Tareas por KAM')).toBeInTheDocument()
   })
 })

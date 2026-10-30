@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { cargarMisConcesiones } from '../../src/app/inicio/datos'
+import { cargarKams, cargarMisConcesiones, cargarRanking } from '../../src/app/inicio/datos'
 import { admin, clienteComo, crearUsuario, resetDatos } from './ayuda'
 
 async function promo(tag: string, espacio: string, estado: string) {
@@ -220,5 +220,67 @@ describe('cargarMisConcesiones', () => {
       { id: 9202, nombre: 'Perm Nulo SL' },
       { id: 9204, nombre: 'Perm Hoy SL' },
     ])
+  })
+})
+
+describe('cargarKams y cargarRanking (admin)', () => {
+  beforeEach(async () => {
+    await resetDatos()
+    await crearUsuario({ email: 'adm@pro.agency', nombre: 'Adm', rol: 'admin' })
+  })
+
+  it('cargarKams: KAM activos a cero y admin titular, sin duplicados ni inactivos', async () => {
+    const ana = (await crearUsuario({ email: 'ana@pro.agency', nombre: 'Ana', rol: 'kam' })).perfilId
+    await crearUsuario({ email: 'bea@pro.agency', nombre: 'Bea', rol: 'kam' })
+    const baja = (await crearUsuario({ email: 'baja@pro.agency', nombre: 'Baja', rol: 'kam' })).perfilId
+    const { error: ep } = await admin().from('perfiles').update({ activo: false }).eq('id', baja)
+    if (ep) throw ep
+    const { data: adm, error: ea } = await admin()
+      .from('perfiles')
+      .select('id')
+      .eq('email', 'adm@pro.agency')
+      .single()
+    if (ea) throw ea
+    const { error } = await admin()
+      .from('concesiones')
+      .insert([
+        { id: 9300, razon_social: 'A1', kam_id: ana },
+        { id: 9301, razon_social: 'A2', kam_id: ana },
+        { id: 9302, razon_social: 'Del admin', kam_id: adm.id },
+      ])
+    if (error) throw error
+    const cliente = await clienteComo('adm@pro.agency')
+    const r = await cargarKams(cliente)
+    expect(r.map((k) => k.nombre).sort()).toEqual(['Adm', 'Ana', 'Bea'])
+    expect(new Set(r.map((k) => k.id)).size).toBe(r.length)
+  })
+
+  it('cargarRanking: solo publicadas, pct = usos/cupos y null con cupos 0', async () => {
+    const pub = await promo('PUB', 'TMICC', 'publicada')
+    const cer = await promo('CER', 'UFS', 'cerrada')
+    const sin = await promo('SIN', 'UFS', 'publicada')
+    const { error: ec } = await admin()
+      .from('concesiones')
+      .insert([
+        { id: 9400, razon_social: 'R1' },
+        { id: 9401, razon_social: 'R2' },
+      ])
+    if (ec) throw ec
+    const { error: es } = await admin()
+      .from('seguimiento')
+      .insert([
+        { promocion_id: pub.id, concesion_id: 9400, estado: 'activa', cupos: 10, usos: 5, gsv: 100.5 },
+        { promocion_id: pub.id, concesion_id: 9401, estado: 'activa', cupos: 10, usos: 3, gsv: 20 },
+        { promocion_id: cer.id, concesion_id: 9400, estado: 'activa', cupos: 10, usos: 10, gsv: 0 },
+      ])
+    if (es) throw es
+    const cliente = await clienteComo('adm@pro.agency')
+    const r = await cargarRanking(cliente)
+    expect(r.map((f) => f.tag).sort()).toEqual(['PUB', 'SIN'])
+    expect(r.find((f) => f.promocion_id === cer.id)).toBeUndefined()
+    const p = r.find((f) => f.promocion_id === pub.id)!
+    expect(p).toMatchObject({ usos: 8, cupos: 20, activas: 2, gsv: 120.5 })
+    expect(p.pct).toBeCloseTo(0.4)
+    expect(r.find((f) => f.promocion_id === sin.id)!.pct).toBeNull()
   })
 })

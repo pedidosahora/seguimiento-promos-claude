@@ -105,3 +105,7 @@ button.etiqueta-estado { padding: 0; border: 0; background: none; font: inherit;
 .lista-tareas .suave { color: var(--color-suave); }
 .etiqueta-estado .cerca { color: var(--color-alerta); font-weight: 600; }
 .etiqueta-estado .agotado { color: var(--color-error); font-weight: 600; }
+.tareas-por-kam .enlace { padding: 0; border: 0; background: none; color: var(--color-primario); font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; }
+.ranking .pct-cupos { display: flex; align-items: center; gap: 8px; }
+.ranking .pct-cupos .barra { flex: 1; min-width: 80px; }
+.ranking .pct-cupos span { min-width: 36px; font-variant-numeric: tabular-nums; }

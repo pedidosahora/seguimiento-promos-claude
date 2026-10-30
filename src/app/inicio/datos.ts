@@ -71,3 +71,63 @@ export async function cargarMisConcesiones(
   }
   return [...porId].map(([id, nombre]) => ({ id, nombre }))
 }
+
+/** KAM para el reparto de tareas: perfiles activos con rol kam más cualquier perfil titular de una concesión. */
+export async function cargarKams(
+  cliente: SupabaseClient = supabase,
+): Promise<{ id: string; nombre: string }[]> {
+  const [activos, titulares] = await Promise.all([
+    cliente.from('perfiles').select('id, nombre').eq('rol', 'kam').eq('activo', true),
+    cliente.from('concesiones').select('kam_id').not('kam_id', 'is', null),
+  ])
+  if (activos.error) throw new Error(activos.error.message)
+  if (titulares.error) throw new Error(titulares.error.message)
+  const porId = new Map<string, string>()
+  for (const p of activos.data ?? []) porId.set(p.id, p.nombre)
+  const faltan = [...new Set((titulares.data ?? []).map((c) => c.kam_id as string))].filter(
+    (id) => !porId.has(id),
+  )
+  if (faltan.length > 0) {
+    const r = await cliente.from('perfiles').select('id, nombre').in('id', faltan)
+    if (r.error) throw new Error(r.error.message)
+    for (const p of r.data ?? []) porId.set(p.id, p.nombre)
+  }
+  return [...porId].map(([id, nombre]) => ({ id, nombre }))
+}
+
+export type FilaRanking = {
+  promocion_id: string
+  tag: string
+  espacio: Espacio
+  usos: number
+  cupos: number
+  gsv: number
+  activas: number
+  pct: number | null
+}
+
+/** Promociones publicadas con su resumen de cupos; pct = usos / cupos (null si no hay cupos). */
+export async function cargarRanking(cliente: SupabaseClient = supabase): Promise<FilaRanking[]> {
+  const [promos, resumen] = await Promise.all([
+    cliente.from('promociones').select('id, tag, espacio').eq('estado', 'publicada'),
+    cliente.from('v_resumen_promocion').select('promocion_id, usos, cupos, gsv, activas'),
+  ])
+  if (promos.error) throw new Error(promos.error.message)
+  if (resumen.error) throw new Error(resumen.error.message)
+  const porPromo = new Map((resumen.data ?? []).map((r) => [r.promocion_id as string, r]))
+  return (promos.data ?? []).map((p) => {
+    const r = porPromo.get(p.id)
+    const usos = Number(r?.usos ?? 0)
+    const cupos = Number(r?.cupos ?? 0)
+    return {
+      promocion_id: p.id,
+      tag: p.tag,
+      espacio: p.espacio as Espacio,
+      usos,
+      cupos,
+      gsv: Number(r?.gsv ?? 0),
+      activas: Number(r?.activas ?? 0),
+      pct: cupos > 0 ? usos / cupos : null,
+    }
+  })
+}
