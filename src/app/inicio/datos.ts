@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 import type { Espacio } from '../../dominio/etiquetas'
 import type { FilaInicio } from '../../dominio/tareas'
@@ -41,11 +42,14 @@ export function rutaPromocion(espacio: Espacio, tag: string): string {
 }
 
 /** Concesiones del perfil: titular o con permiso extra vigente por concesión (los permisos por espacio no cuentan). */
-export async function cargarMisConcesiones(perfilId: string): Promise<{ id: number; nombre: string }[]> {
+export async function cargarMisConcesiones(
+  perfilId: string,
+  cliente: SupabaseClient = supabase,
+): Promise<{ id: number; nombre: string }[]> {
   const hoy = new Date().toISOString().slice(0, 10)
   const [propias, permisos] = await Promise.all([
-    supabase.from('concesiones').select('id, razon_social, nombre_comercial').eq('kam_id', perfilId),
-    supabase
+    cliente.from('concesiones').select('id, razon_social, nombre_comercial').eq('kam_id', perfilId),
+    cliente
       .from('permisos_extra')
       .select('concesion_id, caduca')
       .eq('perfil_id', perfilId)
@@ -57,7 +61,7 @@ export async function cargarMisConcesiones(perfilId: string): Promise<{ id: numb
   const ids = (permisos.data ?? []).map((p) => p.concesion_id as number)
   let extra: typeof propias.data = []
   if (ids.length > 0) {
-    const r = await supabase.from('concesiones').select('id, razon_social, nombre_comercial').in('id', ids)
+    const r = await cliente.from('concesiones').select('id, razon_social, nombre_comercial').in('id', ids)
     if (r.error) throw new Error(r.error.message)
     extra = r.data ?? []
   }

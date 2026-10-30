@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { cargarMisConcesiones } from '../../src/app/inicio/datos'
 import { admin, clienteComo, crearUsuario, resetDatos } from './ayuda'
 
 async function promo(tag: string, espacio: string, estado: string) {
@@ -175,5 +176,49 @@ describe('inicio: campos, triggers y vista', () => {
       .single()
     if (ev) throw ev
     expect(data.editable).toBe(true)
+  })
+})
+
+describe('cargarMisConcesiones', () => {
+  let kam: string
+  const dia = (desfase: number) =>
+    new Date(Date.now() + desfase * 86400000).toISOString().slice(0, 10)
+
+  beforeEach(async () => {
+    await resetDatos()
+    await crearUsuario({ email: 'adm@pro.agency', nombre: 'Adm', rol: 'admin' })
+    kam = (await crearUsuario({ email: 'ana@pro.agency', nombre: 'Ana', rol: 'kam' })).perfilId
+    const otro = (await crearUsuario({ email: 'bea@pro.agency', nombre: 'Bea', rol: 'kam' })).perfilId
+    const { error } = await admin()
+      .from('concesiones')
+      .insert([
+        { id: 9200, razon_social: 'Propia SL', nombre_comercial: 'Propia', kam_id: kam },
+        { id: 9201, razon_social: 'Sin Comercial SL', kam_id: kam },
+        { id: 9202, razon_social: 'Perm Nulo SL', kam_id: otro },
+        { id: 9203, razon_social: 'Perm Ayer SL', kam_id: otro },
+        { id: 9204, razon_social: 'Perm Hoy SL', kam_id: otro },
+        { id: 9205, razon_social: 'Del Espacio SL', kam_id: otro },
+      ])
+    if (error) throw error
+  })
+
+  it('titular, permisos vigentes y nombre; excluye caducados y permisos por espacio', async () => {
+    const { error } = await admin()
+      .from('permisos_extra')
+      .insert([
+        { perfil_id: kam, concesion_id: 9202, caduca: null },
+        { perfil_id: kam, concesion_id: 9203, caduca: dia(-1) },
+        { perfil_id: kam, concesion_id: 9204, caduca: dia(0) },
+        { perfil_id: kam, espacio: 'TMICC' },
+      ])
+    if (error) throw error
+    const ana = await clienteComo('ana@pro.agency')
+    const r = await cargarMisConcesiones(kam, ana)
+    expect(r.sort((a, b) => a.id - b.id)).toEqual([
+      { id: 9200, nombre: 'Propia' },
+      { id: 9201, nombre: 'Sin Comercial SL' },
+      { id: 9202, nombre: 'Perm Nulo SL' },
+      { id: 9204, nombre: 'Perm Hoy SL' },
+    ])
   })
 })
