@@ -111,9 +111,10 @@ describe('useOrden reactividad', () => {
     const { rerender } = render(<Prueba fs={a} ext={0} />);
     fireEvent.click(screen.getByText('ord'));
     expect(screen.getByTestId('r').textContent).toBe('1,2,3');
-    rerender(<Prueba fs={filas([5, 4, 6])} ext={0} />);
+    const b = filas([5, 4, 6]);
+    rerender(<Prueba fs={b} ext={0} />);
     expect(screen.getByTestId('r').textContent).toBe('4,5,6');
-    rerender(<Prueba fs={filas([5, 4, 6])} ext={1} />);
+    rerender(<Prueba fs={b} ext={1} />);
     expect(screen.getByTestId('r').textContent).toBe('6,5,4');
     rerender(<Prueba fs={a} ext={1} />);
     expect(screen.getByTestId('r').textContent).toBe('3,2,1');
