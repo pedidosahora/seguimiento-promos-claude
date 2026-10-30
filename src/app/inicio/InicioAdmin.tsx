@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { contarTareas, hayAgotadas, type FilaInicio, type Tarea } from '../../dominio/tareas'
+import { contarTareas, hayAgotadas, TAREAS, type FilaInicio, type Tarea } from '../../dominio/tareas'
 import Contadores from './Contadores'
 import { cargarFilasInicio, cargarKams, cargarRanking, type FilaRanking } from './datos'
 import ListaTareas from './ListaTareas'
@@ -52,8 +52,14 @@ export default function InicioAdmin() {
 
   const { filas, kams, ranking, ahora } = datos
   const porKam = seleccion !== null && seleccion.kamId !== undefined
-  const filasLista =
-    seleccion && porKam ? filas.filter((f) => (f.kam_id ?? null) === seleccion.kamId) : filas
+  const nombreKam =
+    seleccion && porKam
+      ? seleccion.kamId === null
+        ? 'Sin KAM'
+        : (kams.find((k) => k.id === seleccion.kamId)?.nombre ??
+          filas.find((f) => f.kam_id === seleccion.kamId)?.kam_nombre ??
+          'KAM desconocido')
+      : ''
   return (
     <>
       <Contadores
@@ -64,14 +70,8 @@ export default function InicioAdmin() {
           setSeleccion((s) => (s && s.kamId === undefined && s.tarea === t ? null : { tarea: t }))
         }
       />
-      {seleccion && (
-        <ListaTareas
-          tarea={seleccion.tarea}
-          filas={filasLista}
-          ahora={ahora}
-          onCambio={cambiar}
-          mostrarKam
-        />
+      {seleccion && !porKam && (
+        <ListaTareas tarea={seleccion.tarea} filas={filas} ahora={ahora} onCambio={cambiar} mostrarKam />
       )}
       <PromocionesNuevas filas={filas} ahora={ahora} />
       <section>
@@ -80,8 +80,28 @@ export default function InicioAdmin() {
           filas={filas}
           kams={kams}
           ahora={ahora}
-          onElegir={(kamId, tarea) => setSeleccion({ kamId, tarea })}
+          onElegir={(kamId, tarea) =>
+            setSeleccion((s) =>
+              s && s.kamId === kamId && s.tarea === tarea ? null : { tarea, kamId },
+            )
+          }
         />
+        {seleccion && porKam && (
+          <div className="seleccion-kam">
+            <h3>
+              {nombreKam} · {TAREAS.find((t) => t.clave === seleccion.tarea)?.etiqueta}{' '}
+              <button type="button" className="boton pequeno secundario" onClick={() => setSeleccion(null)}>
+                Cerrar
+              </button>
+            </h3>
+            <ListaTareas
+              tarea={seleccion.tarea}
+              filas={filas.filter((f) => (f.kam_id ?? null) === seleccion.kamId)}
+              ahora={ahora}
+              onCambio={cambiar}
+            />
+          </div>
+        )}
       </section>
       <section>
         <h2>Ranking de promociones</h2>

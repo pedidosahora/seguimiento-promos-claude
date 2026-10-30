@@ -8,7 +8,13 @@ interface Props {
 }
 
 export default function TareasPorKam({ filas, kams, ahora, onElegir }: Props) {
-  const grupos: { id: string | null; nombre: string; conteos: Record<Tarea, number> }[] = kams.map(
+  const conocidos = new Set(kams.map((k) => k.id))
+  const extra = new Map<string, string>()
+  for (const f of filas) {
+    if (f.kam_id && !conocidos.has(f.kam_id)) extra.set(f.kam_id, f.kam_nombre ?? 'KAM desconocido')
+  }
+  const todos = [...kams, ...[...extra].map(([id, nombre]) => ({ id, nombre }))]
+  const grupos: { id: string | null; nombre: string; conteos: Record<Tarea, number> }[] = todos.map(
     (k) => ({
       id: k.id,
       nombre: k.nombre,

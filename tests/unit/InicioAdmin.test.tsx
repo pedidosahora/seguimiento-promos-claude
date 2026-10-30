@@ -96,7 +96,10 @@ describe('TareasPorKam', () => {
     const conSin = render(
       <TareasPorKam filas={filasMixtas()} kams={kams} ahora={ahora} onElegir={() => {}} />,
     )
-    expect(filaDe('Cleo')).toHaveTextContent('0')
+    within(filaDe('Cleo'))
+      .getAllByRole('cell')
+      .slice(1)
+      .forEach((c) => expect(c.textContent).toBe('0'))
     expect(filaDe('Sin KAM')).toBeInTheDocument()
     conSin.unmount()
     render(
@@ -109,6 +112,22 @@ describe('TareasPorKam', () => {
     )
     expect(filaDe('Cleo')).toBeInTheDocument()
     expect(() => filaDe('Sin KAM')).toThrow()
+  })
+
+  it('KAM con kam_id fuera de kams: fila propia con kam_nombre y sumas = global', () => {
+    const filas = [
+      ...filasMixtas(),
+      fila({ seguimiento_id: 'z', kam_id: 'k9', kam_nombre: 'Zoe', estado: 'pendiente' }),
+      fila({ seguimiento_id: 'y', kam_id: 'k8', kam_nombre: null, estado: 'pendiente' }),
+    ]
+    render(<TareasPorKam filas={filas} kams={kams} ahora={ahora} onElegir={() => {}} />)
+    expect(within(filaDe('Zoe')).getAllByRole('cell')[1].textContent).toBe('1')
+    expect(within(filaDe('KAM desconocido')).getAllByRole('cell')[1].textContent).toBe('1')
+    const total = ['Ana', 'Bea', 'Cleo', 'Zoe', 'KAM desconocido', 'Sin KAM'].reduce(
+      (n, k) => n + Number(within(filaDe(k)).getAllByRole('cell')[1].textContent),
+      0,
+    )
+    expect(total).toBe(contarTareas(filas, ahora).sin_respuesta)
   })
 
   it('ordena por Sin respuesta desc y luego por nombre', () => {
@@ -199,6 +218,32 @@ describe('InicioAdmin', () => {
     fireEvent.click(celdaAna)
     expect(screen.getByText('De Ana')).toBeInTheDocument()
     expect(screen.queryByText('De Bea')).not.toBeInTheDocument()
+  })
+
+  it('celda de KAM: lista bajo la tabla con encabezado, solo esa tarea y ese KAM; segundo clic cierra', async () => {
+    mocks.cargarFilasInicio.mockResolvedValue([
+      fila({ seguimiento_id: 'a', concesion_nombre: 'Pend Ana', kam_id: 'k1', kam_nombre: 'Ana', estado: 'pendiente' }),
+      fila({ seguimiento_id: 'd', concesion_nombre: 'Acep Ana', kam_id: 'k1', kam_nombre: 'Ana', estado: 'acepta' }),
+      fila({ seguimiento_id: 'b', concesion_nombre: 'Pend Bea', kam_id: 'k2', kam_nombre: 'Bea', estado: 'pendiente' }),
+    ])
+    mocks.cargarKams.mockResolvedValue(kams)
+    mocks.cargarRanking.mockResolvedValue([])
+    montar()
+    await screen.findByText('Tareas por KAM')
+    fireEvent.click(within(filaDe('Ana')).getByRole('button', { name: /Sin respuesta/ }))
+    expect(screen.getByRole('heading', { name: /Ana · Sin respuesta/ })).toBeInTheDocument()
+    expect(screen.getByText('Pend Ana')).toBeInTheDocument()
+    expect(screen.queryByText('Acep Ana')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pend Bea')).not.toBeInTheDocument()
+    const tablas = screen.getAllByRole('table')
+    const resumen = tablas.find((t) => within(t).queryByText('Total'))!
+    const lista = tablas.find((t) => within(t).queryByText('Pend Ana'))!
+    expect(resumen.compareDocumentPosition(lista) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    fireEvent.click(within(filaDe('Ana')).getByRole('button', { name: /Sin respuesta/ }))
+    expect(screen.queryByText('Pend Ana')).not.toBeInTheDocument()
+    fireEvent.click(within(filaDe('Ana')).getByRole('button', { name: /Sin respuesta/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }))
+    expect(screen.queryByText('Pend Ana')).not.toBeInTheDocument()
   })
 
   it('contador global abre ListaTareas con todas las filas y columna KAM', async () => {
