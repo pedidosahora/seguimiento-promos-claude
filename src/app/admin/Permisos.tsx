@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { PanelPlegable } from '../comun/PanelPlegable'
+import { useOrden, type Columna } from '../comun/orden'
 import { ETIQUETA_ESPACIO } from '../../dominio/etiquetas'
 
 interface Permiso { id: string; perfil_id: string; concesion_id: number | null; espacio: string | null; caduca: string | null }
@@ -13,6 +16,7 @@ export default function Permisos() {
   const [perfiles, setPerfiles] = useState<Perfil[]>([])
   const [concs, setConcs] = useState<Conc[]>([])
   const [f, setF] = useState(VACIO)
+  const [abierto, setAbierto] = useState(false)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -55,6 +59,7 @@ export default function Permisos() {
       const { error: e } = await supabase.from('permisos_extra').insert(fila)
       if (e) return setError(e.message)
       setF(VACIO)
+      setAbierto(false)
       await cargar()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se ha podido guardar')
@@ -78,9 +83,20 @@ export default function Permisos() {
       ? `Concesión ${p.concesion_id} · ${concs.find((c) => c.id === p.concesion_id)?.razon_social ?? ''}`
       : `Espacio ${ETIQUETA_ESPACIO[p.espacio as keyof typeof ETIQUETA_ESPACIO] ?? p.espacio}`
 
+  const columnas: Columna<Permiso>[] = [
+    { clave: 'usuario', valor: (p) => nomPerfil(p.perfil_id) },
+    { clave: 'destino', valor: (p) => destino(p) },
+    { clave: 'caduca', valor: (p) => p.caduca },
+  ]
+  const { filas, orden, alternar } = useOrden(lista, columnas)
+  const cab = { orden, onAlternar: alternar }
+  const cerrar = () => { setAbierto(false); setF(VACIO); setError(null) }
+
   return (
     <section>
       <h2>Permisos extra</h2>
+      {!abierto && <p><button type="button" className="boton" onClick={() => { setF(VACIO); setError(null); setAbierto(true) }}>Añadir permiso</button></p>}
+      <PanelPlegable abierto={abierto} titulo="Añadir permiso">
       <form className="formulario en-linea" onSubmit={guardar}>
         <label>Usuario
           <select value={f.perfil_id} onChange={(e) => setF({ ...f, perfil_id: e.target.value })}>
@@ -112,17 +128,26 @@ export default function Permisos() {
           <input type="date" value={f.caduca} onChange={(e) => setF({ ...f, caduca: e.target.value })} />
         </label>
         <button className="boton" type="submit">Añadir</button>
+        <button className="boton secundario" type="button" onClick={cerrar}>Cancelar</button>
       </form>
+      </PanelPlegable>
       {error && <p role="alert" className="error">{error}</p>}
       {cargando ? <p className="nota">Cargando…</p> : lista.length === 0 ? <p className="nota">No hay permisos extra.</p> : (
         <table className="tabla">
-          <thead><tr><th>Usuario</th><th>Acceso a</th><th>Caduca</th><th /></tr></thead>
+          <thead>
+            <tr>
+              <CabeceraOrdenable clave="usuario" {...cab}>Usuario</CabeceraOrdenable>
+              <CabeceraOrdenable clave="destino" {...cab}>Acceso a</CabeceraOrdenable>
+              <CabeceraOrdenable clave="caduca" {...cab}>Caduca</CabeceraOrdenable>
+              <th />
+            </tr>
+          </thead>
           <tbody>
-            {lista.map((p) => (
+            {filas.map((p) => (
               <tr key={p.id}>
                 <td>{nomPerfil(p.perfil_id)}</td><td>{destino(p)}</td>
                 <td>{p.caduca ? p.caduca.split('-').reverse().join('/') : 'Sin caducidad'}</td>
-                <td className="acciones"><button className="boton secundario" onClick={() => void quitar(p.id)}>Quitar</button></td>
+                <td className="acciones"><button className="boton secundario pequeno" onClick={() => void quitar(p.id)}>Quitar</button></td>
               </tr>
             ))}
           </tbody>

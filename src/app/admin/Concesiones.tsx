@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { Buscador, coincide } from '../comun/Buscador'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { PanelPlegable } from '../comun/PanelPlegable'
+import { useOrden, type Columna } from '../comun/orden'
 
 interface Conc {
   id: number
@@ -20,6 +24,8 @@ export default function Concesiones() {
   const [filtro, setFiltro] = useState<'activas' | 'inactivas'>('activas')
   const [f, setF] = useState(VACIO)
   const [editando, setEditando] = useState<number | null>(null)
+  const [abierto, setAbierto] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -66,6 +72,7 @@ export default function Concesiones() {
       if (e) return setError(e.message)
       setF(VACIO)
       setEditando(null)
+      setAbierto(false)
       await cargar()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se ha podido guardar')
@@ -83,19 +90,35 @@ export default function Concesiones() {
     }
   }
 
+  const cerrar = () => { setAbierto(false); setEditando(null); setF(VACIO); setError(null) }
+  const nueva = () => { setEditando(null); setF(VACIO); setError(null); setAbierto(true) }
   const editar = (c: Conc) => {
+    setAbierto(true)
     setEditando(c.id)
     setF({
       id: String(c.id), razon_social: c.razon_social, nombre_comercial: c.nombre_comercial ?? '',
       kam_id: c.kam_id ?? '', territorio_id: c.territorio_id ? String(c.territorio_id) : '',
     })
   }
-  const visibles = lista.filter((c) => c.activa === (filtro === 'activas'))
   const nombre = (ops: Opcion[], id: string | number | null) => ops.find((o) => o.id === id)?.nombre ?? '—'
+  const visibles = lista.filter(
+    (c) => c.activa === (filtro === 'activas') && coincide(busqueda, c.id, c.razon_social, c.nombre_comercial),
+  )
+  const columnas: Columna<Conc>[] = [
+    { clave: 'codigo', valor: (c) => c.id },
+    { clave: 'razon', valor: (c) => c.razon_social },
+    { clave: 'comercial', valor: (c) => c.nombre_comercial },
+    { clave: 'kam', valor: (c) => (c.kam_id ? nombre(kams, c.kam_id) : null) },
+    { clave: 'territorio', valor: (c) => (c.territorio_id ? nombre(terr, c.territorio_id) : null) },
+  ]
+  const { filas, orden, alternar: ordenarPor } = useOrden(visibles, columnas)
+  const cab = { orden, onAlternar: ordenarPor }
 
   return (
     <section>
       <h2>Concesiones</h2>
+      {!abierto && <p><button type="button" className="boton" onClick={nueva}>Añadir concesión</button></p>}
+      <PanelPlegable abierto={abierto} titulo={editando == null ? 'Añadir concesión' : 'Editar concesión'}>
       <form className="formulario en-linea" onSubmit={guardar}>
         <label>Código
           <input value={f.id} disabled={editando != null} onChange={(e) => setF({ ...f, id: e.target.value })} />
@@ -119,11 +142,11 @@ export default function Concesiones() {
           </select>
         </label>
         <button className="boton" type="submit">{editando == null ? 'Añadir' : 'Guardar cambios'}</button>
-        {editando != null && (
-          <button className="boton secundario" type="button" onClick={() => { setEditando(null); setF(VACIO) }}>Cancelar</button>
-        )}
+        <button className="boton secundario" type="button" onClick={cerrar}>Cancelar</button>
       </form>
+      </PanelPlegable>
       <div className="filtros">
+        <Buscador valor={busqueda} onCambio={setBusqueda} />
         <label>Mostrar
           <select value={filtro} onChange={(e) => setFiltro(e.target.value as 'activas' | 'inactivas')}>
             <option value="activas">Activas</option>
@@ -132,17 +155,26 @@ export default function Concesiones() {
         </label>
       </div>
       {error && <p role="alert" className="error">{error}</p>}
-      {cargando ? <p className="nota">Cargando…</p> : visibles.length === 0 ? <p className="nota">No hay concesiones.</p> : (
+      {cargando ? <p className="nota">Cargando…</p> : lista.length === 0 ? <p className="nota">No hay concesiones.</p> : visibles.length === 0 ? <p className="nota">Sin resultados</p> : (
         <table className="tabla">
-          <thead><tr><th>Código</th><th>Razón social</th><th>Nombre comercial</th><th>KAM</th><th>Territorio</th><th /></tr></thead>
+          <thead>
+            <tr>
+              <CabeceraOrdenable clave="codigo" {...cab}>Código</CabeceraOrdenable>
+              <CabeceraOrdenable clave="razon" {...cab}>Razón social</CabeceraOrdenable>
+              <CabeceraOrdenable clave="comercial" {...cab}>Nombre comercial</CabeceraOrdenable>
+              <CabeceraOrdenable clave="kam" {...cab}>KAM</CabeceraOrdenable>
+              <CabeceraOrdenable clave="territorio" {...cab}>Territorio</CabeceraOrdenable>
+              <th />
+            </tr>
+          </thead>
           <tbody>
-            {visibles.map((c) => (
+            {filas.map((c) => (
               <tr key={c.id}>
                 <td>{c.id}</td><td>{c.razon_social}</td><td>{c.nombre_comercial ?? '—'}</td>
                 <td>{nombre(kams, c.kam_id)}</td><td>{nombre(terr, c.territorio_id)}</td>
                 <td className="acciones">
-                  <button className="boton secundario" onClick={() => editar(c)}>Editar</button>
-                  <button className="boton secundario" onClick={() => void alternar(c)}>{c.activa ? 'Desactivar' : 'Activar'}</button>
+                  <button className="boton secundario pequeno" onClick={() => editar(c)}>Editar</button>
+                  <button className="boton secundario pequeno" onClick={() => void alternar(c)}>{c.activa ? 'Desactivar' : 'Activar'}</button>
                 </td>
               </tr>
             ))}

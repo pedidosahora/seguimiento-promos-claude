@@ -1,5 +1,7 @@
 import { fmtEntero } from '../../dominio/formato'
 import { useMemo, useState } from 'react'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
 import { ETIQUETA_ESPACIO, type Espacio } from '../../dominio/etiquetas'
 
 export type Incidencia = { fila: number | null; categoria: string; detalle: string }
@@ -39,6 +41,24 @@ export default function VistaPrevia({
   const visibles = filtro ? incidencias.filter((i) => i.categoria === filtro) : incidencias
   const nombre = (c: string) => etiquetas[c] ?? c
 
+  const colsPromo: Columna<PromoPrevia>[] = [
+    { clave: 'tag', valor: (p) => p.tag },
+    { clave: 'accion', valor: (p) => p.accion },
+    { clave: 'filas', valor: (p) => p.filas },
+    { clave: 'nuevas', valor: (p) => p.concesiones_nuevas.length },
+  ]
+  const { filas: promosOrd, orden: ordenP, alternar: alternarP } = useOrden(promociones ?? [], colsPromo)
+  const cabP = { orden: ordenP, onAlternar: alternarP }
+  // Por defecto, las incidencias van por nº de fila (sin fila, al final).
+  const colsInc: Columna<Incidencia>[] = [
+    { clave: 'fila', valor: (i) => i.fila },
+    { clave: 'categoria', valor: (i) => nombre(i.categoria) },
+    { clave: 'detalle', valor: (i) => i.detalle },
+  ]
+  const { filas: incOrd, orden: ordenI, alternar: alternarI } = useOrden(visibles, colsInc)
+  const cabI = { orden: ordenI, onAlternar: alternarI }
+  const incFilas = ordenI ? incOrd : [...visibles].sort((a, b) => (a.fila ?? Infinity) - (b.fila ?? Infinity))
+
   return (
     <div>
       <dl className="indicadores">
@@ -61,15 +81,15 @@ export default function VistaPrevia({
         <table className="tabla">
           <thead>
             <tr>
-              <th>TAG</th>
-              <th>Acción</th>
-              <th className="num">Filas</th>
-              <th className="num">Concesiones nuevas</th>
+              <CabeceraOrdenable clave="tag" {...cabP}>TAG</CabeceraOrdenable>
+              <CabeceraOrdenable clave="accion" {...cabP}>Acción</CabeceraOrdenable>
+              <CabeceraOrdenable clave="filas" className="num" {...cabP}>Filas</CabeceraOrdenable>
+              <CabeceraOrdenable clave="nuevas" className="num" {...cabP}>Concesiones nuevas</CabeceraOrdenable>
               <th>Actualizar</th>
             </tr>
           </thead>
           <tbody>
-            {promociones.map((p) => (
+            {promosOrd.map((p) => (
               <tr key={p.tag}>
                 <td>{p.tag}</td>
                 <td>
@@ -122,13 +142,13 @@ export default function VistaPrevia({
           <table className="tabla">
             <thead>
               <tr>
-                <th className="num">Fila</th>
-                <th>Categoría</th>
-                <th>Detalle</th>
+                <CabeceraOrdenable clave="fila" className="num" {...cabI}>Fila</CabeceraOrdenable>
+                <CabeceraOrdenable clave="categoria" {...cabI}>Categoría</CabeceraOrdenable>
+                <CabeceraOrdenable clave="detalle" {...cabI}>Detalle</CabeceraOrdenable>
               </tr>
             </thead>
             <tbody>
-              {visibles.slice(0, MAX_FILAS).map((i, k) => (
+              {incFilas.slice(0, MAX_FILAS).map((i, k) => (
                 <tr key={k}>
                   <td className="num">{i.fila ?? '—'}</td>
                   <td>{nombre(i.categoria)}</td>

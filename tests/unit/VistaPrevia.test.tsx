@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import VistaPrevia, { type PromoPrevia } from '../../src/app/importar/VistaPrevia'
@@ -20,5 +20,39 @@ describe('VistaPrevia del histórico', () => {
     expect(screen.getByRole('checkbox', { name: 'Actualizar MISMA' })).toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Actualizar OTRA' })).not.toBeInTheDocument()
     expect(screen.getByText(/no se actualizará desde TMICC/)).toBeInTheDocument()
+  })
+})
+
+describe('VistaPrevia ordenable', () => {
+  afterEach(cleanup)
+
+  const incidencias = [
+    { fila: 9, categoria: 'b', detalle: 'segunda' },
+    { fila: 3, categoria: 'a', detalle: 'primera' },
+    { fila: 5, categoria: 'a', detalle: 'tercera' },
+  ]
+  const primera = () => within(screen.getAllByRole('row')[1])
+
+  it('incidencias: orden por defecto por nº de fila y reordenables', () => {
+    render(<VistaPrevia conteos={[]} incidencias={incidencias} etiquetas={{ a: 'Aaa', b: 'Bbb' }} />)
+    expect(primera().getByText('primera')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^Fila/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^Fila/ }))
+    expect(primera().getByText('segunda')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^Detalle/ }))
+    expect(primera().getByText('primera')).toBeInTheDocument()
+  })
+
+  it('promociones: ordenan por TAG', () => {
+    const promos: PromoPrevia[] = [
+      { tag: 'ZETA', accion: 'crear', filas: 1, concesiones_nuevas: [] },
+      { tag: 'ALFA', accion: 'crear', filas: 5, concesiones_nuevas: [1, 2] },
+    ]
+    render(<VistaPrevia conteos={[]} incidencias={[]} etiquetas={{}} promociones={promos} />)
+    expect(primera().getByText('ZETA')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^TAG/ }))
+    expect(primera().getByText('ALFA')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^Filas/ }))
+    expect(primera().getByText('ZETA')).toBeInTheDocument()
   })
 })

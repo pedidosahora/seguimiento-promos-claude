@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
 
 interface Conc { id: number; razon_social: string; nombre_comercial: string | null }
 interface Fila {
@@ -69,6 +71,13 @@ export default function Convocatoria() {
       else n.add(cid)
       return n
     })
+  const columnas: Columna<Conc>[] = [
+    { clave: 'concesion', valor: (c) => c.id },
+    { clave: 'razon', valor: (c) => c.razon_social },
+    { clave: 'comercial', valor: (c) => c.nombre_comercial },
+  ]
+  const { filas: ordenadas, orden, alternar: ordenarPor } = useOrden(concs, columnas)
+  const cab = { orden, onAlternar: ordenarPor }
   const todas = concs.length > 0 && concs.every((c) => marcadas.has(c.id))
   const seleccionarTodas = () =>
     setMarcadas((a) => {
@@ -133,9 +142,16 @@ export default function Convocatoria() {
             <input type="checkbox" checked={todas} onChange={seleccionarTodas} /> Seleccionar todas
           </label>
           <table className="tabla">
-            <thead><tr><th /><th>Código</th><th>Razón social</th><th>Nombre comercial</th></tr></thead>
+            <thead>
+              <tr>
+                <th />
+                <CabeceraOrdenable clave="concesion" {...cab}>Código</CabeceraOrdenable>
+                <CabeceraOrdenable clave="razon" {...cab}>Razón social</CabeceraOrdenable>
+                <CabeceraOrdenable clave="comercial" {...cab}>Nombre comercial</CabeceraOrdenable>
+              </tr>
+            </thead>
             <tbody>
-              {concs.map((c) => (
+              {ordenadas.map((c) => (
                 <tr key={c.id}>
                   <td>
                     <input type="checkbox" aria-label={`Convocar ${c.id}`} checked={marcadas.has(c.id)} onChange={() => alternar(c.id)} />

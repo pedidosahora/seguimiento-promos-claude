@@ -50,3 +50,14 @@ describe('Usuarios', () => {
     expect(screen.queryByText(/No puedes cambiar tu propio rol/)).not.toBeInTheDocument()
   })
 })
+
+describe('Usuarios: roles', () => {
+  afterEach(cleanup)
+
+  it('muestra Administrador y KAM en la tabla', async () => {
+    montar()
+    await waitFor(() => expect(screen.getByText('Ana')).toBeInTheDocument())
+    expect(screen.getByText('Administrador')).toBeInTheDocument()
+    expect(screen.getByText('KAM')).toBeInTheDocument()
+  })
+})

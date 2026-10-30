@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
+import { rutaPromocion } from '../inicio/datos'
 import { ETIQUETA_ESPACIO, ETIQUETA_ESTADO_PROMOCION, type Espacio, type EstadoPromocion } from '../../dominio/etiquetas'
 import Concesiones from './Concesiones'
 import Convocatoria from './Convocatoria'
@@ -8,7 +11,11 @@ import FormPromocion from './FormPromocion'
 import Permisos from './Permisos'
 import Usuarios from './Usuarios'
 
-interface Promo { id: string; tag: string; espacio: Espacio; estado: EstadoPromocion }
+interface Promo {
+  id: string; tag: string; espacio: Espacio; estado: EstadoPromocion
+  mecanica: string | null; fecha_inicio: string | null; fecha_fin: string | null
+}
+const fmtFecha = (f: string | null) => (f ? f.split('-').reverse().join('/') : '—')
 
 function ListaAdminPromociones() {
   const [lista, setLista] = useState<Promo[]>([])
@@ -17,7 +24,7 @@ function ListaAdminPromociones() {
 
   useEffect(() => {
     let vivo = true
-    Promise.resolve(supabase.from('promociones').select('id, tag, espacio, estado').order('tag'))
+    Promise.resolve(supabase.from('promociones').select('id, tag, espacio, estado, mecanica, fecha_inicio, fecha_fin').order('tag'))
       .then(({ data, error: e }) => {
         if (!vivo) return
         if (e) setError(e.message)
@@ -30,6 +37,16 @@ function ListaAdminPromociones() {
     }
   }, [])
 
+  const columnas: Columna<Promo>[] = [
+    { clave: 'tag', valor: (p) => p.tag },
+    { clave: 'espacio', valor: (p) => ETIQUETA_ESPACIO[p.espacio] },
+    { clave: 'mecanica', valor: (p) => p.mecanica },
+    { clave: 'vigencia', valor: (p) => p.fecha_inicio },
+    { clave: 'estado', valor: (p) => ETIQUETA_ESTADO_PROMOCION[p.estado] },
+  ]
+  const { filas, orden, alternar } = useOrden(lista, columnas)
+  const cab = { orden, onAlternar: alternar }
+
   return (
     <section>
       <h2>Promociones</h2>
@@ -37,14 +54,27 @@ function ListaAdminPromociones() {
       {error && <p role="alert" className="error">{error}</p>}
       {cargando ? <p className="nota">Cargando…</p> : lista.length === 0 ? <p className="nota">No hay promociones.</p> : (
         <table className="tabla">
-          <thead><tr><th>TAG</th><th>Espacio</th><th>Estado</th><th /></tr></thead>
+          <thead>
+            <tr>
+              <CabeceraOrdenable clave="tag" {...cab}>TAG</CabeceraOrdenable>
+              <CabeceraOrdenable clave="espacio" {...cab}>Espacio</CabeceraOrdenable>
+              <CabeceraOrdenable clave="mecanica" {...cab}>Mecánica</CabeceraOrdenable>
+              <CabeceraOrdenable clave="vigencia" {...cab}>Vigencia</CabeceraOrdenable>
+              <CabeceraOrdenable clave="estado" {...cab}>Estado</CabeceraOrdenable>
+              <th />
+            </tr>
+          </thead>
           <tbody>
-            {lista.map((p) => (
+            {filas.map((p) => (
               <tr key={p.id}>
-                <td>{p.tag}</td><td>{ETIQUETA_ESPACIO[p.espacio]}</td><td>{ETIQUETA_ESTADO_PROMOCION[p.estado]}</td>
+                <td><Link to={rutaPromocion(p.espacio, p.tag)}>{p.tag}</Link></td>
+                <td>{ETIQUETA_ESPACIO[p.espacio]}</td>
+                <td>{p.mecanica ?? '—'}</td>
+                <td>{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
+                <td>{ETIQUETA_ESTADO_PROMOCION[p.estado]}</td>
                 <td className="acciones">
-                  <Link to={`/admin/promociones/${p.id}`}>Editar</Link>
-                  <Link to={`/admin/promociones/${p.id}/convocatoria`}>Convocatoria</Link>
+                  <Link className="boton secundario pequeno" to={`/admin/promociones/${p.id}`}>Editar</Link>
+                  <Link className="boton secundario pequeno" to={`/admin/promociones/${p.id}/convocatoria`}>Convocatoria</Link>
                 </td>
               </tr>
             ))}
