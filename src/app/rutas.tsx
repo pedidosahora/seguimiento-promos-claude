@@ -6,6 +6,7 @@ import Acceso from './auth/Acceso'
 import { SesionContext, useSesion, usePerfil } from './auth/useSesion'
 import Importar from './importar/Importar'
 import Layout from './Layout'
+import Inicio from './inicio/Inicio'
 import FichaConcesion from './promocion/FichaConcesion'
 import Promocion from './promocion/Promocion'
 import ListaPromociones from './promociones/ListaPromociones'
@@ -39,7 +40,7 @@ export default function Rutas() {
     <SesionContext.Provider value={sesion}>
       <Routes>
         <Route element={<Layout />}>
-          <Route index element={<Navigate to="/todos" replace />} />
+          <Route index element={<Inicio />} />
           <Route path="/admin/*" element={<SoloAdmin><Admin /></SoloAdmin>} />
           <Route path="/importar" element={<SoloAdmin><Importar /></SoloAdmin>} />
           <Route path="/concesion/:id" element={<FichaConcesion />} />

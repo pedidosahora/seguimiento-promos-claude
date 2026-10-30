@@ -39,3 +39,31 @@ export function rutaPromocion(espacio: Espacio, tag: string): string {
   const base = { TMICC: 'tmicc', UFS: 'ufs', CAMPANAS: 'campanas' }[espacio]
   return `/${base}/${tag}`
 }
+
+/** Concesiones del perfil: titular o con permiso extra vigente por concesión (los permisos por espacio no cuentan). */
+export async function cargarMisConcesiones(perfilId: string): Promise<{ id: number; nombre: string }[]> {
+  const hoy = new Date().toISOString().slice(0, 10)
+  const [propias, permisos] = await Promise.all([
+    supabase.from('concesiones').select('id, razon_social, nombre_comercial').eq('kam_id', perfilId),
+    supabase
+      .from('permisos_extra')
+      .select('concesion_id, caduca')
+      .eq('perfil_id', perfilId)
+      .not('concesion_id', 'is', null)
+      .or(`caduca.is.null,caduca.gte.${hoy}`),
+  ])
+  if (propias.error) throw new Error(propias.error.message)
+  if (permisos.error) throw new Error(permisos.error.message)
+  const ids = (permisos.data ?? []).map((p) => p.concesion_id as number)
+  let extra: typeof propias.data = []
+  if (ids.length > 0) {
+    const r = await supabase.from('concesiones').select('id, razon_social, nombre_comercial').in('id', ids)
+    if (r.error) throw new Error(r.error.message)
+    extra = r.data ?? []
+  }
+  const porId = new Map<number, string>()
+  for (const c of [...(propias.data ?? []), ...extra]) {
+    porId.set(c.id, c.nombre_comercial ?? c.razon_social)
+  }
+  return [...porId].map(([id, nombre]) => ({ id, nombre }))
+}

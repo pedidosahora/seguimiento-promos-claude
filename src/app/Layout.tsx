@@ -17,6 +17,7 @@ export default function Layout() {
       <header className="cabecera">
         <strong className="marca">Seguimiento de promociones</strong>
         <nav>
+          <NavLink to="/" end>Inicio</NavLink>
           {ESPACIOS.map((e) => (
             <NavLink key={e.ruta} to={e.ruta}>{e.texto}</NavLink>
           ))}

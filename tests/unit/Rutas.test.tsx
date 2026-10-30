@@ -24,6 +24,12 @@ vi.mock('../../src/lib/supabase', () => {
   }
 })
 
+vi.mock('../../src/app/inicio/datos', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../src/app/inicio/datos')>()),
+  cargarFilasInicio: () => Promise.resolve([]),
+  cargarMisConcesiones: () => Promise.resolve([]),
+}))
+
 import Rutas from '../../src/app/rutas'
 
 const montar = () =>
@@ -71,5 +77,14 @@ describe('Rutas / sesión', () => {
     montar()
     fireEvent.click(await screen.findByRole('button', { name: 'Salir' }))
     expect(estado.signOut).toHaveBeenCalledTimes(1)
+  })
+
+  it('la ruta / con perfil kam muestra el inicio del KAM', async () => {
+    estado.resultadoPerfil = {
+      data: { id: 'k1', nombre: 'Ana', rol: 'kam', email: 'a@x.com' },
+      error: null,
+    }
+    montar()
+    expect(await screen.findByText('Todavía no tienes concesiones asignadas')).toBeInTheDocument()
   })
 })
