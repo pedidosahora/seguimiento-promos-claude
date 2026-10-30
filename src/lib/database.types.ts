@@ -47,6 +47,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "seguimiento"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "comentarios_seguimiento_id_fkey"
+      columns: ["seguimiento_id"]
+isOneToOne: false
+      referencedRelation: "v_inicio_filas"
+      referencedColumns: ["seguimiento_id"]
     }
                   ]
                 },"concesiones": {
@@ -122,6 +128,12 @@ isOneToOne: false
       referencedRelation: "concesiones"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "permisos_extra_concesion_id_fkey"
+      columns: ["concesion_id"]
+isOneToOne: false
+      referencedRelation: "v_inicio_filas"
+      referencedColumns: ["concesion_id"]
+    },{
       foreignKeyName: "permisos_extra_perfil_id_fkey"
       columns: ["perfil_id"]
 isOneToOne: false
@@ -131,28 +143,28 @@ isOneToOne: false
                   ]
                 },"promociones": {
                   Row: {
-                    "actualizado_en": string,"canal": string | null,"espacio": Database["public"]['Enums']["espacio"],"estado": Database["public"]['Enums']["estado_promocion"],"fecha_fin": string | null,"fecha_inicio": string | null,"id": string,"marca": Database["public"]['Enums']["marca"],"mecanica": string | null,"objetivo": string | null,"revision_cupos": Database["public"]['Enums']["revision_cupos"],"tag": string,"umbral_cupos": number
+                    "actualizado_en": string,"canal": string | null,"espacio": Database["public"]['Enums']["espacio"],"estado": Database["public"]['Enums']["estado_promocion"],"fecha_fin": string | null,"fecha_inicio": string | null,"id": string,"marca": Database["public"]['Enums']["marca"],"mecanica": string | null,"objetivo": string | null,"publicada_en": string | null,"revision_cupos": Database["public"]['Enums']["revision_cupos"],"tag": string,"umbral_cupos": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "actualizado_en"?: string,"canal"?: string | null,"espacio": Database["public"]['Enums']["espacio"],"estado"?: Database["public"]['Enums']["estado_promocion"],"fecha_fin"?: string | null,"fecha_inicio"?: string | null,"id"?: string,"marca": Database["public"]['Enums']["marca"],"mecanica"?: string | null,"objetivo"?: string | null,"revision_cupos"?: Database["public"]['Enums']["revision_cupos"],"tag": string,"umbral_cupos"?: number
+                    "actualizado_en"?: string,"canal"?: string | null,"espacio": Database["public"]['Enums']["espacio"],"estado"?: Database["public"]['Enums']["estado_promocion"],"fecha_fin"?: string | null,"fecha_inicio"?: string | null,"id"?: string,"marca": Database["public"]['Enums']["marca"],"mecanica"?: string | null,"objetivo"?: string | null,"publicada_en"?: string | null,"revision_cupos"?: Database["public"]['Enums']["revision_cupos"],"tag": string,"umbral_cupos"?: number
                   }
                   Update: {
-                    "actualizado_en"?: string,"canal"?: string | null,"espacio"?: Database["public"]['Enums']["espacio"],"estado"?: Database["public"]['Enums']["estado_promocion"],"fecha_fin"?: string | null,"fecha_inicio"?: string | null,"id"?: string,"marca"?: Database["public"]['Enums']["marca"],"mecanica"?: string | null,"objetivo"?: string | null,"revision_cupos"?: Database["public"]['Enums']["revision_cupos"],"tag"?: string,"umbral_cupos"?: number
+                    "actualizado_en"?: string,"canal"?: string | null,"espacio"?: Database["public"]['Enums']["espacio"],"estado"?: Database["public"]['Enums']["estado_promocion"],"fecha_fin"?: string | null,"fecha_inicio"?: string | null,"id"?: string,"marca"?: Database["public"]['Enums']["marca"],"mecanica"?: string | null,"objetivo"?: string | null,"publicada_en"?: string | null,"revision_cupos"?: Database["public"]['Enums']["revision_cupos"],"tag"?: string,"umbral_cupos"?: number
                   }
                   Relationships: [
                     
                   ]
                 },"seguimiento": {
                   Row: {
-                    "actualizado_en": string,"concesion_id": number,"cupos": number | null,"email": Database["public"]['Enums']["estado_envio"],"estado": Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion": string | null,"fecha_activacion": string | null,"fecha_dato": string | null,"gsv": number | null,"id": string,"promocion_id": string,"sms": Database["public"]['Enums']["estado_envio"],"usos": number | null
+                    "actualizado_en": string,"concesion_id": number,"cupos": number | null,"cupos_revisado_en": string | null,"email": Database["public"]['Enums']["estado_envio"],"estado": Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion": string | null,"fecha_activacion": string | null,"fecha_dato": string | null,"gsv": number | null,"id": string,"promocion_id": string,"sms": Database["public"]['Enums']["estado_envio"],"usos": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "actualizado_en"?: string,"concesion_id": number,"cupos"?: number | null,"email"?: Database["public"]['Enums']["estado_envio"],"estado"?: Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion"?: string | null,"fecha_activacion"?: string | null,"fecha_dato"?: string | null,"gsv"?: number | null,"id"?: string,"promocion_id": string,"sms"?: Database["public"]['Enums']["estado_envio"],"usos"?: number | null
+                    "actualizado_en"?: string,"concesion_id": number,"cupos"?: number | null,"cupos_revisado_en"?: string | null,"email"?: Database["public"]['Enums']["estado_envio"],"estado"?: Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion"?: string | null,"fecha_activacion"?: string | null,"fecha_dato"?: string | null,"gsv"?: number | null,"id"?: string,"promocion_id": string,"sms"?: Database["public"]['Enums']["estado_envio"],"usos"?: number | null
                   }
                   Update: {
-                    "actualizado_en"?: string,"concesion_id"?: number,"cupos"?: number | null,"email"?: Database["public"]['Enums']["estado_envio"],"estado"?: Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion"?: string | null,"fecha_activacion"?: string | null,"fecha_dato"?: string | null,"gsv"?: number | null,"id"?: string,"promocion_id"?: string,"sms"?: Database["public"]['Enums']["estado_envio"],"usos"?: number | null
+                    "actualizado_en"?: string,"concesion_id"?: number,"cupos"?: number | null,"cupos_revisado_en"?: string | null,"email"?: Database["public"]['Enums']["estado_envio"],"estado"?: Database["public"]['Enums']["estado_seguimiento"],"fecha_aceptacion"?: string | null,"fecha_activacion"?: string | null,"fecha_dato"?: string | null,"gsv"?: number | null,"id"?: string,"promocion_id"?: string,"sms"?: Database["public"]['Enums']["estado_envio"],"usos"?: number | null
                   }
                   Relationships: [
                     {
@@ -162,11 +174,23 @@ isOneToOne: false
       referencedRelation: "concesiones"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "seguimiento_concesion_id_fkey"
+      columns: ["concesion_id"]
+isOneToOne: false
+      referencedRelation: "v_inicio_filas"
+      referencedColumns: ["concesion_id"]
+    },{
       foreignKeyName: "seguimiento_promocion_id_fkey"
       columns: ["promocion_id"]
 isOneToOne: false
       referencedRelation: "promociones"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "seguimiento_promocion_id_fkey"
+      columns: ["promocion_id"]
+isOneToOne: false
+      referencedRelation: "v_inicio_filas"
+      referencedColumns: ["promocion_id"]
     },{
       foreignKeyName: "seguimiento_promocion_id_fkey"
       columns: ["promocion_id"]
@@ -192,7 +216,21 @@ isOneToOne: false
                 }
           }
           Views: {
-            "v_resumen_promocion": {
+            "v_inicio_filas": {
+                  Row: {
+                    "actualizado_en": string,"concesion_id": number,"concesion_nombre": string | null,"cupos": number | null,"cupos_revisado_en": string | null,"editable": boolean | null,"email": Database["public"]['Enums']["estado_envio"],"espacio": Database["public"]['Enums']["espacio"],"estado": Database["public"]['Enums']["estado_seguimiento"],"kam_id": string | null,"kam_nombre": string | null,"promocion_id": string,"publicada_en": string | null,"revision_cupos": Database["public"]['Enums']["revision_cupos"],"seguimiento_id": string,"sms": Database["public"]['Enums']["estado_envio"],"tag": string,"umbral_cupos": number,"usos": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "concesiones_kam_id_fkey"
+      columns: ["kam_id"]
+isOneToOne: false
+      referencedRelation: "perfiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"v_resumen_promocion": {
                   Row: {
                     "aceptadas": number | null,"activas": number | null,"convocadas": number | null,"cupos": number | null,"gsv": number | null,"pct_aceptacion": number | null,"pct_activacion": number | null,"pct_pendientes": number | null,"pct_rechazo": number | null,"pendientes": number | null,"presentadas": number | null,"promocion_id": string,"rechazadas": number | null,"usos": number | null
                   }
