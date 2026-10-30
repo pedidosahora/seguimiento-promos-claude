@@ -59,6 +59,12 @@ npx supabase db push
 
 No ejecutes `supabase/seed.sql`: son datos de desarrollo.
 
+**Producción actual** (proyecto `itrvdvnvfsstvmcpsjfq`): las migraciones 0001–0011 se aplicaron con la herramienta `apply_migration` del conector de Supabase, no con `db push`, así que en el historial remoto figuran con versión de fecha y no como `0001…0011`. Si algún día usas `db push`, revisa antes `npx supabase migration list` para no reaplicarlas.
+
+- 0011 (páginas de inicio) aplicada el 30/10/2026.
+- Comprobado: ninguna fila de `seguimiento` sin `cupos_revisado_en` (490 de 490), y `v_inicio_filas` con 455 filas (= seguimiento de promociones publicadas).
+- Orden para futuras migraciones que cambien lo que lee la web: **primero la migración y después el push de `main`**. Si la web nueva se publica antes, falla al no encontrar la vista o la columna.
+
 ## 3. Primer administrador
 
 Solo entran emails dados de alta en `perfiles`. Al iniciar sesión con Google por primera vez, el sistema vincula el perfil con el usuario si el email coincide y está confirmado.
