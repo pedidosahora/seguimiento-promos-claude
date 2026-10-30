@@ -1,0 +1,88 @@
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+
+const seguimientos = [
+  { id: 's1', estado: 'activa', cupos: 10, usos: 9, gsv: 1234.5, promociones: { tag: 'BETA', espacio: 'TMICC', umbral_cupos: 0.8 } },
+  { id: 's2', estado: 'pendiente', cupos: 10, usos: 2, gsv: 10, promociones: { tag: 'ALFA', espacio: 'UFS', umbral_cupos: 0.8 } },
+  { id: 's3', estado: 'activa', cupos: 10, usos: 10, gsv: 0, promociones: { tag: 'GAMMA', espacio: 'TMICC', umbral_cupos: 0.8 } },
+]
+const concesion = {
+  id: 7, razon_social: 'Bar Pepe SL', nombre_comercial: 'Bar Pepe', activa: true,
+  territorios: { nombre: 'Norte' }, kam: { nombre: 'Ana' },
+}
+const selects: string[] = []
+
+vi.mock('../../src/lib/supabase', () => {
+  const construir = (tabla: string) => {
+    const resultado = { data: tabla === 'seguimiento' ? seguimientos : concesion, error: null }
+    const b: Record<string, unknown> = {}
+    b.select = (q: string) => {
+      selects.push(`${tabla}:${q}`)
+      return b
+    }
+    b.eq = () => b
+    b.maybeSingle = () => Promise.resolve(resultado)
+    b.then = (ok: (r: typeof resultado) => unknown, ko?: (e: unknown) => unknown) =>
+      Promise.resolve(resultado).then(ok, ko)
+    return b
+  }
+  return { supabase: { from: construir } }
+})
+
+import FichaConcesion from '../../src/app/promocion/FichaConcesion'
+
+function montar() {
+  return render(
+    <MemoryRouter initialEntries={['/concesion/7']}>
+      <Routes>
+        <Route path="/concesion/:id" element={<FichaConcesion />} />
+        <Route path="/" element={<p>Inicio</p>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+describe('FichaConcesion', () => {
+  afterEach(cleanup)
+
+  it('muestra las columnas, el ⚠ de cupos y amplía el select de seguimiento', async () => {
+    montar()
+    await screen.findByText('BETA')
+    expect(screen.getAllByRole('columnheader').map((h) => h.textContent?.trim())).toEqual([
+      'TAG', 'Espacio', 'Estado en la promoción', 'Cupos', 'Usos', '% cupos', 'GSV',
+    ])
+    const seg = selects.find((s) => s.startsWith('seguimiento:'))!
+    expect(seg).toContain('cupos')
+    expect(seg).toContain('umbral_cupos')
+    const fila = (tag: string) => screen.getByText(tag).closest('tr') as HTMLElement
+    const cerca = within(fila('BETA')).getByText(/⚠/)
+    expect(cerca).toHaveTextContent('90 %')
+    expect(cerca).toHaveClass('cerca')
+    expect(within(fila('GAMMA')).getByText(/⚠/)).toHaveClass('agotado')
+    expect(within(fila('ALFA')).queryByText(/⚠/)).not.toBeInTheDocument()
+    expect(within(fila('ALFA')).getByText('20 %')).toBeInTheDocument()
+  })
+
+  it('«← Volver» lleva a inicio cuando no hay historial previo', async () => {
+    montar()
+    fireEvent.click(await screen.findByRole('link', { name: '← Volver' }))
+    await waitFor(() => expect(screen.getByText('Inicio')).toBeInTheDocument())
+  })
+
+  it('pulsar «% cupos» ordena por valor numérico; la tercera vez restaura el orden por defecto', async () => {
+    montar()
+    await screen.findByText('BETA')
+    const tags = () =>
+      screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0].textContent)
+    expect(tags()).toEqual(['ALFA', 'BETA', 'GAMMA'])
+    const cabecera = screen.getByRole('button', { name: '% cupos' })
+    fireEvent.click(cabecera)
+    expect(tags()).toEqual(['ALFA', 'BETA', 'GAMMA'])
+    fireEvent.click(cabecera)
+    expect(tags()).toEqual(['GAMMA', 'BETA', 'ALFA'])
+    fireEvent.click(cabecera)
+    expect(tags()).toEqual(['ALFA', 'BETA', 'GAMMA'])
+  })
+})

@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../auth/useSesion'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
 import { hoyISO as hoy } from '../../dominio/fechas'
 import {
   ETIQUETA_ESPACIO,
@@ -103,6 +105,20 @@ export default function ListaPromociones() {
     })
   }, [promos, fCiclo, fVigencia, fMarca])
 
+  const columnas: Columna<Promo>[] = [
+    { clave: 'tag', valor: (p) => p.tag },
+    { clave: 'espacio', valor: (p) => ETIQUETA_ESPACIO[p.espacio] },
+    { clave: 'mecanica', valor: (p) => p.mecanica },
+    { clave: 'vigencia', valor: (p) => p.fecha_inicio },
+    { clave: 'presentadas', valor: (p) => resumen[p.id]?.presentadas ?? 0 },
+    { clave: 'pct', valor: (p) => resumen[p.id]?.pct_aceptacion },
+    { clave: 'activas', valor: (p) => resumen[p.id]?.activas ?? 0 },
+    { clave: 'usos', valor: (p) => resumen[p.id]?.usos ?? 0 },
+    { clave: 'gsv', valor: (p) => resumen[p.id]?.gsv ?? 0 },
+  ]
+  const { filas: ordenadas, orden, alternar } = useOrden(visibles, columnas)
+  const cab = { orden, onAlternar: alternar }
+
   const vencida = (p: Promo) => p.estado === 'publicada' && !!p.fecha_fin && p.fecha_fin < hoy()
   const titulo = esTodos
     ? 'Todas las promociones'
@@ -150,19 +166,19 @@ export default function ListaPromociones() {
         <table className="tabla">
           <thead>
             <tr>
-              <th>TAG</th>
-              {esTodos && <th>Espacio</th>}
-              <th>Mecánica</th>
-              <th>Vigencia</th>
-              <th className="num">Presentadas</th>
-              <th className="num">% aceptación</th>
-              <th className="num">Activas</th>
-              <th className="num">Usos</th>
-              <th className="num">GSV</th>
+              <CabeceraOrdenable clave="tag" {...cab}>TAG</CabeceraOrdenable>
+              {esTodos && <CabeceraOrdenable clave="espacio" {...cab}>Espacio</CabeceraOrdenable>}
+              <CabeceraOrdenable clave="mecanica" {...cab}>Mecánica</CabeceraOrdenable>
+              <CabeceraOrdenable clave="vigencia" {...cab}>Vigencia</CabeceraOrdenable>
+              <CabeceraOrdenable clave="presentadas" className="num" {...cab}>Presentadas</CabeceraOrdenable>
+              <CabeceraOrdenable clave="pct" className="num" {...cab}>% aceptación</CabeceraOrdenable>
+              <CabeceraOrdenable clave="activas" className="num" {...cab}>Activas</CabeceraOrdenable>
+              <CabeceraOrdenable clave="usos" className="num" {...cab}>Usos</CabeceraOrdenable>
+              <CabeceraOrdenable clave="gsv" className="num" {...cab}>GSV</CabeceraOrdenable>
             </tr>
           </thead>
           <tbody>
-            {visibles.map((p) => {
+            {ordenadas.map((p) => {
               const r = resumen[p.id]
               const base = esTodos ? p.espacio.toLowerCase() : ruta
               return (

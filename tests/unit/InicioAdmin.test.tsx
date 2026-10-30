@@ -139,6 +139,19 @@ describe('TareasPorKam', () => {
     expect(nombres).toEqual(['Bea', 'Ana', 'Cleo', 'Sin KAM'])
   })
 
+  it('pulsar «KAM» ordena por nombre; la tercera vez restaura el orden por defecto', () => {
+    render(<TareasPorKam filas={filasMixtas()} kams={kams} ahora={ahora} onElegir={() => {}} />)
+    const primera = () => within(screen.getAllByRole('row')[1]).getAllByRole('cell')[0].textContent
+    expect(primera()).toBe('Bea')
+    const cabecera = screen.getByRole('button', { name: 'KAM' })
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('Ana')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('Sin KAM')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('Bea')
+  })
+
   it('solo las celdas > 0 son botones y llaman a onElegir(kamId, tarea)', () => {
     const onElegir = vi.fn()
     render(<TareasPorKam filas={filasMixtas()} kams={kams} ahora={ahora} onElegir={onElegir} />)
@@ -187,6 +200,29 @@ describe('RankingPromociones', () => {
     expect(filas[1]).toHaveTextContent('50 %')
     expect(within(filas[2]).getAllByRole('cell')[2]).toHaveTextContent('—')
     expect(within(filas[0]).getByRole('link')).toHaveAttribute('href', '/tmicc/LLENA')
+  })
+
+  it('pulsar «TAG» ordena; la tercera vez restaura pct desc con nulos al final', () => {
+    render(
+      <MemoryRouter>
+        <RankingPromociones
+          filas={[
+            r({ promocion_id: '1', tag: 'MEDIA', usos: 5, cupos: 10, pct: 0.5 }),
+            r({ promocion_id: '2', tag: 'AAA', usos: 0, cupos: 0, pct: null }),
+            r({ promocion_id: '3', tag: 'LLENA', usos: 10, cupos: 10, pct: 1 }),
+          ]}
+        />
+      </MemoryRouter>,
+    )
+    const primera = () => within(screen.getAllByRole('row')[1]).getByRole('link').textContent
+    expect(primera()).toBe('LLENA')
+    const cabecera = screen.getByRole('button', { name: 'TAG' })
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('AAA')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('MEDIA')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('LLENA')
   })
 })
 

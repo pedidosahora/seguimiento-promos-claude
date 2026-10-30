@@ -1,6 +1,10 @@
 import { fmtEntero, fmtImporte } from '../../dominio/formato'
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
+import { fmtPct } from '../../dominio/formato'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
 import { supabase } from '../../lib/supabase'
 import { ETIQUETA_ESPACIO, ETIQUETA_ESTADO, type Espacio, type EstadoSeguimiento } from '../../dominio/etiquetas'
 
@@ -15,13 +19,25 @@ interface Concesion {
 interface FilaPromo {
   id: string
   estado: EstadoSeguimiento
+  cupos: number | null
   usos: number | null
   gsv: number | null
-  promociones: { tag: string; espacio: Espacio } | null
+  promociones: { tag: string; espacio: Espacio; umbral_cupos: number | string } | null
 }
+
+const COLUMNAS: Columna<FilaPromo>[] = [
+  { clave: 'tag', valor: (f) => f.promociones?.tag },
+  { clave: 'espacio', valor: (f) => (f.promociones ? ETIQUETA_ESPACIO[f.promociones.espacio] : null) },
+  { clave: 'estado', valor: (f) => ETIQUETA_ESTADO[f.estado] },
+  { clave: 'cupos', valor: (f) => f.cupos },
+  { clave: 'usos', valor: (f) => f.usos },
+  { clave: 'pct', valor: (f) => pctCupos(f.usos, f.cupos) },
+  { clave: 'gsv', valor: (f) => f.gsv },
+]
 
 export default function FichaConcesion() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const [concesion, setConcesion] = useState<Concesion | null>(null)
   const [filas, setFilas] = useState<FilaPromo[]>([])
   const [cargando, setCargando] = useState(true)
@@ -40,7 +56,7 @@ export default function FichaConcesion() {
           .maybeSingle(),
         supabase
           .from('seguimiento')
-          .select('id, estado, usos, gsv, promociones(tag, espacio)')
+          .select('id, estado, cupos, usos, gsv, promociones(tag, espacio, umbral_cupos)')
           .eq('concesion_id', Number(id)),
       ])
       if (c.error) throw new Error(c.error.message)
@@ -50,6 +66,7 @@ export default function FichaConcesion() {
       setConcesion(c.data as unknown as Concesion)
       const lista = ((s.data ?? []) as unknown as FilaPromo[]).map((f) => ({
         ...f,
+        cupos: f.cupos == null ? null : Number(f.cupos),
         usos: f.usos == null ? null : Number(f.usos),
         gsv: f.gsv == null ? null : Number(f.gsv),
       }))
@@ -67,11 +84,26 @@ export default function FichaConcesion() {
     }
   }, [id])
 
+  const { filas: ordenadas, orden, alternar } = useOrden(filas, COLUMNAS)
+  const cab = { orden, onAlternar: alternar }
+
   if (cargando) return <p className="nota">Cargando…</p>
   if (error || !concesion) return <p role="alert" className="error">{error ?? 'Concesión no encontrada'}</p>
 
   return (
     <section>
+      <Link
+        to="/"
+        className="volver"
+        onClick={(e) => {
+          if (window.history.state?.idx > 0) {
+            e.preventDefault()
+            navigate(-1)
+          }
+        }}
+      >
+        ← Volver
+      </Link>
       <h1>
         {concesion.nombre_comercial || concesion.razon_social}
         <span className={concesion.activa ? 'insignia neutra' : 'insignia'}>{concesion.activa ? 'Activa' : 'Inactiva'}</span>
@@ -89,15 +121,20 @@ export default function FichaConcesion() {
         <table className="tabla">
           <thead>
             <tr>
-              <th>TAG</th>
-              <th>Espacio</th>
-              <th>Estado</th>
-              <th className="num">Usos</th>
-              <th className="num">GSV</th>
+              <CabeceraOrdenable clave="tag" {...cab}>TAG</CabeceraOrdenable>
+              <CabeceraOrdenable clave="espacio" {...cab}>Espacio</CabeceraOrdenable>
+              <CabeceraOrdenable clave="estado" {...cab}>Estado en la promoción</CabeceraOrdenable>
+              <CabeceraOrdenable clave="cupos" className="num" {...cab}>Cupos</CabeceraOrdenable>
+              <CabeceraOrdenable clave="usos" className="num" {...cab}>Usos</CabeceraOrdenable>
+              <CabeceraOrdenable clave="pct" className="num" {...cab}>% cupos</CabeceraOrdenable>
+              <CabeceraOrdenable clave="gsv" className="num" {...cab}>GSV</CabeceraOrdenable>
             </tr>
           </thead>
           <tbody>
-            {filas.map((f) => (
+            {ordenadas.map((f) => {
+              const pct = pctCupos(f.usos, f.cupos)
+              const nivel = f.promociones ? nivelAlertaCupos(f.usos, f.cupos, Number(f.promociones.umbral_cupos)) : null
+              return (
               <tr key={f.id}>
                 <td>
                   {f.promociones ? (
@@ -108,12 +145,17 @@ export default function FichaConcesion() {
                 </td>
                 <td>{f.promociones ? ETIQUETA_ESPACIO[f.promociones.espacio] : '—'}</td>
                 <td>{ETIQUETA_ESTADO[f.estado]}</td>
+                <td className="num">{fmtEntero(f.cupos)}</td>
                 <td className="num">{fmtEntero(f.usos ?? 0)}</td>
+                <td className="num">
+                  {nivel ? <span className={nivel}>⚠ {fmtPct(pct)}</span> : fmtPct(pct)}
+                </td>
                 <td className="num">
                   {fmtImporte(f.gsv ?? 0)}
                 </td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       )}

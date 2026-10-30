@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { contarTareas, hayAgotadas, type FilaInicio, type Tarea } from '../../dominio/tareas'
 import { usePerfil } from '../auth/useSesion'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
 import Contadores from './Contadores'
 import { cargarFilasInicio, cargarMisConcesiones } from './datos'
 import EtiquetaEstado from './EtiquetaEstado'
@@ -13,6 +15,9 @@ interface Datos {
   concesiones: { id: number; nombre: string }[]
   ahora: Date
 }
+
+type Concesion = { id: number; nombre: string; filas: FilaInicio[] }
+const COLUMNAS: Columna<Concesion>[] = [{ clave: 'concesion', valor: (c) => c.nombre }]
 
 export default function InicioKam() {
   const perfil = usePerfil()
@@ -44,7 +49,7 @@ export default function InicioKam() {
 
   const concesiones = useMemo(() => {
     if (!datos) return []
-    const porId = new Map<number, { id: number; nombre: string; filas: FilaInicio[] }>()
+    const porId = new Map<number, Concesion>()
     for (const c of datos.concesiones) porId.set(c.id, { ...c, filas: [] })
     for (const f of datos.filas) {
       const c = porId.get(f.concesion_id) ?? { id: f.concesion_id, nombre: f.concesion_nombre ?? '', filas: [] as FilaInicio[] }
@@ -59,6 +64,8 @@ export default function InicioKam() {
         a.nombre.localeCompare(b.nombre, 'es'),
     )
   }, [datos])
+
+  const { filas: concesionesOrdenadas, orden, alternar } = useOrden(concesiones, COLUMNAS)
 
   if (error) {
     return (
@@ -89,12 +96,12 @@ export default function InicioKam() {
           <table className="tabla mis-concesiones">
             <thead>
               <tr>
-                <th>Concesión</th>
+                <CabeceraOrdenable clave="concesion" orden={orden} onAlternar={alternar}>Concesión</CabeceraOrdenable>
                 <th>Promociones publicadas</th>
               </tr>
             </thead>
             <tbody>
-              {concesiones.map((c) => (
+              {concesionesOrdenadas.map((c) => (
                 <tr key={c.id}>
                   <td><Link to={`/concesion/${c.id}`}>{c.nombre}</Link></td>
                   <td>

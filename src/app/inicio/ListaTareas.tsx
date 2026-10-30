@@ -6,7 +6,10 @@ import {
   type EstadoEnvio,
   type EstadoSeguimiento,
 } from '../../dominio/etiquetas'
+import { pctCupos } from '../../dominio/calculos'
 import { tareasDeFila, type FilaInicio, type Tarea } from '../../dominio/tareas'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
 import { ConflictoError, type Cambios } from '../promocion/servicio'
 import { guardarDesdeInicio, recargarFila, rutaPromocion } from './datos'
 
@@ -46,16 +49,30 @@ interface Props {
   mostrarKam?: boolean
 }
 
+function textoDato(tarea: Tarea, f: FilaInicio): string | number | null {
+  if (tarea === 'sin_respuesta' || tarea === 'sin_activar') return ETIQUETA_ESTADO[f.estado]
+  if (tarea === 'envios') return `SMS ${ETIQUETA_ENVIO[f.sms]} · Email ${ETIQUETA_ENVIO[f.email]}`
+  return pctCupos(f.usos, f.cupos)
+}
+
 export default function ListaTareas({ tarea, filas, ahora, onCambio, mostrarKam }: Props) {
   const propias = filas.filter((f) => tareasDeFila(f, ahora).includes(tarea))
+  const columnas: Columna<FilaInicio>[] = [
+    { clave: 'concesion', valor: (f) => f.concesion_nombre ?? f.concesion_id },
+    { clave: 'kam', valor: (f) => f.kam_nombre },
+    { clave: 'tag', valor: (f) => f.tag },
+    { clave: 'dato', valor: (f) => textoDato(tarea, f) },
+  ]
+  const { filas: ordenadas, orden, alternar } = useOrden(propias, columnas)
+  const cab = { orden, onAlternar: alternar }
   return (
     <table className="tabla lista-tareas">
       <thead>
         <tr>
-          <th>Concesión</th>
-          {mostrarKam && <th>KAM</th>}
-          <th>TAG</th>
-          <th>Dato</th>
+          <CabeceraOrdenable clave="concesion" {...cab}>Concesión</CabeceraOrdenable>
+          {mostrarKam && <CabeceraOrdenable clave="kam" {...cab}>KAM</CabeceraOrdenable>}
+          <CabeceraOrdenable clave="tag" {...cab}>TAG</CabeceraOrdenable>
+          <CabeceraOrdenable clave="dato" {...cab}>Dato</CabeceraOrdenable>
           <th>Acción</th>
         </tr>
       </thead>
@@ -65,7 +82,7 @@ export default function ListaTareas({ tarea, filas, ahora, onCambio, mostrarKam 
             <td colSpan={mostrarKam ? 5 : 4} className="suave">No hay tareas pendientes</td>
           </tr>
         )}
-        {propias.map((f) => (
+        {ordenadas.map((f) => (
           <FilaTarea
             key={f.seguimiento_id}
             tarea={tarea}

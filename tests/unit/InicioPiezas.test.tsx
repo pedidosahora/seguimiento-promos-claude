@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
@@ -178,7 +178,8 @@ describe('ListaTareas', () => {
     expect(screen.getByText('PROMO1')).toBeInTheDocument()
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument()
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    // Las cabeceras ordenables son botones; en el cuerpo no debe haber ninguno.
+    expect(within(screen.getAllByRole('rowgroup')[1]).queryByRole('button')).not.toBeInTheDocument()
   })
 
   it('doble envío: un segundo clic con el guardado en curso no vuelve a guardar', async () => {
@@ -229,6 +230,48 @@ describe('ListaTareas', () => {
       />,
     )
     expect(screen.getByText('Ana')).toBeInTheDocument()
+  })
+
+  const nombres = () =>
+    screen.getAllByRole('row').slice(1).map((r) => within(r).getAllByRole('cell')[0].textContent)
+
+  it('pulsar una cabecera ordena las filas; la tercera vez restaura el orden por defecto', () => {
+    const filas = [
+      fila({ seguimiento_id: 'a', concesion_nombre: 'Bravo', tag: 'T1' }),
+      fila({ seguimiento_id: 'b', concesion_nombre: 'Charlie', tag: 'T2' }),
+      fila({ seguimiento_id: 'c', concesion_nombre: 'Alfa', tag: 'T3' }),
+    ]
+    montar(<ListaTareas tarea="sin_respuesta" filas={filas} ahora={ahora} onCambio={() => {}} />)
+    expect(nombres()).toEqual(['Bravo', 'Charlie', 'Alfa'])
+    const cabecera = screen.getByRole('button', { name: 'Concesión' })
+    expect(screen.queryByRole('button', { name: 'Acción' })).not.toBeInTheDocument()
+    fireEvent.click(cabecera)
+    expect(nombres()).toEqual(['Alfa', 'Bravo', 'Charlie'])
+    fireEvent.click(cabecera)
+    expect(nombres()).toEqual(['Charlie', 'Bravo', 'Alfa'])
+    fireEvent.click(cabecera)
+    expect(nombres()).toEqual(['Bravo', 'Charlie', 'Alfa'])
+  })
+
+  it('tras cambiar una fila con un orden activo, la lista sigue ordenada', () => {
+    const base = (n: string, id: string) =>
+      fila({ seguimiento_id: id, concesion_nombre: n, estado: 'activa', cupos: 10, usos: 9 })
+    const props = { tarea: 'cupos' as const, ahora, onCambio: () => {} }
+    const { rerender } = montar(
+      <ListaTareas {...props} filas={[base('Bravo', 'a'), base('Alfa', 'b'), base('Charlie', 'c')]} />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Concesión' }))
+    expect(nombres()).toEqual(['Alfa', 'Bravo', 'Charlie'])
+    const cambiada = fila({
+      seguimiento_id: 'a', concesion_nombre: 'Bravo', estado: 'activa', cupos: 11, usos: 9,
+      actualizado_en: '2026-10-30T10:05:00Z',
+    })
+    rerender(
+      <MemoryRouter>
+        <ListaTareas {...props} filas={[cambiada, base('Alfa', 'b'), base('Charlie', 'c')]} />
+      </MemoryRouter>,
+    )
+    expect(nombres()).toEqual(['Alfa', 'Bravo', 'Charlie'])
   })
 })
 

@@ -1,4 +1,14 @@
 import { contarTareas, TAREAS, type FilaInicio, type Tarea } from '../../dominio/tareas'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
+
+type Grupo = { id: string | null; nombre: string; conteos: Record<Tarea, number> }
+const total = (g: Grupo) => TAREAS.reduce((s, t) => s + g.conteos[t.clave], 0)
+const COLUMNAS: Columna<Grupo>[] = [
+  { clave: 'kam', valor: (g) => g.nombre },
+  ...TAREAS.map((t) => ({ clave: t.clave, valor: (g: Grupo) => g.conteos[t.clave] })),
+  { clave: 'total', valor: total },
+]
 
 interface Props {
   filas: FilaInicio[]
@@ -14,7 +24,7 @@ export default function TareasPorKam({ filas, kams, ahora, onElegir }: Props) {
     if (f.kam_id && !conocidos.has(f.kam_id)) extra.set(f.kam_id, f.kam_nombre ?? 'KAM desconocido')
   }
   const todos = [...kams, ...[...extra].map(([id, nombre]) => ({ id, nombre }))]
-  const grupos: { id: string | null; nombre: string; conteos: Record<Tarea, number> }[] = todos.map(
+  const grupos: Grupo[] = todos.map(
     (k) => ({
       id: k.id,
       nombre: k.nombre,
@@ -29,19 +39,21 @@ export default function TareasPorKam({ filas, kams, ahora, onElegir }: Props) {
     (a, b) =>
       b.conteos.sin_respuesta - a.conteos.sin_respuesta || a.nombre.localeCompare(b.nombre, 'es'),
   )
+  const { filas: ordenados, orden, alternar } = useOrden(grupos, COLUMNAS)
+  const cab = { orden, onAlternar: alternar }
   return (
     <table className="tabla tareas-por-kam">
       <thead>
         <tr>
-          <th>KAM</th>
+          <CabeceraOrdenable clave="kam" {...cab}>KAM</CabeceraOrdenable>
           {TAREAS.map((t) => (
-            <th key={t.clave} className="num">{t.etiqueta}</th>
+            <CabeceraOrdenable key={t.clave} clave={t.clave} className="num" {...cab}>{t.etiqueta}</CabeceraOrdenable>
           ))}
-          <th className="num">Total</th>
+          <CabeceraOrdenable clave="total" className="num" {...cab}>Total</CabeceraOrdenable>
         </tr>
       </thead>
       <tbody>
-        {grupos.map((g) => (
+        {ordenados.map((g) => (
           <tr key={g.id ?? 'sin-kam'}>
             <td>{g.nombre}</td>
             {TAREAS.map((t) => (
@@ -60,7 +72,7 @@ export default function TareasPorKam({ filas, kams, ahora, onElegir }: Props) {
                 )}
               </td>
             ))}
-            <td className="num">{TAREAS.reduce((s, t) => s + g.conteos[t.clave], 0)}</td>
+            <td className="num">{total(g)}</td>
           </tr>
         ))}
       </tbody>

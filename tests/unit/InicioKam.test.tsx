@@ -163,4 +163,27 @@ describe('InicioKam', () => {
     expect(screen.queryByRole('link', { name: 'VIEJA' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'SINFECHA' })).not.toBeInTheDocument()
   })
+
+  it('Mis concesiones: pulsar «Concesión» ordena; la tercera vez restaura el orden por defecto', async () => {
+    datos(
+      [
+        fila({ seguimiento_id: 's1', tag: 'T1', concesion_id: 2, concesion_nombre: 'Zeta' }),
+        fila({ seguimiento_id: 's2', tag: 'T2', concesion_id: 3, concesion_nombre: 'Mid' }),
+      ],
+      [{ id: 1, nombre: 'Alfa vacía' }, { id: 2, nombre: 'Zeta' }, { id: 3, nombre: 'Mid' }],
+    )
+    montar()
+    await screen.findByText('Mis concesiones (3)')
+    const tabla = document.querySelector('table.mis-concesiones') as HTMLElement
+    const primera = () => within(within(tabla).getAllByRole('row')[1]).getAllByRole('cell')[0].textContent
+    expect(primera()).toBe('Mid')
+    const cabecera = within(tabla).getByRole('button', { name: 'Concesión' })
+    expect(within(tabla).queryByRole('button', { name: 'Promociones publicadas' })).not.toBeInTheDocument()
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('Alfa vacía')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('Zeta')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('Mid')
+  })
 })

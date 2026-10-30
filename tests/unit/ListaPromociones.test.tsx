@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
@@ -92,5 +92,23 @@ describe('ListaPromociones', () => {
     montar('kam', '/todos')
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('red caída'))
     expect(screen.queryByText('Cargando…')).not.toBeInTheDocument()
+  })
+
+  it('pulsar «TAG» ordena; la tercera vez restaura el orden por defecto; Vigencia ordena por inicio', async () => {
+    montar('kam', '/todos')
+    await waitFor(() => expect(screen.getByText('TMICC-VIEJA')).toBeInTheDocument())
+    const primera = () => within(screen.getAllByRole('row')[1]).getAllByRole('cell')[0].textContent
+    expect(primera()).toBe('TMICC-VIEJA')
+    const cabecera = screen.getByRole('button', { name: 'TAG' })
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('CAMP-FUTURA')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('TMICC-VIEJA')
+    fireEvent.click(cabecera)
+    expect(primera()).toBe('TMICC-VIEJA')
+    fireEvent.click(screen.getByRole('button', { name: /^Vigencia/ }))
+    expect(primera()).toBe('TMICC-VIEJA')
+    fireEvent.click(screen.getByRole('button', { name: /^Vigencia/ }))
+    expect(primera()).toBe('CAMP-FUTURA')
   })
 })

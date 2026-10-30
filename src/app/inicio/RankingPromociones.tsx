@@ -1,29 +1,43 @@
 import { fmtEntero, fmtPct } from '../../dominio/formato'
 import { Link } from 'react-router-dom'
 import { rutaPromocion, type FilaRanking } from './datos'
+import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { useOrden, type Columna } from '../comun/orden'
+
+const COLUMNAS: Columna<FilaRanking>[] = [
+  { clave: 'tag', valor: (f) => f.tag },
+  { clave: 'espacio', valor: (f) => f.espacio },
+  { clave: 'pct', valor: (f) => f.pct },
+  { clave: 'usos', valor: (f) => f.usos },
+  { clave: 'cupos', valor: (f) => f.cupos },
+  { clave: 'gsv', valor: (f) => f.gsv },
+  { clave: 'activas', valor: (f) => f.activas },
+]
 
 export default function RankingPromociones({ filas }: { filas: FilaRanking[] }) {
-  const orden = [...filas].sort(
+  const porDefecto = [...filas].sort(
     (a, b) =>
       Number(a.pct == null) - Number(b.pct == null) ||
       (b.pct ?? 0) - (a.pct ?? 0) ||
       a.tag.localeCompare(b.tag, 'es'),
   )
+  const { filas: ordenadas, orden, alternar } = useOrden(porDefecto, COLUMNAS)
+  const cab = { orden, onAlternar: alternar }
   return (
     <table className="tabla ranking">
       <thead>
         <tr>
-          <th>TAG</th>
-          <th>Espacio</th>
-          <th>% cupos gastados</th>
-          <th className="num">Usos</th>
-          <th className="num">Cupos</th>
-          <th className="num">GSV</th>
-          <th className="num">Activas</th>
+          <CabeceraOrdenable clave="tag" {...cab}>TAG</CabeceraOrdenable>
+          <CabeceraOrdenable clave="espacio" {...cab}>Espacio</CabeceraOrdenable>
+          <CabeceraOrdenable clave="pct" {...cab}>% cupos gastados</CabeceraOrdenable>
+          <CabeceraOrdenable clave="usos" className="num" {...cab}>Usos</CabeceraOrdenable>
+          <CabeceraOrdenable clave="cupos" className="num" {...cab}>Cupos</CabeceraOrdenable>
+          <CabeceraOrdenable clave="gsv" className="num" {...cab}>GSV</CabeceraOrdenable>
+          <CabeceraOrdenable clave="activas" className="num" {...cab}>Activas</CabeceraOrdenable>
         </tr>
       </thead>
       <tbody>
-        {orden.map((f) => (
+        {ordenadas.map((f) => (
           <tr key={f.promocion_id}>
             <td><Link to={rutaPromocion(f.espacio, f.tag)}>{f.tag}</Link></td>
             <td>{f.espacio}</td>
