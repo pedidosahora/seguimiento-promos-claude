@@ -24,6 +24,7 @@ export async function cargarFilasAnalisis(cliente: SupabaseClient = supabase): P
       .from('seguimiento')
       .select(SELECT)
       .neq('promociones.estado', 'borrador')
+      .order('id')
       .range(i, i + PAGINA - 1)
     if (error) throw new Error(error.message)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -19,6 +19,7 @@ function cliente(paginas: unknown[][]) {
   const qb: Record<string, unknown> = {}
   qb.select = vi.fn(() => qb)
   qb.neq = vi.fn(() => qb)
+  qb.order = vi.fn(() => qb)
   qb.range = vi.fn((a: number, b: number) => {
     rangos.push([a, b])
     return Promise.resolve({ data: paginas[n++] ?? [], error: null })
@@ -30,8 +31,9 @@ describe('cargarFilasAnalisis', () => {
   it('pagina hasta una página incompleta y concatena', async () => {
     const p1 = Array.from({ length: 1000 }, (_, i) => crudo(i))
     const p2 = [crudo(1000), crudo(1001)]
-    const { c, rangos } = cliente([p1, p2])
+    const { c, rangos, qb } = cliente([p1, p2])
     const filas = await cargarFilasAnalisis(c)
+    expect(qb.order).toHaveBeenCalledWith('id')
     expect(filas).toHaveLength(1002)
     expect(rangos).toEqual([[0, 999], [1000, 1999]])
   })
@@ -53,6 +55,7 @@ describe('cargarFilasAnalisis', () => {
     const qb: Record<string, unknown> = {}
     qb.select = () => qb
     qb.neq = () => qb
+    qb.order = () => qb
     qb.range = () => Promise.resolve({ data: null, error: { message: 'boom' } })
     await expect(cargarFilasAnalisis({ from: () => qb } as unknown as SupabaseClient)).rejects.toThrow('boom')
   })
