@@ -23,7 +23,8 @@ vi.mock('../../src/lib/supabase', () => {
       Promise.resolve({ data: tabla === 'promociones' ? promo : { convocadas: 1, presentadas: 1, usos: 0, gsv: 0 }, error: null })
     b.then = (ok: (r: unknown) => unknown, ko?: (e: unknown) => unknown) => {
       if (tabla === 'seguimiento') estado.cargas += 1
-      return Promise.resolve({ data: [fila], error: null }).then(ok, ko)
+      const data = tabla === 'seguimiento' ? [fila] : []
+      return Promise.resolve({ data, error: null }).then(ok, ko)
     }
     return b
   }
@@ -40,8 +41,12 @@ vi.mock('../../src/app/promocion/servicio', async (original) => {
 
 // La tabla AG Grid no es el objeto de esta prueba: un stub dispara la edición.
 vi.mock('../../src/app/promocion/TablaSeguimiento', () => ({
-  default: ({ filas, onEditar }: { filas: { id: string }[]; onEditar: (f: unknown, c: string, v: unknown) => void }) => (
-    <button onClick={() => onEditar(filas[0], 'estado', 'acepta')}>editar</button>
+  default: ({ filas, onEditar, onAbrirFicha }: { filas: { id: string }[]; onEditar: (f: unknown, c: string, v: unknown) => void; onAbrirFicha: (id: string) => void }) => (
+    <div>
+      <button onClick={() => onEditar(filas[0], 'estado', 'acepta')}>editar</button>
+      <button onClick={() => onAbrirFicha(filas[0].id)}>abrir ficha</button>
+      <button onClick={() => onAbrirFicha('f2')}>abrir otra</button>
+    </div>
   ),
 }))
 
@@ -68,5 +73,35 @@ describe('Promocion', () => {
     // y sigue ahí cuando la recarga ha terminado
     await new Promise((r) => setTimeout(r, 50))
     expect(screen.getByRole('alert')).toHaveTextContent('Esta fila ha cambiado; recarga')
+  })
+
+  function montar() {
+    const perfil = { id: 'u1', user_id: 'x', email: 'a@pro.agency', nombre: 'A', rol: 'kam' as const, activo: true }
+    return render(
+      <SesionContext.Provider value={{ cargando: false, perfil }}>
+        <MemoryRouter initialEntries={['/tmicc/T1']}>
+          <Routes>
+            <Route path="/:espacio/:tag" element={<Promocion />} />
+          </Routes>
+        </MemoryRouter>
+      </SesionContext.Provider>,
+    )
+  }
+
+  it('la ficha es un panel superpuesto: abrirla no cambia la clase del contenedor de la tabla; Esc la cierra', async () => {
+    const { container } = montar()
+    fireEvent.click(await screen.findByText('abrir ficha'))
+    expect(await screen.findByLabelText('Ficha de Alfa')).toBeInTheDocument()
+    expect(container.querySelector('.promo-cuerpo')!.className).toBe('promo-cuerpo')
+    expect(container.querySelector('.con-ficha')).toBeNull()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByLabelText('Ficha de Alfa')).toBeNull())
+  })
+
+  it('«Cerrar» cierra la ficha', async () => {
+    montar()
+    fireEvent.click(await screen.findByText('abrir ficha'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Cerrar ficha' }))
+    await waitFor(() => expect(screen.queryByLabelText('Ficha de Alfa')).toBeNull())
   })
 })

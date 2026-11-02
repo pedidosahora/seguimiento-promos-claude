@@ -35,6 +35,9 @@ const tema = themeQuartz.withParams({
   borderColor: '#d9dee5',
 })
 
+/** Hasta este número de filas la tabla se ajusta a su contenido; con más, alto fijo y cabecera fija. */
+const MAX_FILAS_AUTO = 20
+
 export interface PropsTabla {
   filas: FilaGrid[]
   /** concesion_id de las filas que el usuario puede editar. */
@@ -44,6 +47,8 @@ export interface PropsTabla {
   onEditar: (fila: FilaGrid, campo: CampoEditable, valor: unknown) => void
   onSeleccion: (ids: string[]) => void
   onAbrirFicha: (id: string) => void
+  /** Fila cuya ficha está abierta (se resalta; pulsar otra fila cambia la ficha). */
+  fichaId?: string | null
   /** Cada cambio de este contador deselecciona todas las filas. */
   limpiarSeleccion?: number
   /** Oculta KAM y Territorio (en "Mis concesiones" son los del propio usuario). */
@@ -61,6 +66,7 @@ export default function TablaSeguimiento({
   onEditar,
   onSeleccion,
   onAbrirFicha,
+  fichaId,
   limpiarSeleccion,
   ocultarKamTerritorio,
   pruebas,
@@ -69,6 +75,10 @@ export default function TablaSeguimiento({
   useEffect(() => {
     grid.current?.api?.deselectAll()
   }, [limpiarSeleccion])
+
+  useEffect(() => {
+    grid.current?.api?.redrawRows()
+  }, [fichaId])
 
   const columnas = useMemo<ColDef<FilaGrid>[]>(() => {
     const ctx = (f: FilaGrid) => ({ editable: editables.has(f.concesion_id), esAdmin, umbral })
@@ -98,9 +108,11 @@ export default function TablaSeguimiento({
       field: campo,
       headerName: titulo,
       type: 'rightAligned',
-      width: 80,
+      width: campo === 'gsv' ? 110 : 80,
+      minWidth: campo === 'gsv' ? 110 : undefined,
       editable: editable(campo),
       cellClass: clase(campo),
+      tooltipValueGetter: (p) => (p.value == null ? undefined : formato(p.value as number | null)),
       cellEditor: 'agNumberCellEditor',
       cellEditorParams: { min: 0, precision: campo === 'gsv' ? 2 : 0 },
       valueFormatter: (p) => formato(p.value as number | null),
@@ -143,7 +155,7 @@ export default function TablaSeguimiento({
       numero('gsv', 'GSV', fmtImporte),
       {
         colId: 'pct_cupos',
-        headerName: '% Cupos',
+        headerName: '% cupos',
         type: 'rightAligned',
         width: 80,
         cellClass: clase('pct_cupos'),
@@ -161,7 +173,9 @@ export default function TablaSeguimiento({
         colId: 'gsv_uso',
         headerName: 'GSV/uso',
         type: 'rightAligned',
-        width: 80,
+        width: 110,
+        minWidth: 110,
+        tooltipValueGetter: (p) => (p.data ? textoGsvUso(p.data.gsv, p.data.usos) : undefined),
         valueGetter: (p) => (p.data && p.data.usos ? Number(p.data.gsv ?? 0) / p.data.usos : null),
         valueFormatter: (p) => (p.data ? textoGsvUso(p.data.gsv, p.data.usos) : ''),
       },
@@ -186,8 +200,9 @@ export default function TablaSeguimiento({
     if (e.data) onEditar(e.data, campo, valor)
   }
 
+  const autoAlto = pruebas || filas.length <= MAX_FILAS_AUTO
   return (
-    <div className={pruebas ? undefined : 'tabla-grid'}>
+    <div className={pruebas ? undefined : autoAlto ? 'tabla-grid tabla-auto' : 'tabla-grid tabla-fija'}>
       <AgGridReact<FilaGrid>
         ref={grid}
         theme={tema}
@@ -207,7 +222,12 @@ export default function TablaSeguimiento({
         suppressRowVirtualisation={pruebas}
         suppressColumnVirtualisation={pruebas}
         animateRows={!pruebas}
-        domLayout={pruebas ? 'autoHeight' : 'normal'}
+        domLayout={autoAlto ? 'autoHeight' : 'normal'}
+        tooltipShowDelay={400}
+        getRowClass={(p) => (fichaId && p.data?.id === fichaId ? 'fila-ficha' : undefined)}
+        onRowClicked={(e) => {
+          if (fichaId && e.data && e.data.id !== fichaId) onAbrirFicha(e.data.id)
+        }}
       />
     </div>
   )

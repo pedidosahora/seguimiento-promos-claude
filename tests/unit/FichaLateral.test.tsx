@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
@@ -21,11 +21,11 @@ const fila = (usos: number): FilaGrid => ({
   nombre: 'Alfa', kam_id: 'k1', kam_nombre: 'Ana', territorio: 'Norte',
 })
 
-function montar(usos: number) {
+function montar(usos: number, onCerrar = vi.fn()) {
   return render(
     <MemoryRouter>
       <FichaLateral fila={fila(usos)} umbral={0.8} editable={false} esAdmin={false}
-        perfilId="k1" onCerrar={vi.fn()} onDeshecho={vi.fn()} />
+        perfilId="k1" onCerrar={onCerrar} onDeshecho={vi.fn()} />
     </MemoryRouter>,
   )
 }
@@ -46,5 +46,14 @@ describe('FichaLateral', () => {
     cleanup()
     montar(10)
     expect(screen.getByText(/20 %/).textContent).not.toContain('⚠')
+  })
+
+  it('«Cerrar» y Esc cierran la ficha', () => {
+    const onCerrar = vi.fn()
+    montar(10, onCerrar)
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar ficha' }))
+    expect(onCerrar).toHaveBeenCalledTimes(1)
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(onCerrar).toHaveBeenCalledTimes(2)
   })
 })

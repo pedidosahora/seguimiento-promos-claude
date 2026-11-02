@@ -75,6 +75,14 @@ export default function FichaLateral({ fila, umbral, editable, esAdmin, perfilId
     }
   }, [fila.id])
 
+  useEffect(() => {
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCerrar()
+    }
+    document.addEventListener('keydown', alTeclear)
+    return () => document.removeEventListener('keydown', alTeclear)
+  }, [onCerrar])
+
   // Recarga también cuando la fila cambia desde la tabla (actualizado_en nuevo).
   useEffect(() => {
     let vivo = true

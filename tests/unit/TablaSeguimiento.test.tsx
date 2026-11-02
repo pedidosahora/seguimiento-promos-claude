@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import {
@@ -176,5 +176,60 @@ describe('TablaSeguimiento', () => {
     expect(container.querySelector('.ag-header-cell[col-id="kam"]')).toBeNull()
     expect(container.querySelector('.ag-header-cell[col-id="territorio"]')).toBeNull()
     expect(container.querySelector('.ag-header-cell[col-id="email"]')).not.toBeNull()
+  })
+
+  it('alto: autoHeight con 20 filas o menos; alto fijo con más', async () => {
+    const muchas = (n: number) => Array.from({ length: n }, (_, i) => fila({ id: `x${i}`, concesion_id: 9000 + i, nombre: `C${i}` }))
+    const { container, rerender } = render(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} pruebas={false} filas={muchas(5)} />
+      </div>,
+    )
+    await waitFor(() => expect(container.querySelector('.ag-root-wrapper')).not.toBeNull())
+    expect(container.querySelector('.tabla-grid.tabla-auto')).not.toBeNull()
+    expect(container.querySelector('.ag-layout-auto-height')).not.toBeNull()
+    rerender(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} pruebas={false} filas={muchas(25)} />
+      </div>,
+    )
+    await waitFor(() => expect(container.querySelector('.tabla-grid.tabla-fija')).not.toBeNull())
+    expect(container.querySelector('.tabla-auto')).toBeNull()
+    await waitFor(() => expect(container.querySelector('.ag-layout-normal')).not.toBeNull())
+  })
+
+  it('cabeceras «% cupos» y «GSV/uso» y valor completo como tooltip en GSV', async () => {
+    const { container } = render(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} filas={[fila({ gsv: 12345.67, usos: 2 })]} />
+      </div>,
+    )
+    await waitFor(() => expect(screen.getByText('Alfa')).toBeInTheDocument())
+    expect(container.querySelector('.ag-header-cell[col-id="pct_cupos"]')!.textContent).toContain('% cupos')
+    expect(container.querySelector('.ag-header-cell[col-id="gsv_uso"]')!.textContent).toContain('GSV/uso')
+    expect(container.querySelector('[row-id="f1"] [col-id="gsv"]')!.textContent).toMatch(/12\.345,67/)
+  })
+
+  it('resalta la fila con la ficha abierta', async () => {
+    const { container } = render(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} filas={[fila({ id: 'a' }), fila({ id: 'b', concesion_id: 9101, nombre: 'Beta' })]} fichaId="b" />
+      </div>,
+    )
+    await waitFor(() => expect(screen.getByText('Beta')).toBeInTheDocument())
+    await waitFor(() => expect(container.querySelector('[row-id="b"]')!.className).toContain('fila-ficha'))
+    expect(container.querySelector('[row-id="a"]')!.className).not.toContain('fila-ficha')
+  })
+
+  it('con la ficha abierta, pulsar otra fila la abre en esa fila', async () => {
+    const onAbrirFicha = vi.fn()
+    const { container } = render(
+      <div style={{ width: 1600, height: 600 }}>
+        <TablaSeguimiento {...props} onAbrirFicha={onAbrirFicha} filas={[fila({ id: 'a' }), fila({ id: 'b', concesion_id: 9101, nombre: 'Beta' })]} fichaId="a" />
+      </div>,
+    )
+    await waitFor(() => expect(screen.getByText('Beta')).toBeInTheDocument())
+    fireEvent.click(container.querySelector('[row-id="b"] [col-id="num"]')!)
+    await waitFor(() => expect(onAbrirFicha).toHaveBeenCalledWith('b'))
   })
 })

@@ -240,6 +240,7 @@ export default function Promocion() {
   }, [filas, pestana, perfil?.id])
 
   const abrirFicha = useCallback((id: string) => setFichaId(id), [])
+  const cerrarFicha = useCallback(() => setFichaId(null), [])
   const fichaFila = fichaId ? filas.find((f) => f.id === fichaId) : undefined
 
   if (cargando && !promo) return <p className="nota">Cargando…</p>
@@ -270,7 +271,7 @@ export default function Promocion() {
         onAplicar={aplicarBloque}
         onLimpiar={() => setLimpiar((n) => n + 1)}
       />
-      <div className={fichaFila ? 'promo-cuerpo con-ficha' : 'promo-cuerpo'}>
+      <div className="promo-cuerpo">
         {visibles.length === 0 ? (
           <p className="nota">No hay concesiones en esta vista.</p>
         ) : (
@@ -282,6 +283,7 @@ export default function Promocion() {
             onEditar={editar}
             onSeleccion={setSeleccion}
             onAbrirFicha={abrirFicha}
+            fichaId={fichaFila?.id ?? null}
             limpiarSeleccion={limpiar}
             ocultarKamTerritorio={pestana === 'mis'}
           />
@@ -293,7 +295,7 @@ export default function Promocion() {
             editable={editables.has(fichaFila.concesion_id)}
             esAdmin={esAdmin}
             perfilId={perfil.id}
-            onCerrar={() => setFichaId(null)}
+            onCerrar={cerrarFicha}
             onDeshecho={recargarFila}
           />
         )}

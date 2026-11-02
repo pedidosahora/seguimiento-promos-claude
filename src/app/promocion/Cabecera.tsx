@@ -37,19 +37,34 @@ interface Props {
 }
 
 export default function Cabecera({ promo, indicadores: i, pestana, onPestana, onExportar }: Props) {
-  const datos: [string, string][] = i
+  const grupos: [string, [string, string][]][] = i
     ? [
-        ['Convocadas', String(i.convocadas)],
-        ['Presentadas', String(i.presentadas)],
-        ['Activas', String(i.activas)],
-        ['Pendientes', String(i.pendientes)],
-        ['% aceptación', fmtPct(i.pct_aceptacion)],
-        ['% pendientes', fmtPct(i.pct_pendientes)],
-        ['% rechazo', fmtPct(i.pct_rechazo)],
-        ['% activación', fmtPct(i.pct_activacion)],
-        ['Cupos', fmtEntero(i.cupos)],
-        ['Usos', fmtEntero(i.usos)],
-        ['GSV', fmtImporte(i.gsv)],
+        [
+          'Participación',
+          [
+            ['Convocadas', String(i.convocadas)],
+            ['Presentadas', String(i.presentadas)],
+            ['Activas', String(i.activas)],
+            ['Pendientes', String(i.pendientes)],
+          ],
+        ],
+        [
+          'Porcentajes',
+          [
+            ['% aceptación', fmtPct(i.pct_aceptacion)],
+            ['% pendientes', fmtPct(i.pct_pendientes)],
+            ['% rechazo', fmtPct(i.pct_rechazo)],
+            ['% activación', fmtPct(i.pct_activacion)],
+          ],
+        ],
+        [
+          'Resultados',
+          [
+            ['Cupos', fmtEntero(i.cupos)],
+            ['Usos', fmtEntero(i.usos)],
+            ['GSV', fmtImporte(i.gsv)],
+          ],
+        ],
       ]
     : []
   return (
@@ -67,14 +82,21 @@ export default function Cabecera({ promo, indicadores: i, pestana, onPestana, on
           Exportar a Excel
         </button>
       )}
-      <dl className="indicadores">
-        {datos.map(([k, v]) => (
-          <div key={k}>
-            <dt>{k}</dt>
-            <dd>{v}</dd>
-          </div>
+      <div className="indicadores">
+        {grupos.map(([titulo, datos]) => (
+          <section key={titulo} className="indicadores-grupo">
+            <h2>{titulo}</h2>
+            <dl>
+              {datos.map(([k, v]) => (
+                <div key={k}>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         ))}
-      </dl>
+      </div>
       <div className="subnav" role="tablist">
         {(
           [
