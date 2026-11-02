@@ -140,3 +140,24 @@ button.etiqueta-estado:focus-visible { outline: 2px solid var(--color-primario);
 .zona-archivo:hover, .zona-archivo:focus-within { border-color: var(--color-primario); color: var(--color-primario); }
 .zona-archivo input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
 @media (max-width: 720px) { .grupos { grid-template-columns: 1fr; } }
+
+/* Análisis: indicadores y gráficos */
+.analisis-indicadores { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0 16px; padding: 0; }
+.analisis-indicadores > div { background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); padding: 6px 10px 8px; min-width: 0; }
+.analisis-indicadores dt { font-size: 11px; color: var(--color-suave); white-space: nowrap; }
+.analisis-indicadores dd { margin: 2px 0 0; font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.grafico-vacio { color: var(--color-suave); margin: 12px 0; }
+.barras-h { display: flex; flex-direction: column; gap: 2px; }
+.barra-fila { display: grid; grid-template-columns: minmax(80px, 200px) 1fr 90px; align-items: center; gap: 8px; padding: 2px 0; }
+.barra-fila:hover { background: var(--color-borde); }
+.barra-etiqueta { color: var(--color-texto); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barra-pista { display: block; height: 10px; border-left: 1px solid var(--color-borde); }
+.barra-relleno { display: block; height: 100%; background: var(--color-primario); border-radius: 0 4px 4px 0; }
+.barra-valor { color: var(--color-texto); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.barras-v { overflow-x: auto; }
+.mes-barra { fill: var(--color-primario); }
+.mes-col:hover .mes-zona { fill: var(--color-borde); fill-opacity: 0.5; }
+.eje-linea { stroke: var(--color-borde); stroke-width: 1; }
+.eje-rejilla { stroke: var(--color-borde); stroke-width: 1; stroke-dasharray: 2 3; }
+.mes-etiqueta, .mes-valor { fill: var(--color-texto); font-size: 11px; }
+.mes-valor { font-weight: 600; }
