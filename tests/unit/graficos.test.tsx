@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import BarrasHorizontales from '../../src/app/analisis/BarrasHorizontales'
 import BarrasMensuales from '../../src/app/analisis/BarrasMensuales'
@@ -88,6 +88,27 @@ describe('BarrasMensuales', () => {
     expect(x).toBeGreaterThanOrEqual(0)
     expect(x).toBeLessThanOrEqual(vb[2])
     expect(v.getAttribute('text-anchor')).toBe('start')
+  })
+
+  it('vacío y luego con datos: el observador de ancho se engancha', () => {
+    const observe = vi.fn()
+    vi.stubGlobal('ResizeObserver', class { observe = observe; disconnect() {} })
+    try {
+      const { rerender, container } = render(<BarrasMensuales datos={[]} formato={f} titulo="Mes" />)
+      rerender(<BarrasMensuales datos={datos} formato={f} titulo="Mes" />)
+      expect(observe).toHaveBeenCalledTimes(1)
+      expect(observe.mock.calls[0][0]).toBe(container.querySelector('.barras-v'))
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('barras finas: máximo 28 de ancho', () => {
+    const { container } = render(<BarrasMensuales datos={[datos[1]]} formato={f} titulo="Mes" />)
+    const d = container.querySelector('.mes-barra')!.getAttribute('d')!
+    const m = /^M([\d.]+),/.exec(d)!
+    const h = /H([\d.]+)/.exec(d)!
+    expect(Number(h[1]) - Number(m[1])).toBeLessThanOrEqual(28)
   })
 
   it('vacío muestra mensaje', () => {

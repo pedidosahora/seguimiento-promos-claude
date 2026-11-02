@@ -51,7 +51,14 @@ function useAncho() {
 
 export default function BarrasMensuales({ datos, formato, titulo }: Props) {
   const { ref, ancho: contenedor } = useAncho()
-  if (datos.length === 0) return <p className="grafico-vacio">{SIN_DATOS}</p>
+  // El contenedor medido se renderiza siempre, para que el observador se enganche aunque empiece vacío.
+  if (datos.length === 0) {
+    return (
+      <div className="grafico barras-v" ref={ref}>
+        <p className="grafico-vacio">{SIN_DATOS}</p>
+      </div>
+    )
+  }
   const meses = [...datos].sort((a, b) => a.mes.localeCompare(b.mes))
   const mayor = meses.reduce((a, b) => (b.valor > a.valor ? b : a), meses[0])
   const tope = mayor.valor > 0 ? mayor.valor : 1
@@ -59,7 +66,7 @@ export default function BarrasMensuales({ datos, formato, titulo }: Props) {
   const col = Math.max(COL_MIN, Math.min(COL_MAX, contenedor / n))
   const ancho = Math.max(contenedor, n * col)
   const inicio = (ancho - n * col) / 2
-  const barra = Math.max(ANCHO_MIN_BARRA, Math.min(48, col * 0.5))
+  const barra = Math.max(ANCHO_MIN_BARRA, Math.min(28, col * 0.5))
   return (
     <div className="grafico barras-v" ref={ref}>
       <svg
