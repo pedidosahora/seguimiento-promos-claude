@@ -16,7 +16,7 @@ function uno<T>(v: T | T[] | null | undefined): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : (v ?? null)
 }
 
-/** Todas las filas de seguimiento de promociones no borrador, leídas en bloques de 1000. */
+/** Todas las filas de seguimiento de promociones no borrador, leídas en bloques de 1000 hasta que una página llega vacía. */
 export async function cargarFilasAnalisis(cliente: SupabaseClient = supabase): Promise<FilaAnalisis[]> {
   const filas: FilaAnalisis[] = []
   for (let i = 0; ; i += PAGINA) {
@@ -53,7 +53,8 @@ export async function cargarFilasAnalisis(cliente: SupabaseClient = supabase): P
         kam_nombre: uno(c.kam)?.nombre ?? null,
       })
     }
-    if (pagina.length < PAGINA) break
+    // Hasta una página vacía: si el servidor limita max_rows por debajo de 1000, no se trunca en silencio.
+    if (pagina.length === 0) break
   }
   return filas
 }

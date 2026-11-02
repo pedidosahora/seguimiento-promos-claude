@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { agrupar, filtrar, metricas, type FilaAnalisis, type Filtros } from '../../src/analisis/agregar'
+import { agrupar, filtrar, metricas, rellenarMeses, type FilaAnalisis, type Filtros } from '../../src/analisis/agregar'
 
 function fila(o: Partial<FilaAnalisis> = {}): FilaAnalisis {
   return {
@@ -109,5 +109,25 @@ describe('agrupar', () => {
     expect(agrupar(fs, 'espacio')[0].etiqueta).toBe('TMICC')
     expect(agrupar(fs, 'marca')[0].etiqueta).toBe('TMICC')
     expect(agrupar(fs, 'concesion')[0].etiqueta).toBe('C1')
+  })
+})
+
+describe('rellenarMeses', () => {
+  const g = (f: string) => agrupar([fila({ fecha_inicio: f, estado: 'activa', gsv: 50, usos: 3 })], 'mes')[0]
+  it('rellena con ceros los meses sin datos', () => {
+    const r = rellenarMeses([g('2026-01-10'), g('2026-03-02')])
+    expect(r.map((x) => x.clave)).toEqual(['2026-01', '2026-02', '2026-03'])
+    expect(r[1].m.gsv).toBe(0)
+    expect(r[1].m.usos).toBe(0)
+    expect(r[1].etiqueta).toBe('feb 2026')
+    expect(r[0].m.gsv).toBe(50)
+  })
+  it('cruza el cambio de año', () => {
+    const r = rellenarMeses([g('2026-11-01'), g('2027-02-01')])
+    expect(r.map((x) => x.clave)).toEqual(['2026-11', '2026-12', '2027-01', '2027-02'])
+  })
+  it('vacío y «sin fecha» no generan meses', () => {
+    expect(rellenarMeses([])).toEqual([])
+    expect(rellenarMeses(agrupar([fila({ fecha_inicio: null })], 'mes'))).toEqual([])
   })
 })

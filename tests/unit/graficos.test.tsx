@@ -11,10 +11,10 @@ const f = (v: number | null) => (v == null ? '—' : `${v} u`)
 
 describe('BarrasHorizontales', () => {
   const datos = [
-    { etiqueta: 'B', valor: 5 },
-    { etiqueta: 'A', valor: 10 },
-    { etiqueta: 'N', valor: null },
-    { etiqueta: 'C', valor: 2 },
+    { clave: 'b', etiqueta: 'B', valor: 5 },
+    { clave: 'a', etiqueta: 'A', valor: 10 },
+    { clave: 'n', etiqueta: 'N', valor: null },
+    { clave: 'c', etiqueta: 'C', valor: 2 },
   ]
 
   it('ordena desc, excluye nulos y limita a max', () => {
@@ -39,9 +39,36 @@ describe('BarrasHorizontales', () => {
     expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Usos: 3 grupos; mayor A 10 u')
   })
 
-  it('vacío muestra mensaje', () => {
-    render(<BarrasHorizontales datos={[{ etiqueta: 'x', valor: null }]} formato={f} titulo="T" max={15} />)
-    expect(screen.getByText('No hay datos con estos filtros')).toBeInTheDocument()
+  it('todos los valores nulos: «Sin valores para este indicador»', () => {
+    render(<BarrasHorizontales datos={[{ clave: 'x', etiqueta: 'x', valor: null }]} formato={f} titulo="T" max={15} />)
+    expect(screen.getByText('Sin valores para este indicador')).toBeInTheDocument()
+  })
+
+  it('etiquetas repetidas con distinta clave: dos filas y sin aviso de key', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const dup = [
+        { clave: '1', etiqueta: 'Bar Pepe', valor: 5 },
+        { clave: '2', etiqueta: 'Bar Pepe', valor: 3 },
+      ]
+      const { container } = render(<BarrasHorizontales datos={dup} formato={f} titulo="T" />)
+      expect(container.querySelectorAll('.barra-fila')).toHaveLength(2)
+      expect(err).not.toHaveBeenCalled()
+    } finally {
+      err.mockRestore()
+    }
+  })
+
+  it('más valores que el máximo: nota con las cifras reales', () => {
+    const muchos = Array.from({ length: 20 }, (_, i) => ({ clave: String(i), etiqueta: `G${i}`, valor: i + 1 }))
+    const { container } = render(<BarrasHorizontales datos={muchos} formato={f} titulo="T" />)
+    expect(container.querySelectorAll('.barra-fila')).toHaveLength(15)
+    expect(screen.getByText('Se muestran los 15 mayores de 20; el resto, en la tabla.')).toBeInTheDocument()
+  })
+
+  it('sin truncar no hay nota', () => {
+    render(<BarrasHorizontales datos={datos} formato={f} titulo="T" max={15} />)
+    expect(screen.queryByText(/Se muestran los/)).not.toBeInTheDocument()
   })
 })
 

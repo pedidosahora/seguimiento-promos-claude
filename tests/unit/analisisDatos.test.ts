@@ -28,14 +28,20 @@ function cliente(paginas: unknown[][]) {
 }
 
 describe('cargarFilasAnalisis', () => {
-  it('pagina hasta una página incompleta y concatena', async () => {
+  it('pagina hasta una página vacía y concatena', async () => {
     const p1 = Array.from({ length: 1000 }, (_, i) => crudo(i))
     const p2 = [crudo(1000), crudo(1001)]
-    const { c, rangos, qb } = cliente([p1, p2])
+    const { c, rangos, qb } = cliente([p1, p2, []])
     const filas = await cargarFilasAnalisis(c)
     expect(qb.order).toHaveBeenCalledWith('id')
     expect(filas).toHaveLength(1002)
-    expect(rangos).toEqual([[0, 999], [1000, 1999]])
+    expect(rangos).toEqual([[0, 999], [1000, 1999], [2000, 2999]])
+  })
+  it('un max_rows del servidor menor que 1000 no trunca', async () => {
+    const corta = (a: number) => Array.from({ length: 100 }, (_, i) => crudo(a + i))
+    const { c, rangos } = cliente([corta(0), corta(100), []])
+    expect(await cargarFilasAnalisis(c)).toHaveLength(200)
+    expect(rangos).toHaveLength(3)
   })
   it('mapea nombre comercial y numéricos', async () => {
     const otra = { id: 8, razon_social: 'R', nombre_comercial: 'Bar', kam_id: null, territorios: null, kam: null }

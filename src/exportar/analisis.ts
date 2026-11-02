@@ -3,19 +3,19 @@ import type { Metricas } from '../analisis/agregar'
 
 /** Columnas de la comparativa; el primer encabezado es el nombre de la dimensión. */
 const CABECERA = [
-  'Promociones', 'Convocadas', 'Presentadas', 'Activas', 'Pendientes', '% aceptación', '% activación',
-  'Cupos', 'Usos', '% cupos gastados', 'GSV', 'GSV/uso',
+  'Promociones', 'Convocadas', 'Presentadas', 'Aceptadas', 'Activas', 'Pendientes', 'Rechazadas',
+  '% aceptación', '% activación', 'Cupos', 'Usos', '% cupos gastados', 'GSV', 'GSV/uso',
 ]
 
 /** Libro xlsx de una hoja con la tabla comparativa: valores numéricos crudos (proporciones 0–1, vacío si no hay dato). */
 export function exportarComparativa(filas: { etiqueta: string; m: Metricas }[], dimension: string): Blob {
   const cuerpo = filas.map(({ etiqueta, m }) => [
-    etiqueta, m.promociones, m.convocadas, m.presentadas, m.activas, m.pendientes,
+    etiqueta, m.promociones, m.convocadas, m.presentadas, m.aceptadas, m.activas, m.pendientes, m.rechazadas,
     m.pctAceptacion, m.pctActivacion, m.cupos, m.usos, m.pctCupos, m.gsv, m.gsvUso,
   ])
   const cab = [dimension, ...CABECERA]
   const ws = XLSX.utils.aoa_to_sheet([cab, ...cuerpo])
-  const formatos: Record<number, string> = { 6: '0%', 7: '0%', 10: '0%', 11: '#,##0.00', 12: '#,##0.00' }
+  const formatos: Record<number, string> = { 8: '0%', 9: '0%', 12: '0%', 13: '#,##0.00', 14: '#,##0.00' }
   for (let r = 1; r <= filas.length; r++) {
     for (const [c, z] of Object.entries(formatos)) {
       const celda = ws[XLSX.utils.encode_cell({ r, c: Number(c) })]

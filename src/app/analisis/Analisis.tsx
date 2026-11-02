@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
-import { agrupar, filtrar, metricas, type Dimension, type FilaAnalisis, type Filtros, type Metricas } from '../../analisis/agregar'
+import { agrupar, filtrar, metricas, rellenarMeses, type Dimension, type FilaAnalisis, type Filtros, type Metricas } from '../../analisis/agregar'
 import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { exportarComparativa, nombreArchivoAnalisis } from '../../exportar/analisis'
 import { descargar } from '../../exportar/seguimiento'
@@ -39,8 +39,10 @@ const COLUMNAS_METRICA: { clave: keyof Metricas; texto: string; fmt: (v: number 
   { clave: 'promociones', texto: 'Promociones', fmt: fmtEntero },
   { clave: 'convocadas', texto: 'Convocadas', fmt: fmtEntero },
   { clave: 'presentadas', texto: 'Presentadas', fmt: fmtEntero },
+  { clave: 'aceptadas', texto: 'Aceptadas', fmt: fmtEntero },
   { clave: 'activas', texto: 'Activas', fmt: fmtEntero },
   { clave: 'pendientes', texto: 'Pendientes', fmt: fmtEntero },
+  { clave: 'rechazadas', texto: 'Rechazadas', fmt: fmtEntero },
   { clave: 'pctAceptacion', texto: '% aceptación', fmt: fmtPct },
   { clave: 'pctActivacion', texto: '% activación', fmt: fmtPct },
   { clave: 'cupos', texto: 'Cupos', fmt: fmtEntero },
@@ -54,15 +56,18 @@ const COLUMNAS_METRICA: { clave: keyof Metricas; texto: string; fmt: (v: number 
 function TablaComparativa({
   grupos,
   etiquetaDim,
+  dimension,
   visibles,
 }: {
   grupos: Grupo[]
   etiquetaDim: string
+  dimension: Dimension
   /** Recibe las filas en el orden que ve la usuaria, para exportarlas igual. */
   visibles: MutableRefObject<Grupo[]>
 }) {
   const columnas: Columna<Grupo>[] = [
-    { clave: 'etiqueta', valor: (g) => g.etiqueta },
+    // Por mes se ordena por la clave aaaa-mm (cronológico), no por la etiqueta; «sin fecha» queda siempre al final.
+    { clave: 'etiqueta', valor: (g) => (dimension === 'mes' ? (g.clave === 'sin-fecha' ? null : g.clave) : g.etiqueta) },
     ...COLUMNAS_METRICA.map((c) => ({ clave: c.clave, valor: (g: Grupo) => g.m[c.clave] })),
   ]
   const { filas, orden, alternar } = useOrden(grupos, columnas)
@@ -151,7 +156,7 @@ export default function Analisis() {
   }, [visibles, dimension, indicador])
 
   const meses = useMemo(
-    () => agrupar(visibles, 'mes').filter((g) => g.clave !== 'sin-fecha'),
+    () => rellenarMeses(agrupar(visibles, 'mes')),
     [visibles],
   )
 
@@ -204,16 +209,22 @@ export default function Analisis() {
           </select>
         </label>
       </div>
-      <BarrasHorizontales
-        datos={grupos.map((g) => ({ etiqueta: g.etiqueta, valor: g.m[indicador] }))}
-        formato={ind.formato}
-        titulo={`${ind.texto} por ${etiquetaDim.toLowerCase()}`}
-      />
       {grupos.length === 0 ? (
         <p className="grafico-vacio">{SIN_DATOS}</p>
       ) : (
         <>
-          <TablaComparativa key={`${dimension}-${indicador}`} grupos={grupos} etiquetaDim={etiquetaDim} visibles={filasTabla} />
+          <BarrasHorizontales
+            datos={grupos.map((g) => ({ clave: g.clave, etiqueta: g.etiqueta, valor: g.m[indicador] }))}
+            formato={ind.formato}
+            titulo={`${ind.texto} por ${etiquetaDim.toLowerCase()}`}
+          />
+          <TablaComparativa
+            key={`${dimension}-${indicador}`}
+            grupos={grupos}
+            etiquetaDim={etiquetaDim}
+            dimension={dimension}
+            visibles={filasTabla}
+          />
           <p>
             <button className="boton secundario" onClick={exportar}>Exportar a Excel</button>
           </p>

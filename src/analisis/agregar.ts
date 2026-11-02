@@ -144,6 +144,23 @@ function claveEtiqueta(f: FilaAnalisis, d: Dimension): { clave: string; etiqueta
   }
 }
 
+/** Todos los meses entre el primero y el último presentes (aaaa-mm), con métricas a cero en los que faltan. Ignora «sin-fecha». */
+export function rellenarMeses<T extends { clave: string; etiqueta: string; m: Metricas }>(
+  grupos: T[],
+): { clave: string; etiqueta: string; m: Metricas }[] {
+  const porClave = new Map(grupos.filter((g) => /^\d{4}-\d{2}$/.test(g.clave)).map((g) => [g.clave, g]))
+  if (porClave.size === 0) return []
+  const claves = [...porClave.keys()].sort()
+  const [a0, m0] = claves[0].split('-').map(Number)
+  const [a1, m1] = claves[claves.length - 1].split('-').map(Number)
+  const res: { clave: string; etiqueta: string; m: Metricas }[] = []
+  for (let n = a0 * 12 + (m0 - 1); n <= a1 * 12 + (m1 - 1); n++) {
+    const clave = `${Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, '0')}`
+    res.push(porClave.get(clave) ?? { clave, etiqueta: etiquetaMes(clave), m: metricas([]) })
+  }
+  return res
+}
+
 /** Agrupa y calcula métricas por grupo. Para «mes», ordenado por clave (cronológico, «Sin fecha» al final). */
 export function agrupar(
   filas: FilaAnalisis[],

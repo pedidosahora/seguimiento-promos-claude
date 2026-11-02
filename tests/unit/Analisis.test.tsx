@@ -135,7 +135,8 @@ describe('Analisis', () => {
     await screen.findByText('Comparativa')
     fireEvent.change(screen.getByLabelText('Estado de la promoción'), { target: { value: 'archivada' } })
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
-    expect(screen.getAllByText('No hay datos con estos filtros').length).toBeGreaterThanOrEqual(3)
+    // Un solo aviso en la comparativa (no el del gráfico y el de la tabla) más los dos gráficos mensuales.
+    expect(screen.getAllByText('No hay datos con estos filtros')).toHaveLength(3)
     expect(indicador('Convocadas')).toHaveTextContent('0')
     expect(indicador('% aceptación')).toHaveTextContent('—')
   })
@@ -145,7 +146,54 @@ describe('Analisis', () => {
     montar(kam)
     await screen.findByText('Comparativa')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    expect(screen.getAllByText('No hay datos con estos filtros').length).toBeGreaterThanOrEqual(3)
+    expect(screen.getAllByText('No hay datos con estos filtros')).toHaveLength(3)
+  })
+
+  it('filas pero indicador sin valores: aviso en el gráfico y la tabla sigue', async () => {
+    mocks.cargarFilasAnalisis.mockResolvedValue([fila({ cupos: 0, usos: 0 })])
+    montar(admin)
+    await screen.findByText('Comparativa')
+    fireEvent.change(screen.getByLabelText('Indicador del gráfico'), { target: { value: 'pctCupos' } })
+    expect(screen.getByText('Sin valores para este indicador')).toBeInTheDocument()
+    expect(screen.getByRole('table')).toBeInTheDocument()
+  })
+
+  it('la tabla incluye Aceptadas y Rechazadas', async () => {
+    mocks.cargarFilasAnalisis.mockResolvedValue([fila({ estado: 'acepta' }), fila({ estado: 'rechaza' }), fila({ estado: 'rechaza' })])
+    montar(admin)
+    await screen.findByText('Comparativa')
+    const t = within(screen.getByRole('table'))
+    const cab = t.getAllByRole('columnheader').map((h) => h.textContent ?? '')
+    const celdas = within(t.getAllByRole('row')[1]).getAllByRole('cell').map((c) => c.textContent)
+    expect(celdas[cab.findIndex((x) => x.startsWith('Aceptadas'))]).toBe('1')
+    expect(celdas[cab.findIndex((x) => x.startsWith('Rechazadas'))]).toBe('2')
+  })
+
+  it('«Mes de inicio»: ordena por mes cronológico y «Sin fecha» al final', async () => {
+    mocks.cargarFilasAnalisis.mockResolvedValue([
+      fila({ fecha_inicio: '2026-10-05', gsv: 10 }),
+      fila({ fecha_inicio: '2026-02-05', gsv: 30 }),
+      fila({ fecha_inicio: null, gsv: 99 }),
+      fila({ fecha_inicio: '2026-04-05', gsv: 20 }),
+    ])
+    montar(admin)
+    await screen.findByText('Comparativa')
+    fireEvent.change(screen.getByLabelText('Agrupar por'), { target: { value: 'mes' } })
+    const cab = () => within(screen.getByRole('table')).getByRole('button', { name: /^Mes de inicio/ })
+    fireEvent.click(cab())
+    expect(primeraColumna()).toEqual(['feb 2026', 'abr 2026', 'oct 2026', 'Sin fecha'])
+    fireEvent.click(cab())
+    expect(primeraColumna()).toEqual(['oct 2026', 'abr 2026', 'feb 2026', 'Sin fecha'])
+  })
+
+  it('Evolución mensual incluye los meses intermedios sin datos', async () => {
+    mocks.cargarFilasAnalisis.mockResolvedValue([fila({ fecha_inicio: '2026-01-05' }), fila({ fecha_inicio: '2026-03-05' })])
+    const { container } = montar(admin)
+    await screen.findByText('Comparativa')
+    const graficos = container.querySelectorAll('svg')
+    expect(graficos).toHaveLength(2)
+    graficos.forEach((g) => expect(g.querySelectorAll('.mes-col')).toHaveLength(3))
+    expect(container.textContent).toContain('feb 26')
   })
 
   it('Exportar sigue el orden actual de la tabla', async () => {

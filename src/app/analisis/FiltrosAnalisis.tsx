@@ -72,7 +72,12 @@ export default function FiltrosAnalisis({ filtros, onCambio, filas, puedeSoloMia
       </label>
       <label>
         KAM
-        <select value={filtros.kamId ?? ''} onChange={(e) => cambiar({ kamId: e.target.value || null })}>
+        <select
+          value={filtros.kamId ?? ''}
+          disabled={filtros.soloKamId !== null}
+          title={filtros.soloKamId !== null ? 'Desmarca «Solo mis concesiones» para elegir otro KAM' : undefined}
+          onChange={(e) => cambiar({ kamId: e.target.value || null })}
+        >
           <option value="">Todos</option>
           {kams.map(([id, nombre]) => (
             <option key={id} value={id}>{nombre}</option>
@@ -97,6 +102,9 @@ export default function FiltrosAnalisis({ filtros, onCambio, filas, puedeSoloMia
           />
           Solo mis concesiones
         </label>
+      )}
+      {filtros.desde && filtros.hasta && filtros.desde > filtros.hasta && (
+        <p role="alert" className="error">La fecha "desde" es posterior a "hasta"</p>
       )}
     </div>
   )
