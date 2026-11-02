@@ -198,7 +198,7 @@ describe('TablaSeguimiento', () => {
     await waitFor(() => expect(container.querySelector('.ag-layout-normal')).not.toBeNull())
   })
 
-  it('cabeceras «% cupos» y «GSV/uso» y valor completo como tooltip en GSV', async () => {
+  it('cabeceras «% cupos» y «GSV/uso» y GSV con formato completo sin recortar', async () => {
     const { container } = render(
       <div style={{ width: 1600, height: 600 }}>
         <TablaSeguimiento {...props} filas={[fila({ gsv: 12345.67, usos: 2 })]} />

@@ -77,7 +77,11 @@ export default function FichaLateral({ fila, umbral, editable, esAdmin, perfilId
 
   useEffect(() => {
     const alTeclear = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCerrar()
+      if (e.key !== 'Escape' || e.defaultPrevented) return
+      // Esc dirigido a un editor de celda, un popup o un campo de formulario no es para la ficha.
+      const t = e.target
+      if (t instanceof Element && t.closest('.ag-cell-inline-editing, .ag-popup, input, textarea, select')) return
+      onCerrar()
     }
     document.addEventListener('keydown', alTeclear)
     return () => document.removeEventListener('keydown', alTeclear)

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -55,5 +56,25 @@ describe('FichaLateral', () => {
     expect(onCerrar).toHaveBeenCalledTimes(1)
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onCerrar).toHaveBeenCalledTimes(2)
+  })
+
+  it('Esc con el foco en el comentario no cierra la ficha; en el documento sí', () => {
+    const onCerrar = vi.fn()
+    render(
+      <MemoryRouter>
+        <FichaLateral fila={fila(10)} umbral={0.8} editable esAdmin={false}
+          perfilId="k1" onCerrar={onCerrar} onDeshecho={vi.fn()} />
+      </MemoryRouter>,
+    )
+    fireEvent.keyDown(screen.getByLabelText('Nuevo comentario'), { key: 'Escape' })
+    expect(onCerrar).not.toHaveBeenCalled()
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    expect(onCerrar).toHaveBeenCalledTimes(1)
+  })
+
+  it('la ficha se coloca bajo la cabecera de la app (no top: 0)', () => {
+    const css = readFileSync('src/app/estilos.css', 'utf8')
+    expect(css).toMatch(/\.ficha \{[^}]*top: var\(--alto-cabecera\)/)
+    expect(css).toMatch(/\.cabecera \{[^}]*height: var\(--alto-cabecera\)/)
   })
 })
