@@ -7,6 +7,7 @@ const ESPACIOS = [
   { ruta: '/ufs', texto: 'UFS' },
   { ruta: '/campanas', texto: 'Campañas' },
   { ruta: '/todos', texto: 'Todos' },
+  { ruta: '/analisis', texto: 'Análisis' },
 ]
 
 export default function Layout() {

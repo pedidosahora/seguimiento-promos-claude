@@ -32,6 +32,8 @@ vi.mock('../../src/app/inicio/datos', async (importOriginal) => ({
   cargarRanking: () => Promise.resolve([]),
 }))
 
+vi.mock('../../src/app/analisis/datos', () => ({ cargarFilasAnalisis: () => Promise.resolve([]) }))
+
 import Rutas from '../../src/app/rutas'
 
 const montar = () =>
@@ -88,6 +90,20 @@ describe('Rutas / sesión', () => {
     }
     montar()
     expect(await screen.findByText('Todavía no tienes concesiones asignadas')).toBeInTheDocument()
+  })
+
+  it('el menú tiene Análisis y /analisis renderiza la página', async () => {
+    estado.resultadoPerfil = {
+      data: { id: 'a1', nombre: 'Adm', rol: 'admin', email: 'adm@pro.agency' },
+      error: null,
+    }
+    render(
+      <MemoryRouter initialEntries={['/analisis']}>
+        <Rutas />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByRole('link', { name: 'Análisis' })).toBeInTheDocument()
+    expect(await screen.findByText('Comparativa')).toBeInTheDocument()
   })
 
   it('la ruta / con perfil admin muestra el inicio de administración', async () => {

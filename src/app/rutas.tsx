@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Admin from './admin/Admin'
+import Analisis from './analisis/Analisis'
 import Acceso from './auth/Acceso'
 import { SesionContext, useSesion, usePerfil } from './auth/useSesion'
 import Importar from './importar/Importar'
@@ -44,6 +45,7 @@ export default function Rutas() {
           <Route path="/admin/*" element={<SoloAdmin><Admin /></SoloAdmin>} />
           <Route path="/importar" element={<SoloAdmin><Importar /></SoloAdmin>} />
           <Route path="/concesion/:id" element={<FichaConcesion />} />
+          <Route path="/analisis" element={<Analisis />} />
           <Route path="/:espacio" element={<ListaPromociones />} />
           <Route path="/:espacio/:tag" element={<Promocion />} />
         </Route>
