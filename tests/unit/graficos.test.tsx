@@ -29,7 +29,7 @@ describe('BarrasHorizontales', () => {
     const { container } = render(<BarrasHorizontales datos={datos} formato={f} titulo="T" max={15} />)
     expect(container.querySelectorAll('.barra-valor')).toHaveLength(1)
     expect(screen.getByText('10 u')).toBeInTheDocument()
-    const rellenos = container.querySelectorAll<HTMLElement>('.barra-relleno')
+    const rellenos = container.querySelectorAll<HTMLElement>('.barra-h-relleno')
     expect(rellenos[0].style.width).toBe('100%')
     expect(rellenos[1].style.width).toBe('50%')
   })
@@ -114,7 +114,21 @@ describe('BarrasMensuales', () => {
     const x = Number(v.getAttribute('x'))
     expect(x).toBeGreaterThanOrEqual(0)
     expect(x).toBeLessThanOrEqual(vb[2])
+    // Con espacio a los lados, el valor va centrado sobre su columna.
+    expect(v.getAttribute('text-anchor')).toBe('middle')
+    expect(x).toBe(xs[0])
+  })
+
+  it('valor del pico pegado al borde izquierdo: se ancla al inicio de la barra', () => {
+    const muchos = Array.from({ length: 14 }, (_, i) => ({
+      mes: i < 12 ? `2025-${String(i + 1).padStart(2, '0')}` : `2026-0${i - 11}`,
+      etiqueta: `m${i}`,
+      valor: i === 0 ? 9999 : 1,
+    }))
+    const { container } = render(<BarrasMensuales datos={muchos} formato={f} titulo="Mes" />)
+    const v = container.querySelector('.mes-valor')!
     expect(v.getAttribute('text-anchor')).toBe('start')
+    expect(Number(v.getAttribute('x'))).toBeGreaterThanOrEqual(0)
   })
 
   it('vacío y luego con datos: el observador de ancho se engancha', () => {

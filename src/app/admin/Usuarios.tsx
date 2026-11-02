@@ -115,7 +115,7 @@ export default function Usuarios() {
               <CabeceraOrdenable clave="email" {...cab}>Email</CabeceraOrdenable>
               <CabeceraOrdenable clave="rol" {...cab}>Rol</CabeceraOrdenable>
               <CabeceraOrdenable clave="activo" {...cab}>Activo</CabeceraOrdenable>
-              <th />
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>

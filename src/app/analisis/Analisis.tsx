@@ -74,26 +74,28 @@ function TablaComparativa({
   const cab = { orden, onAlternar: alternar }
   visibles.current = filas
   return (
-    <table className="tabla">
-      <thead>
-        <tr>
-          <CabeceraOrdenable clave="etiqueta" {...cab}>{etiquetaDim}</CabeceraOrdenable>
-          {COLUMNAS_METRICA.map((c) => (
-            <CabeceraOrdenable key={c.clave} clave={c.clave} className="num" {...cab}>{c.texto}</CabeceraOrdenable>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {filas.map((g) => (
-          <tr key={g.clave}>
-            <td>{g.etiqueta}</td>
+    <div className="tabla-scroll">
+      <table className="tabla tabla-compacta">
+        <thead>
+          <tr>
+            <CabeceraOrdenable clave="etiqueta" {...cab}>{etiquetaDim}</CabeceraOrdenable>
             {COLUMNAS_METRICA.map((c) => (
-              <td key={c.clave} className="num">{c.fmt(g.m[c.clave])}</td>
+              <CabeceraOrdenable key={c.clave} clave={c.clave} className="num" {...cab}>{c.texto}</CabeceraOrdenable>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {filas.map((g) => (
+            <tr key={g.clave}>
+              <td className="sin-corte">{g.etiqueta}</td>
+              {COLUMNAS_METRICA.map((c) => (
+                <td key={c.clave} className="num">{c.fmt(g.m[c.clave])}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -190,7 +192,12 @@ export default function Analisis() {
       />
       <Indicadores m={total} />
 
-      <h2>Comparativa</h2>
+      <div className="titulo-seccion">
+        <h2>Comparativa</h2>
+        {grupos.length > 0 && (
+          <button className="boton secundario" onClick={exportar}>Exportar a Excel</button>
+        )}
+      </div>
       <div className="filtros">
         <label>
           Agrupar por
@@ -225,9 +232,6 @@ export default function Analisis() {
             dimension={dimension}
             visibles={filasTabla}
           />
-          <p>
-            <button className="boton secundario" onClick={exportar}>Exportar a Excel</button>
-          </p>
         </>
       )}
 

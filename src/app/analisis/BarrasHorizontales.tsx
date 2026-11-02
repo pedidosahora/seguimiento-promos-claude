@@ -27,7 +27,7 @@ export default function BarrasHorizontales({ datos, formato, titulo, max = 15 }:
           <div key={d.clave} className="barra-fila" title={`${d.etiqueta}: ${formato(d.valor)}`}>
             <span className="barra-etiqueta">{d.etiqueta}</span>
             <span className="barra-pista">
-              <span className="barra-relleno" style={{ width: `${Math.max(0, (d.valor / tope) * 100)}%` }} />
+              <span className="barra-h-relleno" style={{ width: `${Math.max(0, (d.valor / tope) * 100)}%` }} />
             </span>
             {i === 0 ? <span className="barra-valor">{formato(d.valor)}</span> : <span />}
           </div>

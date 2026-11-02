@@ -164,7 +164,7 @@ export default function Concesiones() {
               <CabeceraOrdenable clave="comercial" {...cab}>Nombre comercial</CabeceraOrdenable>
               <CabeceraOrdenable clave="kam" {...cab}>KAM</CabeceraOrdenable>
               <CabeceraOrdenable clave="territorio" {...cab}>Territorio</CabeceraOrdenable>
-              <th />
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>

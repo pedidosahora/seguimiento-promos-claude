@@ -61,7 +61,7 @@ function ListaAdminPromociones() {
               <CabeceraOrdenable clave="mecanica" {...cab}>Mecánica</CabeceraOrdenable>
               <CabeceraOrdenable clave="vigencia" {...cab}>Vigencia</CabeceraOrdenable>
               <CabeceraOrdenable clave="estado" {...cab}>Estado</CabeceraOrdenable>
-              <th />
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>

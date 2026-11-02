@@ -1,12 +1,13 @@
 import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { Link } from 'react-router-dom'
+import { ETIQUETA_ESPACIO } from '../../dominio/etiquetas'
 import { rutaPromocion, type FilaRanking } from './datos'
 import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
 import { useOrden, type Columna } from '../comun/orden'
 
 const COLUMNAS: Columna<FilaRanking>[] = [
   { clave: 'tag', valor: (f) => f.tag },
-  { clave: 'espacio', valor: (f) => f.espacio },
+  { clave: 'espacio', valor: (f) => ETIQUETA_ESPACIO[f.espacio] ?? f.espacio },
   { clave: 'pct', valor: (f) => f.pct },
   { clave: 'usos', valor: (f) => f.usos },
   { clave: 'cupos', valor: (f) => f.cupos },
@@ -40,7 +41,7 @@ export default function RankingPromociones({ filas }: { filas: FilaRanking[] }) 
         {ordenadas.map((f) => (
           <tr key={f.promocion_id}>
             <td><Link to={rutaPromocion(f.espacio, f.tag)}>{f.tag}</Link></td>
-            <td>{f.espacio}</td>
+            <td>{ETIQUETA_ESPACIO[f.espacio] ?? f.espacio}</td>
             <td>
               {f.pct == null ? (
                 '—'

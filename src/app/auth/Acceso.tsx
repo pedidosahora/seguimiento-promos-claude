@@ -43,7 +43,9 @@ export default function Acceso() {
 
   return (
     <main className="acceso">
+      <p className="acceso-marca">Pro Agency · Pedidos Ahora</p>
       <h1>Seguimiento de promociones</h1>
+      <p className="nota">Entra con tu cuenta de Google de Pro Agency.</p>
       <button className="boton" onClick={entrarConGoogle}>Entrar con Google</button>
       {import.meta.env.DEV && (
         <form onSubmit={enviarEnlace} className="acceso-dev">

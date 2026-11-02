@@ -152,7 +152,7 @@ button.etiqueta-estado:focus-visible { outline: 2px solid var(--color-primario);
 .barra-fila:hover { background: var(--color-borde); }
 .barra-etiqueta { color: var(--color-texto); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .barra-pista { display: block; height: 10px; border-left: 1px solid var(--color-borde); }
-.barra-relleno { display: block; height: 100%; background: var(--color-primario); border-radius: 0 4px 4px 0; }
+.barra-h-relleno { display: block; height: 100%; background: var(--color-primario); border-radius: 0 4px 4px 0; }
 .barra-valor { color: var(--color-texto); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .barras-v { overflow-x: auto; }
 .mes-barra { fill: var(--color-primario); }
@@ -164,3 +164,42 @@ button.etiqueta-estado:focus-visible { outline: 2px solid var(--color-primario);
 .analisis-filtros { flex-wrap: wrap; align-items: flex-end; row-gap: 12px; }
 .filtro-casilla { display: flex; align-items: center; gap: 6px; }
 .filtro-casilla input { display: inline-block; padding: 0; border: 0; width: auto; min-width: 0; }
+
+/* Acabado: interacción, márgenes y coherencia */
+html { scrollbar-gutter: stable; }
+.boton:hover { background: color-mix(in srgb, var(--color-primario) 88%, #000); }
+.boton.secundario:hover { background: color-mix(in srgb, var(--color-primario) 6%, var(--color-superficie)); border-color: var(--color-primario); }
+.boton:disabled, .boton:disabled:hover { opacity: 0.55; cursor: not-allowed; background: var(--color-primario); }
+.boton.secundario:disabled, .boton.secundario:disabled:hover { background: transparent; border-color: var(--color-borde); }
+.boton:focus-visible, .cabecera nav a:focus-visible, .subnav a:focus-visible, .pestana:focus-visible, .contadores button:focus-visible,
+.contenido a:focus-visible, .contenido select:focus-visible, .contenido input:focus-visible, .contenido textarea:focus-visible {
+  outline: 2px solid var(--color-primario); outline-offset: 2px;
+}
+.cabecera nav a:hover:not(.active) { background: var(--color-fondo); color: var(--color-texto); }
+.subnav a:hover:not(.active), .pestana:hover:not(.activa) { color: var(--color-texto); }
+.tabla th .th-orden:hover { color: var(--color-texto); }
+.tabla th:not([aria-sort]) .th-orden::after { content: ' ↕' / ''; opacity: 0; }
+.tabla th:not([aria-sort]) .th-orden:hover::after { opacity: 0.6; }
+.tabla tbody tr:hover { background: color-mix(in srgb, var(--color-primario) 4%, var(--color-superficie)); }
+.tabla td.acciones { display: table-cell; white-space: nowrap; }
+.tabla td.acciones > * + * { margin-left: 8px; }
+.tabla, .tabla-scroll { margin-bottom: 20px; }
+.tabla-scroll { overflow-x: auto; border: 1px solid var(--color-borde); }
+.tabla-scroll .tabla { margin-bottom: 0; border: 0; }
+.tabla-compacta th, .tabla-compacta td { padding: 8px; }
+.tabla .sin-corte { white-space: nowrap; }
+.tabla .cerca { color: var(--color-alerta); font-weight: 600; }
+.tabla .agotado { color: var(--color-error); font-weight: 600; }
+.titulo-seccion { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.titulo-seccion h1, .titulo-seccion h2 { margin: 0; }
+.ficha-datos-pagina { grid-template-columns: repeat(4, max-content); gap: 8px 48px; }
+.tabla-auto .ag-center-cols-viewport { min-height: 0 !important; }
+.tarjetas-promo { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; padding: 0; }
+.tarjetas-promo li { display: flex; flex-direction: column; gap: 2px; padding: 8px 14px; background: var(--color-superficie); border: 1px solid var(--color-borde); border-left: 3px solid var(--color-primario); border-radius: var(--radio); }
+.tarjetas-promo a { font-weight: 600; }
+.tarjetas-promo .nota { font-size: 12px; }
+.acceso { padding: 32px; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); }
+.acceso h1 { margin: 0; }
+.acceso .nota { margin: -8px 0 0; }
+.acceso-marca { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-primario); }
+.acceso-dev input { width: 100%; }

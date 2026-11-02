@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
+import { MemoryRouter } from 'react-router-dom'
 import Cabecera from '../../src/app/promocion/Cabecera'
 
 describe('Cabecera', () => {
@@ -18,6 +19,7 @@ describe('Cabecera', () => {
         pestana="todas"
         onPestana={vi.fn()}
       />,
+      { wrapper: MemoryRouter },
     )
     const valor = (k: string) => screen.getByText(k).nextElementSibling?.textContent
     expect(valor('Activas')).toBe('3')
@@ -39,6 +41,7 @@ describe('Cabecera', () => {
         pestana="todas"
         onPestana={vi.fn()}
       />,
+      { wrapper: MemoryRouter },
     )
     const grupo = (titulo: string) => {
       const g = screen.getByText(titulo).closest('.indicadores-grupo') as HTMLElement
@@ -47,5 +50,6 @@ describe('Cabecera', () => {
     expect(grupo('Participación')).toEqual(['Convocadas', 'Presentadas', 'Activas', 'Pendientes'])
     expect(grupo('Porcentajes')).toEqual(['% aceptación', '% pendientes', '% rechazo', '% activación'])
     expect(grupo('Resultados')).toEqual(['Cupos', 'Usos', 'GSV'])
+    expect(screen.getByRole('link', { name: '← TMICC' })).toHaveAttribute('href', '/tmicc')
   })
 })

@@ -18,6 +18,8 @@ const ARRIBA = 24
 const BASE = ARRIBA + ALTO
 const TOTAL_ALTO = BASE + 26
 const R = 4
+/** Distancia al borde por debajo de la cual la etiqueta del pico deja de ir centrada (cabe un importe largo). */
+const MARGEN_ETIQUETA = 48
 
 // Barra con las esquinas superiores redondeadas y la base recta sobre la línea base.
 function trazo(x: number, h: number, ancho: number): string {
@@ -82,10 +84,10 @@ export default function BarrasMensuales({ datos, formato, titulo }: Props) {
           const x0 = inicio + i * col
           const h = (d.valor / tope) * ALTO
           const x = x0 + (col - barra) / 2
-          const primera = i === 0 && n > 1
-          const ultima = i === n - 1 && n > 1
-          const anclaje = primera ? 'start' : ultima ? 'end' : 'middle'
-          const xv = primera ? x0 + 4 : ultima ? x0 + col - 4 : x0 + col / 2
+          // Centrada sobre la barra; solo se ancla a un lado si la barra está pegada al borde del gráfico.
+          const centro = x0 + col / 2
+          const anclaje = centro < MARGEN_ETIQUETA ? 'start' : centro > ancho - MARGEN_ETIQUETA ? 'end' : 'middle'
+          const xv = anclaje === 'start' ? x : anclaje === 'end' ? x + barra : centro
           return (
             <g key={d.mes} className="mes-col">
               <title>{`${d.etiqueta}: ${formato(d.valor)}`}</title>

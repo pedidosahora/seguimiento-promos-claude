@@ -107,7 +107,7 @@ export default function FichaConcesion() {
         {concesion.nombre_comercial || concesion.razon_social}
         <span className={concesion.activa ? 'insignia neutra' : 'insignia'}>{concesion.activa ? 'Activa' : 'Inactiva'}</span>
       </h1>
-      <dl className="ficha-datos">
+      <dl className="ficha-datos ficha-datos-pagina">
         <div><dt>Nº concesión</dt><dd>{concesion.id}</dd></div>
         <div><dt>Razón social</dt><dd>{concesion.razon_social}</dd></div>
         <div><dt>KAM</dt><dd>{concesion.kam?.nombre ?? '—'}</dd></div>
@@ -143,7 +143,7 @@ export default function FichaConcesion() {
                   ) : '—'}
                 </td>
                 <td>{f.promociones ? ETIQUETA_ESPACIO[f.promociones.espacio] : '—'}</td>
-                <td>{ETIQUETA_ESTADO[f.estado]}</td>
+                <td><span className={`etiqueta-estado estado-${f.estado}`}>{ETIQUETA_ESTADO[f.estado]}</span></td>
                 <td className="num">{fmtEntero(f.cupos)}</td>
                 <td className="num">{fmtEntero(f.usos ?? 0)}</td>
                 <td className="num">

@@ -132,8 +132,8 @@ export default function Convocatoria() {
 
   return (
     <section>
+      <Link to={`/admin/promociones/${id}`} className="volver">← Volver a la promoción</Link>
       <h1>Convocatoria {tag && `· ${tag}`}</h1>
-      <p className="nota"><Link to={`/admin/promociones/${id}`}>Volver a la promoción</Link></p>
       {error && <p role="alert" className="error">{error}</p>}
       {aviso && <p className="nota">{aviso}</p>}
       {cargando ? <p className="nota">Cargando…</p> : (

@@ -28,6 +28,7 @@ ModuleRegistry.registerModules([AllCommunityModule])
 
 const tema = themeQuartz.withParams({
   accentColor: '#1f4e79',
+  fontFamily: 'inherit',
   fontSize: 13,
   rowHeight: 34,
   headerHeight: 36,
@@ -120,8 +121,8 @@ export default function TablaSeguimiento({
       field: campo,
       headerName: titulo,
       type: 'rightAligned',
-      width: campo === 'gsv' ? 110 : 80,
-      minWidth: campo === 'gsv' ? 110 : undefined,
+      width: campo === 'gsv' ? 105 : 72,
+      minWidth: campo === 'gsv' ? 105 : undefined,
       editable: editable(campo),
       cellClass: clase(campo),
       tooltipValueGetter: (p) => (p.value == null ? undefined : formato(p.value as number | null)),
@@ -133,7 +134,7 @@ export default function TablaSeguimiento({
     const fecha = (campo: 'fecha_aceptacion' | 'fecha_activacion', titulo: string): ColDef<FilaGrid> => ({
       colId: campo,
       headerName: titulo,
-      width: 110,
+      width: 115,
       editable: editable(campo),
       cellClass: clase(campo),
       // Sin cellDataType el editor devolvería solo la fecha y perdería la hora.
@@ -150,7 +151,7 @@ export default function TablaSeguimiento({
         headerName: 'Concesión',
         field: 'nombre',
         pinned: 'left',
-        width: 200,
+        width: 165,
         cellRenderer: (p: ICellRendererParams<FilaGrid>) =>
           p.data ? (
             <button type="button" className="enlace" onClick={() => onAbrirFicha(p.data!.id)}>
@@ -158,8 +159,14 @@ export default function TablaSeguimiento({
             </button>
           ) : null,
       },
-      { colId: 'num', headerName: 'Nº', field: 'concesion_id', width: 80, type: 'rightAligned' },
-      seleccion('estado', 'Estado', ETIQUETA_ESTADO, 120),
+      { colId: 'num', headerName: 'Nº', field: 'concesion_id', width: 64, type: 'rightAligned' },
+      {
+        ...seleccion('estado', 'Estado', ETIQUETA_ESTADO, 115),
+        cellRenderer: (p: ICellRendererParams<FilaGrid>) =>
+          p.data ? (
+            <span className={`etiqueta-estado estado-${p.data.estado}`}>{ETIQUETA_ESTADO[p.data.estado]}</span>
+          ) : null,
+      },
       fecha('fecha_aceptacion', 'F. aceptación'),
       fecha('fecha_activacion', 'F. activación'),
       numero('cupos', 'Cupos', fmtEntero),
@@ -169,7 +176,7 @@ export default function TablaSeguimiento({
         colId: 'pct_cupos',
         headerName: '% cupos',
         type: 'rightAligned',
-        width: 80,
+        width: 90,
         cellClass: clase('pct_cupos'),
         valueGetter: (p) => (p.data ? pctCupos(p.data.usos, p.data.cupos) : null),
         valueFormatter: (p) => (p.data ? textoPctCupos(p.data.usos, p.data.cupos) : ''),
@@ -185,14 +192,14 @@ export default function TablaSeguimiento({
         colId: 'gsv_uso',
         headerName: 'GSV/uso',
         type: 'rightAligned',
-        width: 110,
-        minWidth: 110,
+        width: 95,
+        minWidth: 95,
         tooltipValueGetter: (p) => (p.data ? textoGsvUso(p.data.gsv, p.data.usos) : undefined),
         valueGetter: (p) => (p.data && p.data.usos ? Number(p.data.gsv ?? 0) / p.data.usos : null),
         valueFormatter: (p) => (p.data ? textoGsvUso(p.data.gsv, p.data.usos) : ''),
       },
-      seleccion('sms', 'SMS', ETIQUETA_ENVIO, 90),
-      seleccion('email', 'Email', ETIQUETA_ENVIO, 90),
+      seleccion('sms', 'SMS', ETIQUETA_ENVIO, 85),
+      seleccion('email', 'Email', ETIQUETA_ENVIO, 85),
       // KAM y Territorio al final para que %Cupos, SMS y Email queden a la vista a 1366 px.
       {
         colId: 'kam', headerName: 'KAM', field: 'kam_nombre', width: 120,

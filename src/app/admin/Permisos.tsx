@@ -139,7 +139,7 @@ export default function Permisos() {
               <CabeceraOrdenable clave="usuario" {...cab}>Usuario</CabeceraOrdenable>
               <CabeceraOrdenable clave="destino" {...cab}>Acceso a</CabeceraOrdenable>
               <CabeceraOrdenable clave="caduca" {...cab}>Caduca</CabeceraOrdenable>
-              <th />
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
