@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { agrupar, filtrar, metricas, type Dimension, type FilaAnalisis, type Filtros, type Metricas } from '../../analisis/agregar'
 import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { exportarComparativa, nombreArchivoAnalisis } from '../../exportar/analisis'
@@ -45,19 +45,29 @@ const COLUMNAS_METRICA: { clave: keyof Metricas; texto: string; fmt: (v: number 
   { clave: 'pctActivacion', texto: '% activación', fmt: fmtPct },
   { clave: 'cupos', texto: 'Cupos', fmt: fmtEntero },
   { clave: 'usos', texto: 'Usos', fmt: fmtEntero },
-  { clave: 'pctCupos', texto: '% cupos', fmt: fmtPct },
+  { clave: 'pctCupos', texto: '% cupos gastados', fmt: fmtPct },
   { clave: 'gsv', texto: 'GSV', fmt: fmtImporte },
   { clave: 'gsvUso', texto: 'GSV/uso', fmt: fmtImporte },
 ]
 
 /** Se monta con `key` por dimensión+indicador: al cambiarlos, el orden manual se reinicia. */
-function TablaComparativa({ grupos, etiquetaDim }: { grupos: Grupo[]; etiquetaDim: string }) {
+function TablaComparativa({
+  grupos,
+  etiquetaDim,
+  visibles,
+}: {
+  grupos: Grupo[]
+  etiquetaDim: string
+  /** Recibe las filas en el orden que ve la usuaria, para exportarlas igual. */
+  visibles: MutableRefObject<Grupo[]>
+}) {
   const columnas: Columna<Grupo>[] = [
     { clave: 'etiqueta', valor: (g) => g.etiqueta },
     ...COLUMNAS_METRICA.map((c) => ({ clave: c.clave, valor: (g: Grupo) => g.m[c.clave] })),
   ]
   const { filas, orden, alternar } = useOrden(grupos, columnas)
   const cab = { orden, onAlternar: alternar }
+  visibles.current = filas
   return (
     <table className="tabla">
       <thead>
@@ -101,6 +111,7 @@ export default function Analisis() {
   }))
   const [dimension, setDimension] = useState<Dimension>('promocion')
   const [indicador, setIndicador] = useState<ClaveIndicador>('gsv')
+  const filasTabla = useRef<Grupo[]>([])
 
   useEffect(() => {
     let vivo = true
@@ -157,7 +168,7 @@ export default function Analisis() {
 
   const exportar = () => {
     descargar(
-      exportarComparativa(grupos.map((g) => ({ etiqueta: g.etiqueta, m: g.m })), etiquetaDim),
+      exportarComparativa(filasTabla.current.map((g) => ({ etiqueta: g.etiqueta, m: g.m })), etiquetaDim),
       nombreArchivoAnalisis(dimension),
     )
   }
@@ -202,7 +213,7 @@ export default function Analisis() {
         <p className="grafico-vacio">{SIN_DATOS}</p>
       ) : (
         <>
-          <TablaComparativa key={`${dimension}-${indicador}`} grupos={grupos} etiquetaDim={etiquetaDim} />
+          <TablaComparativa key={`${dimension}-${indicador}`} grupos={grupos} etiquetaDim={etiquetaDim} visibles={filasTabla} />
           <p>
             <button className="boton secundario" onClick={exportar}>Exportar a Excel</button>
           </p>

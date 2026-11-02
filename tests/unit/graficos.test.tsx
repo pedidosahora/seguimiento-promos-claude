@@ -72,6 +72,24 @@ describe('BarrasMensuales', () => {
     expect(h[0]).toBeGreaterThan(0)
   })
 
+  it('etiquetas de mes separadas y centradas por columna; valor máximo dentro del viewBox', () => {
+    const largos = [
+      { mes: '2026-08', etiqueta: 'ago 2026', valor: 1234.5 },
+      { mes: '2026-10', etiqueta: 'oct 2026', valor: 10 },
+    ]
+    const { container } = render(<BarrasMensuales datos={largos} formato={f} titulo="Mes" />)
+    const etiquetas = Array.from(container.querySelectorAll('.mes-etiqueta'))
+    expect(etiquetas.map((t) => t.textContent)).toEqual(['ago 26', 'oct 26'])
+    const xs = etiquetas.map((t) => Number(t.getAttribute('x')))
+    expect(xs[1] - xs[0]).toBeGreaterThanOrEqual(52)
+    const vb = (container.querySelector('svg')!.getAttribute('viewBox') ?? '').split(' ').map(Number)
+    const v = container.querySelector('.mes-valor')!
+    const x = Number(v.getAttribute('x'))
+    expect(x).toBeGreaterThanOrEqual(0)
+    expect(x).toBeLessThanOrEqual(vb[2])
+    expect(v.getAttribute('text-anchor')).toBe('start')
+  })
+
   it('vacío muestra mensaje', () => {
     render(<BarrasMensuales datos={[]} formato={f} titulo="Mes" />)
     expect(screen.getByText('No hay datos con estos filtros')).toBeInTheDocument()

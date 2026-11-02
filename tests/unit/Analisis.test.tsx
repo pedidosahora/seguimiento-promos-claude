@@ -148,6 +148,21 @@ describe('Analisis', () => {
     expect(screen.getAllByText('No hay datos con estos filtros').length).toBeGreaterThanOrEqual(3)
   })
 
+  it('Exportar sigue el orden actual de la tabla', async () => {
+    montar(admin)
+    await screen.findByText('Comparativa')
+    fireEvent.click(screen.getByRole('button', { name: 'Exportar a Excel' }))
+    const orden = (i: number) =>
+      (mocks.exportarComparativa.mock.calls[i] as unknown as [{ etiqueta: string }[]])[0].map((x) => x.etiqueta)
+    expect(orden(0)).toEqual(['PROMO-B', 'PROMO-A'])
+    fireEvent.click(within(screen.getByRole('table')).getByRole('button', { name: /^Usos/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Exportar a Excel' }))
+    expect(orden(1)).toEqual(['PROMO-B', 'PROMO-A'])
+    fireEvent.click(within(screen.getByRole('table')).getByRole('button', { name: /^Usos/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Exportar a Excel' }))
+    expect(orden(2)).toEqual(['PROMO-A', 'PROMO-B'])
+  })
+
   it('Exportar a Excel llama a exportarComparativa con las filas actuales', async () => {
     montar(admin)
     await screen.findByText('Comparativa')
