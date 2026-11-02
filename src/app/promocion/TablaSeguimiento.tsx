@@ -76,8 +76,20 @@ export default function TablaSeguimiento({
     grid.current?.api?.deselectAll()
   }, [limpiarSeleccion])
 
+  // La fila resaltada se lee de una ref para no tener que redibujar toda la tabla (mataría los editores abiertos).
+  const fichaRef = useRef(fichaId)
+  fichaRef.current = fichaId
+  const fichaPrevia = useRef(fichaId)
   useEffect(() => {
-    grid.current?.api?.redrawRows()
+    const api = grid.current?.api
+    const previa = fichaPrevia.current
+    fichaPrevia.current = fichaId
+    if (!api || previa === fichaId) return
+    const rowNodes = [previa, fichaId].flatMap((id) => {
+      const nodo = id ? api.getRowNode(id) : undefined
+      return nodo ? [nodo] : []
+    })
+    if (rowNodes.length) api.redrawRows({ rowNodes })
   }, [fichaId])
 
   const columnas = useMemo<ColDef<FilaGrid>[]>(() => {
@@ -224,9 +236,14 @@ export default function TablaSeguimiento({
         animateRows={!pruebas}
         domLayout={autoAlto ? 'autoHeight' : 'normal'}
         tooltipShowDelay={400}
-        getRowClass={(p) => (fichaId && p.data?.id === fichaId ? 'fila-ficha' : undefined)}
+        getRowClass={(p) => (fichaRef.current && p.data?.id === fichaRef.current ? 'fila-ficha' : undefined)}
         onRowClicked={(e) => {
-          if (fichaId && e.data && e.data.id !== fichaId) onAbrirFicha(e.data.id)
+          if (!fichaId || !e.data || e.data.id === fichaId) return
+          // Pulsar una celda editable solo edita; la ficha cambia con el nombre o con una celda no editable.
+          const celda = (e.event?.target as HTMLElement | null)?.closest?.('.ag-cell')
+          const colId = celda?.getAttribute('col-id')
+          if (colId && e.api.getColumn(colId)?.isCellEditable(e.node)) return
+          onAbrirFicha(e.data.id)
         }}
       />
     </div>

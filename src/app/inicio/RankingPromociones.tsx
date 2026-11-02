@@ -1,4 +1,4 @@
-import { fmtEntero, fmtPct } from '../../dominio/formato'
+import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { Link } from 'react-router-dom'
 import { rutaPromocion, type FilaRanking } from './datos'
 import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
@@ -55,7 +55,7 @@ export default function RankingPromociones({ filas }: { filas: FilaRanking[] }) 
             </td>
             <td className="num">{fmtEntero(f.usos)}</td>
             <td className="num">{fmtEntero(f.cupos)}</td>
-            <td className="num">{fmtEntero(f.gsv)}</td>
+            <td className="num">{fmtImporte(f.gsv)}</td>
             <td className="num">{fmtEntero(f.activas)}</td>
           </tr>
         ))}

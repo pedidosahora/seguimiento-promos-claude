@@ -16,7 +16,7 @@ export function CabeceraOrdenable({ clave, orden, onAlternar, className, childre
     <th aria-sort={ariaSort} className={className}>
       <button type="button" className="th-orden" onClick={() => onAlternar(clave)}>
         {children}
-        {activa ? (orden.dir === 'asc' ? ' ▲' : ' ▼') : null}
+        {activa ? <span aria-hidden="true">{orden.dir === 'asc' ? ' ▲' : ' ▼'}</span> : null}
       </button>
     </th>
   );

@@ -103,6 +103,7 @@ describe('Concesiones', () => {
     expect(primeraFila('Bodegas Ñandú')).toBeInTheDocument()
     ordenarPor(/^Código/)
     expect(primeraFila('Zumos Pérez')).toBeInTheDocument()
+    expect(screen.getByLabelText('Buscar')).toHaveAttribute('placeholder', 'Buscar…')
     fireEvent.change(screen.getByLabelText('Buscar'), { target: { value: 'PEREZ' } })
     expect(screen.getByText('Zumos Pérez')).toBeInTheDocument()
     expect(screen.queryByText('Bodegas Ñandú')).not.toBeInTheDocument()

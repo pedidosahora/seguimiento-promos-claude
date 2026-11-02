@@ -13,7 +13,7 @@ export function Buscador({ valor, onCambio, etiqueta = 'Buscar' }: Props) {
   return (
     <label>
       {etiqueta}
-      <input type="search" value={valor} onChange={(e) => onCambio(e.target.value)} />
+      <input type="search" placeholder="Buscar…" value={valor} onChange={(e) => onCambio(e.target.value)} />
     </label>
   );
 }

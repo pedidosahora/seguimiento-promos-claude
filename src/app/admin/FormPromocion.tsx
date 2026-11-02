@@ -185,7 +185,7 @@ export default function FormPromocion() {
             </label>
           </fieldset>
         </div>
-        <p className="nota">* Necesario para publicar</p>
+        <p className="nota">* TAG siempre; mecánica y fechas, para publicar</p>
         {error && <p role="alert" className="error">{error}</p>}
         {aviso && <p className="nota">{aviso}</p>}
         <div className="acciones">

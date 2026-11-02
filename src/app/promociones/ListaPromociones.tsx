@@ -190,11 +190,11 @@ export default function ListaPromociones() {
                   {esTodos && <td>{ETIQUETA_ESPACIO[p.espacio]}</td>}
                   <td>{p.mecanica ?? '—'}</td>
                   <td>{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
-                  <td className="num">{r?.presentadas ?? 0}</td>
+                  <td className="num">{fmtEntero(r?.presentadas ?? 0)}</td>
                   <td className="num">
                     {fmtPct(r?.pct_aceptacion)}
                   </td>
-                  <td className="num">{r?.activas ?? 0}</td>
+                  <td className="num">{fmtEntero(r?.activas ?? 0)}</td>
                   <td className="num">{fmtEntero(r?.usos ?? 0)}</td>
                   <td className="num">
                     {fmtImporte(r?.gsv ?? 0)}

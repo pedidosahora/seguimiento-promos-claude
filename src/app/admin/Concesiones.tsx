@@ -108,7 +108,7 @@ export default function Concesiones() {
     { clave: 'codigo', valor: (c) => c.id },
     { clave: 'razon', valor: (c) => c.razon_social },
     { clave: 'comercial', valor: (c) => c.nombre_comercial },
-    { clave: 'kam', valor: (c) => (c.kam_id ? nombre(kams, c.kam_id) : null) },
+    { clave: 'kam', valor: (c) => (kams.find((k) => k.id === c.kam_id)?.nombre ?? null) },
     { clave: 'territorio', valor: (c) => (c.territorio_id ? nombre(terr, c.territorio_id) : null) },
   ]
   const { filas, orden, alternar: ordenarPor } = useOrden(visibles, columnas)

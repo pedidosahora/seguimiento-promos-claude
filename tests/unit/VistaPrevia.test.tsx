@@ -23,6 +23,19 @@ describe('VistaPrevia del histórico', () => {
   })
 })
 
+describe('VistaPrevia conteos', () => {
+  afterEach(cleanup)
+
+  it('los conteos usan su propia lista y separador de miles', () => {
+    const { container } = render(
+      <VistaPrevia conteos={[{ clave: 'x', etiqueta: 'Filas', n: 12345 }]} incidencias={[]} etiquetas={{}} />,
+    )
+    const dl = container.querySelector('dl.conteos')!
+    expect(dl.className).not.toContain('indicadores')
+    expect(dl.textContent).toContain('12.345')
+  })
+})
+
 describe('VistaPrevia ordenable', () => {
   afterEach(cleanup)
 

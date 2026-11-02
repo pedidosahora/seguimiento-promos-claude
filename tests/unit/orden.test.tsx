@@ -84,6 +84,7 @@ describe('useOrden + CabeceraOrdenable', () => {
     fireEvent.click(btn);
     expect(th.getAttribute('aria-sort')).toBe('ascending');
     expect(btn.textContent).toContain('▲');
+    expect(btn.querySelector('[aria-hidden="true"]')!.textContent).toContain('▲');
     expect(orden()).toEqual(['1', '2', '3']);
     fireEvent.click(btn);
     expect(th.getAttribute('aria-sort')).toBe('descending');

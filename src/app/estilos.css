@@ -18,7 +18,7 @@
 body { margin: 0; font-family: var(--fuente); background: var(--color-fondo); color: var(--color-texto); font-size: 14px; }
 h1 { font-size: 1.4rem; margin: 0 0 12px; }
 a { color: var(--color-primario); }
-.cabecera { height: var(--alto-cabecera); display: flex; align-items: center; gap: 24px; padding: 10px 24px; background: var(--color-superficie); border-bottom: 1px solid var(--color-borde); }
+.cabecera { position: sticky; top: 0; z-index: 40; height: var(--alto-cabecera); display: flex; align-items: center; gap: 24px; padding: 10px 24px; background: var(--color-superficie); border-bottom: 1px solid var(--color-borde); }
 .cabecera nav { display: flex; gap: 4px; flex: 1; }
 .cabecera nav a { padding: 6px 12px; border-radius: var(--radio); text-decoration: none; color: var(--color-suave); }
 .cabecera nav a.active { background: var(--color-primario); color: var(--color-primario-texto); }
@@ -29,8 +29,9 @@ a { color: var(--color-primario); }
 .boton.secundario { background: transparent; color: var(--color-primario); border: 1px solid var(--color-borde); }
 .acceso { max-width: 360px; margin: 15vh auto; display: flex; flex-direction: column; gap: 16px; }
 .acceso-dev { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--color-borde); padding-top: 16px; }
-.acceso-dev input, .filtros select { display: block; padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
+.acceso-dev input, .filtros select, .filtros input { display: block; padding: 6px 8px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; background: var(--color-superficie); }
 .filtros { display: flex; gap: 16px; margin-bottom: 16px; }
+.filtros input[type="search"] { min-width: 240px; }
 .filtros label { color: var(--color-suave); font-size: 13px; }
 .tabla { width: 100%; border-collapse: collapse; background: var(--color-superficie); border: 1px solid var(--color-borde); }
 .tabla th, .tabla td { padding: 8px 12px; border-bottom: 1px solid var(--color-borde); text-align: left; }
@@ -62,6 +63,10 @@ a.boton { display: inline-block; text-decoration: none; }
 .indicadores-grupo dl { display: flex; gap: 14px; margin: 0; padding: 0; }
 .indicadores dt { font-size: 11px; color: var(--color-suave); white-space: nowrap; }
 .indicadores dd { margin: 2px 0 0; font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.conteos { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0 16px; }
+.conteos > div { background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); padding: 6px 10px 8px; min-width: 0; }
+.conteos dt { font-size: 11px; color: var(--color-suave); white-space: nowrap; }
+.conteos dd { margin: 2px 0 0; font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pestana { padding: 8px 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-suave); font: inherit; cursor: pointer; }
 .pestana.activa { color: var(--color-primario); border-bottom-color: var(--color-primario); }
 .barra-bloque { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 10px 14px; margin-bottom: 12px; background: var(--color-superficie); border: 1px solid var(--color-primario); border-radius: var(--radio); }

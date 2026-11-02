@@ -59,7 +59,7 @@ describe('FormPromocion', () => {
     expect(screen.getByLabelText('Mecánica *')).toBeInTheDocument()
     expect(screen.getByLabelText('Fecha de inicio *')).toBeInTheDocument()
     expect(screen.getByLabelText('Fecha de fin *')).toBeInTheDocument()
-    expect(screen.getByText('* Necesario para publicar')).toBeInTheDocument()
+    expect(screen.getByText('* TAG siempre; mecánica y fechas, para publicar')).toBeInTheDocument()
   })
 
   it('guarda con los mismos datos', async () => {

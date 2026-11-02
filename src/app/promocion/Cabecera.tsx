@@ -42,10 +42,10 @@ export default function Cabecera({ promo, indicadores: i, pestana, onPestana, on
         [
           'Participación',
           [
-            ['Convocadas', String(i.convocadas)],
-            ['Presentadas', String(i.presentadas)],
-            ['Activas', String(i.activas)],
-            ['Pendientes', String(i.pendientes)],
+            ['Convocadas', fmtEntero(i.convocadas)],
+            ['Presentadas', fmtEntero(i.presentadas)],
+            ['Activas', fmtEntero(i.activas)],
+            ['Pendientes', fmtEntero(i.pendientes)],
           ],
         ],
         [

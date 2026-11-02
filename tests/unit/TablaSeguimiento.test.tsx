@@ -232,4 +232,53 @@ describe('TablaSeguimiento', () => {
     fireEvent.click(container.querySelector('[row-id="b"] [col-id="num"]')!)
     await waitFor(() => expect(onAbrirFicha).toHaveBeenCalledWith('b'))
   })
+  describe('ficha abierta y edición', () => {
+    const tres = [
+      fila({ id: 'a' }),
+      fila({ id: 'b', concesion_id: 9101, nombre: 'Beta' }),
+      fila({ id: 'c', concesion_id: 9102, nombre: 'Gamma' }),
+    ]
+    const editables = new Set([9100, 9101, 9102])
+
+    it('pulsar una celda editable de otra fila no cambia la ficha', async () => {
+      const onAbrirFicha = vi.fn()
+      const { container } = render(
+        <div style={{ width: 1600, height: 600 }}>
+          <TablaSeguimiento {...props} editables={editables} onAbrirFicha={onAbrirFicha} filas={tres} fichaId="a" />
+        </div>,
+      )
+      await waitFor(() => expect(screen.getByText('Beta')).toBeInTheDocument())
+      fireEvent.click(container.querySelector('[row-id="b"] [col-id="estado"]')!)
+      expect(onAbrirFicha).not.toHaveBeenCalled()
+    })
+
+    it('pulsar el nombre de otra fila cambia la ficha', async () => {
+      const onAbrirFicha = vi.fn()
+      render(
+        <div style={{ width: 1600, height: 600 }}>
+          <TablaSeguimiento {...props} editables={editables} onAbrirFicha={onAbrirFicha} filas={tres} fichaId="a" />
+        </div>,
+      )
+      await waitFor(() => expect(screen.getByText('Beta')).toBeInTheDocument())
+      fireEvent.click(screen.getByText('Beta'))
+      expect(onAbrirFicha).toHaveBeenCalledWith('b')
+    })
+
+    it('al cambiar la ficha solo se redibujan las dos filas afectadas', async () => {
+      const el = (
+        <TablaSeguimiento {...props} editables={editables} filas={tres} fichaId="a" />
+      )
+      const { container, rerender } = render(<div style={{ width: 1600, height: 600 }}>{el}</div>)
+      await waitFor(() => expect(container.querySelector('[row-id="a"]')!.className).toContain('fila-ficha'))
+      const ajena = container.querySelector('[row-id="c"]')!
+      rerender(
+        <div style={{ width: 1600, height: 600 }}>
+          <TablaSeguimiento {...props} editables={editables} filas={tres} fichaId="b" />
+        </div>,
+      )
+      await waitFor(() => expect(container.querySelector('[row-id="b"]')!.className).toContain('fila-ficha'))
+      expect(container.querySelector('[row-id="a"]')!.className).not.toContain('fila-ficha')
+      expect(container.querySelector('[row-id="c"]')).toBe(ajena)
+    })
+  })
 })

@@ -1,3 +1,4 @@
+import { fmtEntero } from '../../dominio/formato'
 import { contarTareas, TAREAS, type FilaInicio, type Tarea } from '../../dominio/tareas'
 import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
 import { useOrden, type Columna } from '../comun/orden'
@@ -65,14 +66,14 @@ export default function TareasPorKam({ filas, kams, ahora, onElegir }: Props) {
                     aria-label={`${g.nombre}: ${t.etiqueta} (${g.conteos[t.clave]})`}
                     onClick={() => onElegir(g.id, t.clave)}
                   >
-                    {g.conteos[t.clave]}
+                    {fmtEntero(g.conteos[t.clave])}
                   </button>
                 ) : (
                   0
                 )}
               </td>
             ))}
-            <td className="num">{total(g)}</td>
+            <td className="num">{fmtEntero(total(g))}</td>
           </tr>
         ))}
       </tbody>

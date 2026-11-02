@@ -61,7 +61,7 @@ export default function VistaPrevia({
 
   return (
     <div>
-      <dl className="indicadores">
+      <dl className="conteos">
         {conteos.map((c) => (
           <div key={c.clave}>
             <dt>{c.etiqueta}</dt>
@@ -73,7 +73,7 @@ export default function VistaPrevia({
       {antiguos && antiguos.n > 0 && (
         <label className="casilla formulario">
           <input type="checkbox" checked={antiguos.incluir} onChange={(e) => antiguos.onCambio(e.target.checked)} />
-          Aplicar también datos más antiguos ({antiguos.n})
+          Aplicar también datos más antiguos ({fmtEntero(antiguos.n)})
         </label>
       )}
 
@@ -97,7 +97,7 @@ export default function VistaPrevia({
                     ? 'Se creará'
                     : p.espacio ? `Ya existe (en ${ETIQUETA_ESPACIO[p.espacio]})` : 'Ya existe'}
                 </td>
-                <td className="num">{p.filas}</td>
+                <td className="num">{fmtEntero(p.filas)}</td>
                 <td className="num">{p.concesiones_nuevas.length}</td>
                 <td>
                   {p.accion === 'ya_existe' && p.espacio && espacioActual && p.espacio !== espacioActual && (
@@ -123,7 +123,7 @@ export default function VistaPrevia({
         </table>
       )}
 
-      <h2>Incidencias ({incidencias.length})</h2>
+      <h2>Incidencias ({fmtEntero(incidencias.length)})</h2>
       {incidencias.length === 0 ? (
         <p className="nota">Sin incidencias.</p>
       ) : (
@@ -158,7 +158,7 @@ export default function VistaPrevia({
             </tbody>
           </table>
           {visibles.length > MAX_FILAS && (
-            <p className="nota">Se muestran las {MAX_FILAS} primeras de {visibles.length}.</p>
+            <p className="nota">Se muestran las {MAX_FILAS} primeras de {fmtEntero(visibles.length)}.</p>
           )}
         </>
       )}
