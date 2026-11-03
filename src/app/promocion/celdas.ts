@@ -103,3 +103,11 @@ export function textoFechaHora(iso: string | null): string {
   const [f, h] = l.split('T')
   return `${f.split('-').reverse().join('/')} ${h.slice(0, 5)}`
 }
+
+/** Fecha corta (dd/mm/aa) para la tabla; la hora va en el tooltip. */
+export function textoFechaCorta(iso: string | null): string {
+  const l = isoALocal(iso)
+  if (!l) return '—'
+  const [a, m, d] = l.slice(0, 10).split('-')
+  return `${d}/${m}/${a.slice(2)}`
+}

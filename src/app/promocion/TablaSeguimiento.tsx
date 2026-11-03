@@ -16,6 +16,7 @@ import {
   esEditable,
   isoALocal,
   localAIso,
+  textoFechaCorta,
   textoFechaHora,
   textoGsvUso,
   textoPctCupos,
@@ -136,7 +137,8 @@ export default function TablaSeguimiento({
     const fecha = (campo: 'fecha_aceptacion' | 'fecha_activacion', titulo: string): ColDef<FilaGrid> => ({
       colId: campo,
       headerName: titulo,
-      width: 105,
+      headerTooltip: campo === 'fecha_aceptacion' ? 'Fecha de aceptación' : 'Fecha de activación',
+      width: 84,
       editable: editable(campo),
       cellClass: clase(campo),
       // Sin cellDataType el editor devolvería solo la fecha y perdería la hora.
@@ -144,7 +146,9 @@ export default function TablaSeguimiento({
       cellEditor: 'agDateStringCellEditor',
       cellEditorParams: { includeTime: true },
       valueGetter: (p) => isoALocal(p.data?.[campo] ?? null),
-      valueFormatter: (p) => textoFechaHora(localAIso((p.value as string | null) ?? null)),
+      // En la celda solo dd/mm/aa para que quepa; la hora completa, en el tooltip.
+      valueFormatter: (p) => textoFechaCorta(localAIso((p.value as string | null) ?? null)),
+      tooltipValueGetter: (p) => (p.value ? textoFechaHora(localAIso(p.value as string)) : undefined),
     })
 
     return [
@@ -153,7 +157,10 @@ export default function TablaSeguimiento({
         headerName: 'Concesión',
         field: 'nombre',
         pinned: 'left',
-        width: 140,
+        // flex no se aplica a columnas fijadas: el ancho se reparte a mano para que todo quepa a 1366 px
+        // y, sin KAM ni Territorio (90 + 105), la Concesión ocupa su hueco.
+        width: ocultarKamTerritorio ? 370 : 175,
+        tooltipValueGetter: (p) => p.data?.nombre,
         cellRenderer: (p: ICellRendererParams<FilaGrid>) =>
           p.data ? (
             <button type="button" className="enlace" onClick={() => onAbrirFicha(p.data!.id)}>
@@ -169,8 +176,8 @@ export default function TablaSeguimiento({
             <span className={`etiqueta-estado estado-${p.data.estado}`}>{ETIQUETA_ESTADO[p.data.estado]}</span>
           ) : null,
       },
-      fecha('fecha_aceptacion', 'F. aceptación'),
-      fecha('fecha_activacion', 'F. activación'),
+      fecha('fecha_aceptacion', 'Aceptada'),
+      fecha('fecha_activacion', 'Activada'),
       numero('cupos', 'Cupos', fmtEntero),
       numero('usos', 'Usos', fmtEntero),
       numero('gsv', 'GSV', fmtImporte),
@@ -200,15 +207,15 @@ export default function TablaSeguimiento({
         valueGetter: (p) => (p.data && p.data.usos ? Number(p.data.gsv ?? 0) / p.data.usos : null),
         valueFormatter: (p) => (p.data ? textoGsvUso(p.data.gsv, p.data.usos) : ''),
       },
-      seleccion('sms', 'SMS', ETIQUETA_ENVIO, 85),
-      seleccion('email', 'Email', ETIQUETA_ENVIO, 85),
+      seleccion('sms', 'SMS', ETIQUETA_ENVIO, 80),
+      seleccion('email', 'Email', ETIQUETA_ENVIO, 80),
       // KAM y Territorio al final para que %Cupos, SMS y Email queden a la vista a 1366 px.
       {
-        colId: 'kam', headerName: 'KAM', field: 'kam_nombre', width: 100,
+        colId: 'kam', headerName: 'KAM', field: 'kam_nombre', width: 90,
         hide: ocultarKamTerritorio, valueFormatter: (p) => p.value ?? '—',
       },
       {
-        colId: 'territorio', headerName: 'Territorio', field: 'territorio', width: 90,
+        colId: 'territorio', headerName: 'Territorio', field: 'territorio', width: 105,
         hide: ocultarKamTerritorio, valueFormatter: (p) => p.value ?? '—',
       },
     ]

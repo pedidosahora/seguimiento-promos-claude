@@ -6,6 +6,7 @@ import {
   esEditable,
   isoALocal,
   localAIso,
+  textoFechaCorta,
   textoGsvUso,
   textoPctCupos,
   validarCambio,
@@ -85,6 +86,11 @@ describe('lógica de celdas', () => {
     // formato que devuelve el editor de fecha y hora con cellDataType dateTimeString
     expect(localAIso('2026-10-05T09:30:00')).toBe(new Date(2026, 9, 5, 9, 30, 0).toISOString())
     expect(isoALocal(new Date(2026, 9, 5, 9, 30, 0).toISOString())).toBe('2026-10-05T09:30:00')
+  })
+
+  it('textoFechaCorta: dd/mm/aa en hora local; — sin fecha', () => {
+    expect(textoFechaCorta(new Date(2026, 9, 5, 23, 30).toISOString())).toBe('05/10/26')
+    expect(textoFechaCorta(null)).toBe('—')
   })
 })
 

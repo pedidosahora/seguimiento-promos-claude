@@ -25,10 +25,13 @@ describe('BarrasHorizontales', () => {
     expect(filas[1]).toHaveAttribute('title', 'B: 5 u')
   })
 
-  it('valor directo solo en la mayor; ancho proporcional', () => {
+  it('valor al final de cada barra, destacado en la mayor; ancho proporcional', () => {
     const { container } = render(<BarrasHorizontales datos={datos} formato={f} titulo="T" max={15} />)
-    expect(container.querySelectorAll('.barra-valor')).toHaveLength(1)
-    expect(screen.getByText('10 u')).toBeInTheDocument()
+    const valores = container.querySelectorAll('.barra-valor')
+    expect(valores).toHaveLength(container.querySelectorAll('.barra-fila').length)
+    expect(container.querySelectorAll('.barra-valor.mayor')).toHaveLength(1)
+    expect(valores[0]).toHaveTextContent('10 u')
+    expect(valores[1]).toHaveTextContent('5 u')
     const rellenos = container.querySelectorAll<HTMLElement>('.barra-h-relleno')
     expect(rellenos[0].style.width).toBe('100%')
     expect(rellenos[1].style.width).toBe('50%')

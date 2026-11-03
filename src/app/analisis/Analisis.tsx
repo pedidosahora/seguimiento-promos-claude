@@ -65,10 +65,12 @@ function TablaComparativa({
   /** Recibe las filas en el orden que ve la usuaria, para exportarlas igual. */
   visibles: MutableRefObject<Grupo[]>
 }) {
+  // Agrupando por promoción, «Promociones» siempre vale 1: no aporta.
+  const metricas = dimension === 'promocion' ? COLUMNAS_METRICA.filter((c) => c.clave !== 'promociones') : COLUMNAS_METRICA
   const columnas: Columna<Grupo>[] = [
     // Por mes se ordena por la clave aaaa-mm (cronológico), no por la etiqueta; «sin fecha» queda siempre al final.
     { clave: 'etiqueta', valor: (g) => (dimension === 'mes' ? (g.clave === 'sin-fecha' ? null : g.clave) : g.etiqueta) },
-    ...COLUMNAS_METRICA.map((c) => ({ clave: c.clave, valor: (g: Grupo) => g.m[c.clave] })),
+    ...metricas.map((c) => ({ clave: c.clave, valor: (g: Grupo) => g.m[c.clave] })),
   ]
   const { filas, orden, alternar } = useOrden(grupos, columnas)
   const cab = { orden, onAlternar: alternar }
@@ -79,7 +81,7 @@ function TablaComparativa({
         <thead>
           <tr>
             <CabeceraOrdenable clave="etiqueta" {...cab}>{etiquetaDim}</CabeceraOrdenable>
-            {COLUMNAS_METRICA.map((c) => (
+            {metricas.map((c) => (
               <CabeceraOrdenable key={c.clave} clave={c.clave} className="num" {...cab}>{c.texto}</CabeceraOrdenable>
             ))}
           </tr>
@@ -88,7 +90,7 @@ function TablaComparativa({
           {filas.map((g) => (
             <tr key={g.clave}>
               <td className="sin-corte">{g.etiqueta}</td>
-              {COLUMNAS_METRICA.map((c) => (
+              {metricas.map((c) => (
                 <td key={c.clave} className="num">{c.fmt(g.m[c.clave])}</td>
               ))}
             </tr>

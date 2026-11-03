@@ -80,7 +80,6 @@ export default function Usuarios() {
 
   return (
     <section>
-      <h2>Usuarios</h2>
       {!abierto && <p><button type="button" className="boton" onClick={nuevo}>Añadir usuario</button></p>}
       <PanelPlegable abierto={abierto} titulo={editando == null ? 'Añadir usuario' : 'Editar usuario'}>
       <form className="formulario en-linea" onSubmit={guardar}>

@@ -202,6 +202,21 @@ describe('RankingPromociones', () => {
     expect(within(filas[0]).getByRole('link')).toHaveAttribute('href', '/tmicc/LLENA')
   })
 
+  it('sin cupos, ordena por GSV de mayor a menor', () => {
+    render(
+      <MemoryRouter>
+        <RankingPromociones
+          filas={[
+            r({ promocion_id: '1', tag: 'AAA', cupos: 0, pct: null, gsv: 10 }),
+            r({ promocion_id: '2', tag: 'BBB', cupos: 0, pct: null, gsv: 900 }),
+          ]}
+        />
+      </MemoryRouter>,
+    )
+    const filas = screen.getAllByRole('row').slice(1)
+    expect(filas.map((f) => within(f).getByRole('link').textContent)).toEqual(['BBB', 'AAA'])
+  })
+
   it('pulsar «TAG» ordena; la tercera vez restaura pct desc con nulos al final', () => {
     render(
       <MemoryRouter>

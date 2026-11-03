@@ -20,6 +20,8 @@ export default function RankingPromociones({ filas }: { filas: FilaRanking[] }) 
     (a, b) =>
       Number(a.pct == null) - Number(b.pct == null) ||
       (b.pct ?? 0) - (a.pct ?? 0) ||
+      // Sin cupos (pct nulo) o empatadas: primero las de más GSV.
+      (b.gsv ?? 0) - (a.gsv ?? 0) ||
       a.tag.localeCompare(b.tag, 'es'),
   )
   const { filas: ordenadas, orden, alternar } = useOrden(porDefecto, COLUMNAS)

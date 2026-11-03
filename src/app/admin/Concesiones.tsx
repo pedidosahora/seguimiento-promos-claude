@@ -116,7 +116,6 @@ export default function Concesiones() {
 
   return (
     <section>
-      <h2>Concesiones</h2>
       {!abierto && <p><button type="button" className="boton" onClick={nueva}>Añadir concesión</button></p>}
       <PanelPlegable abierto={abierto} titulo={editando == null ? 'Añadir concesión' : 'Editar concesión'}>
       <form className="formulario en-linea" onSubmit={guardar}>
@@ -145,7 +144,7 @@ export default function Concesiones() {
         <button className="boton secundario" type="button" onClick={cerrar}>Cancelar</button>
       </form>
       </PanelPlegable>
-      <div className="filtros">
+      <div className="filtros barra-filtros">
         <Buscador valor={busqueda} onCambio={setBusqueda} />
         <label>Mostrar
           <select value={filtro} onChange={(e) => setFiltro(e.target.value as 'activas' | 'inactivas')}>
@@ -153,6 +152,11 @@ export default function Concesiones() {
             <option value="inactivas">Inactivas</option>
           </select>
         </label>
+        {!cargando && (
+          <div className="filtros-resumen">
+            <span>{visibles.length === 1 ? '1 concesión' : `${visibles.length} concesiones`}</span>
+          </div>
+        )}
       </div>
       {error && <p role="alert" className="error">{error}</p>}
       {cargando ? <p className="nota">Cargando…</p> : lista.length === 0 ? <p className="nota">No hay concesiones.</p> : visibles.length === 0 ? <p className="nota">Sin resultados</p> : (

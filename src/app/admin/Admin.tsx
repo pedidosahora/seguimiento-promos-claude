@@ -49,7 +49,6 @@ function ListaAdminPromociones() {
 
   return (
     <section>
-      <h2>Promociones</h2>
       <p><Link className="boton" to="/admin/promociones/nueva">Nueva promoción</Link></p>
       {error && <p role="alert" className="error">{error}</p>}
       {cargando ? <p className="nota">Cargando…</p> : lista.length === 0 ? <p className="nota">No hay promociones.</p> : (
@@ -70,7 +69,7 @@ function ListaAdminPromociones() {
                 <td><Link to={rutaPromocion(p.espacio, p.tag)}>{p.tag}</Link></td>
                 <td>{ETIQUETA_ESPACIO[p.espacio]}</td>
                 <td>{p.mecanica ?? '—'}</td>
-                <td>{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
+                <td className="sin-corte">{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
                 <td><span className={`etiqueta-estado estado-promo-${p.estado}`}>{ETIQUETA_ESTADO_PROMOCION[p.estado]}</span></td>
                 <td className="acciones">
                   <Link className="boton secundario pequeno" to={`/admin/promociones/${p.id}`}>Editar</Link>

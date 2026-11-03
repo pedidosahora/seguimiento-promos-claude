@@ -176,7 +176,11 @@ export default function ListaPromociones() {
       {cargando ? (
         <p className="nota">Cargando…</p>
       ) : visibles.length === 0 ? (
-        <p className="nota">No hay promociones.</p>
+        <p className="nota">
+          {promos.length === 0
+            ? `Todavía no hay promociones${esTodos ? '' : ` en ${titulo}`}. Aparecerán aquí cuando se den de alta en Admin › Promociones.`
+            : 'No hay promociones con estos filtros.'}
+        </p>
       ) : (
         <table className="tabla">
           <thead>
@@ -204,7 +208,7 @@ export default function ListaPromociones() {
                   </td>
                   {esTodos && <td>{ETIQUETA_ESPACIO[p.espacio]}</td>}
                   <td>{p.mecanica ?? '—'}</td>
-                  <td>{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
+                  <td className="sin-corte">{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
                   <td className="num">{fmtEntero(r?.presentadas ?? 0)}</td>
                   <td className="num">
                     {fmtPct(r?.pct_aceptacion)}

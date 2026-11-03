@@ -29,7 +29,7 @@ export default function BarrasHorizontales({ datos, formato, titulo, max = 15 }:
             <span className="barra-pista">
               <span className="barra-h-relleno" style={{ width: `${Math.max(0, (d.valor / tope) * 100)}%` }} />
             </span>
-            {i === 0 ? <span className="barra-valor">{formato(d.valor)}</span> : <span />}
+            <span className={i === 0 ? 'barra-valor mayor' : 'barra-valor'}>{formato(d.valor)}</span>
           </div>
         ))}
       </div>
