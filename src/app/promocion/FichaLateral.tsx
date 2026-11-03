@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ETIQUETA_ENVIO, ETIQUETA_ESTADO } from '../../dominio/etiquetas'
 import { nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
@@ -59,6 +59,7 @@ export default function FichaLateral({ fila, umbral, editable, esAdmin, perfilId
   const [texto, setTexto] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState(false)
+  const { pathname } = useLocation()
 
   const cargar = useCallback(async () => {
     const [c, h, p] = await Promise.all([
@@ -154,7 +155,7 @@ export default function FichaLateral({ fila, umbral, editable, esAdmin, perfilId
         <div><dt>Nº concesión</dt><dd>{fila.concesion_id}</dd></div>
         <div><dt>KAM</dt><dd>{fila.kam_nombre ?? '—'}</dd></div>
         <div><dt>Territorio</dt><dd>{fila.territorio ?? '—'}</dd></div>
-        <div><dt>Estado</dt><dd>{ETIQUETA_ESTADO[fila.estado]}</dd></div>
+        <div><dt>Estado</dt><dd><span className={`etiqueta-estado estado-${fila.estado}`}>{ETIQUETA_ESTADO[fila.estado]}</span></dd></div>
         <div><dt>SMS / Email</dt><dd>{ETIQUETA_ENVIO[fila.sms]} / {ETIQUETA_ENVIO[fila.email]}</dd></div>
         <div><dt>Usos / Cupos</dt><dd>{fila.usos ?? '—'} / {fila.cupos ?? '—'}</dd></div>
       </dl>
@@ -175,7 +176,14 @@ export default function FichaLateral({ fila, umbral, editable, esAdmin, perfilId
           <div className={`barra-relleno ${nivel ? `alerta-${nivel}-barra` : ''}`} style={{ width: `${pct == null ? 0 : Math.min(100, pct * 100)}%` }} />
         </div>
       </div>
-      <p><Link to={`/concesion/${fila.concesion_id}`}>Ver todas sus promociones</Link></p>
+      <p>
+        <Link
+          to={`/concesion/${fila.concesion_id}`}
+          state={{ desde: { texto: decodeURIComponent(pathname.split('/').pop() ?? ''), ruta: pathname } }}
+        >
+          Ver todas sus promociones
+        </Link>
+      </p>
 
       <section>
         <h3>Comentarios</h3>

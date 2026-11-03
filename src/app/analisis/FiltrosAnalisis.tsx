@@ -9,6 +9,8 @@ type Props = {
   /** Muestra «Solo mis concesiones» (solo perfil KAM). */
   puedeSoloMias: boolean
   miId: string | null
+  /** Si hay filtros distintos de los iniciales, muestra «Limpiar filtros». */
+  onLimpiar?: () => void
 }
 
 const GRUPOS_ESTADO: { valor: string; texto: string; estados: EstadoPromocion[] }[] = [
@@ -19,7 +21,7 @@ const GRUPOS_ESTADO: { valor: string; texto: string; estados: EstadoPromocion[] 
   { valor: 'todas', texto: 'Todas', estados: ['publicada', 'cerrada', 'archivada'] },
 ]
 
-export default function FiltrosAnalisis({ filtros, onCambio, filas, puedeSoloMias, miId }: Props) {
+export default function FiltrosAnalisis({ filtros, onCambio, filas, puedeSoloMias, miId, onLimpiar }: Props) {
   const kams = useMemo(() => {
     const m = new Map<string, string>()
     for (const f of filas) if (f.kam_id) m.set(f.kam_id, f.kam_nombre ?? f.kam_id)
@@ -33,7 +35,7 @@ export default function FiltrosAnalisis({ filtros, onCambio, filas, puedeSoloMia
   const valorEstados = GRUPOS_ESTADO.find((g) => g.estados.join() === filtros.estados.join())?.valor ?? 'publicada,cerrada'
 
   return (
-    <div className="filtros analisis-filtros">
+    <div className="filtros barra-filtros analisis-filtros">
       <label>
         Espacio
         <select value={filtros.espacio ?? ''} onChange={(e) => cambiar({ espacio: (e.target.value || null) as Espacio | null })}>
@@ -102,6 +104,11 @@ export default function FiltrosAnalisis({ filtros, onCambio, filas, puedeSoloMia
           />
           Solo mis concesiones
         </label>
+      )}
+      {onLimpiar && (
+        <div className="filtros-resumen">
+          <button type="button" className="boton secundario pequeno" onClick={onLimpiar}>Limpiar filtros</button>
+        </div>
       )}
       {filtros.desde && filtros.hasta && filtros.desde > filtros.hasta && (
         <p role="alert" className="error">La fecha "desde" es posterior a "hasta"</p>

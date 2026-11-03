@@ -31,6 +31,8 @@ const tema = themeQuartz.withParams({
   fontFamily: 'inherit',
   fontSize: 13,
   rowHeight: 34,
+  // Menos relleno lateral que el de Quartz (16 px) para que quepan todas las columnas a 1366 px.
+  cellHorizontalPadding: 10,
   headerHeight: 36,
   headerBackgroundColor: '#f6f7f9',
   borderColor: '#d9dee5',
@@ -121,8 +123,8 @@ export default function TablaSeguimiento({
       field: campo,
       headerName: titulo,
       type: 'rightAligned',
-      width: campo === 'gsv' ? 105 : 72,
-      minWidth: campo === 'gsv' ? 105 : undefined,
+      width: campo === 'gsv' ? 95 : 64,
+      minWidth: campo === 'gsv' ? 95 : undefined,
       editable: editable(campo),
       cellClass: clase(campo),
       tooltipValueGetter: (p) => (p.value == null ? undefined : formato(p.value as number | null)),
@@ -134,7 +136,7 @@ export default function TablaSeguimiento({
     const fecha = (campo: 'fecha_aceptacion' | 'fecha_activacion', titulo: string): ColDef<FilaGrid> => ({
       colId: campo,
       headerName: titulo,
-      width: 115,
+      width: 105,
       editable: editable(campo),
       cellClass: clase(campo),
       // Sin cellDataType el editor devolvería solo la fecha y perdería la hora.
@@ -151,7 +153,7 @@ export default function TablaSeguimiento({
         headerName: 'Concesión',
         field: 'nombre',
         pinned: 'left',
-        width: 165,
+        width: 140,
         cellRenderer: (p: ICellRendererParams<FilaGrid>) =>
           p.data ? (
             <button type="button" className="enlace" onClick={() => onAbrirFicha(p.data!.id)}>
@@ -159,9 +161,9 @@ export default function TablaSeguimiento({
             </button>
           ) : null,
       },
-      { colId: 'num', headerName: 'Nº', field: 'concesion_id', width: 64, type: 'rightAligned' },
+      { colId: 'num', headerName: 'Nº', field: 'concesion_id', width: 52, type: 'rightAligned' },
       {
-        ...seleccion('estado', 'Estado', ETIQUETA_ESTADO, 115),
+        ...seleccion('estado', 'Estado', ETIQUETA_ESTADO, 100),
         cellRenderer: (p: ICellRendererParams<FilaGrid>) =>
           p.data ? (
             <span className={`etiqueta-estado estado-${p.data.estado}`}>{ETIQUETA_ESTADO[p.data.estado]}</span>
@@ -176,7 +178,7 @@ export default function TablaSeguimiento({
         colId: 'pct_cupos',
         headerName: '% cupos',
         type: 'rightAligned',
-        width: 90,
+        width: 80,
         cellClass: clase('pct_cupos'),
         valueGetter: (p) => (p.data ? pctCupos(p.data.usos, p.data.cupos) : null),
         valueFormatter: (p) => (p.data ? textoPctCupos(p.data.usos, p.data.cupos) : ''),
@@ -192,8 +194,8 @@ export default function TablaSeguimiento({
         colId: 'gsv_uso',
         headerName: 'GSV/uso',
         type: 'rightAligned',
-        width: 95,
-        minWidth: 95,
+        width: 85,
+        minWidth: 85,
         tooltipValueGetter: (p) => (p.data ? textoGsvUso(p.data.gsv, p.data.usos) : undefined),
         valueGetter: (p) => (p.data && p.data.usos ? Number(p.data.gsv ?? 0) / p.data.usos : null),
         valueFormatter: (p) => (p.data ? textoGsvUso(p.data.gsv, p.data.usos) : ''),
@@ -202,11 +204,11 @@ export default function TablaSeguimiento({
       seleccion('email', 'Email', ETIQUETA_ENVIO, 85),
       // KAM y Territorio al final para que %Cupos, SMS y Email queden a la vista a 1366 px.
       {
-        colId: 'kam', headerName: 'KAM', field: 'kam_nombre', width: 120,
+        colId: 'kam', headerName: 'KAM', field: 'kam_nombre', width: 100,
         hide: ocultarKamTerritorio, valueFormatter: (p) => p.value ?? '—',
       },
       {
-        colId: 'territorio', headerName: 'Territorio', field: 'territorio', width: 110,
+        colId: 'territorio', headerName: 'Territorio', field: 'territorio', width: 90,
         hide: ocultarKamTerritorio, valueFormatter: (p) => p.value ?? '—',
       },
     ]

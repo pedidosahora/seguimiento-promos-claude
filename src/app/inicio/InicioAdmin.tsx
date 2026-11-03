@@ -62,6 +62,7 @@ export default function InicioAdmin() {
       : ''
   return (
     <>
+      <h1>Inicio</h1>
       <Contadores
         conteos={contarTareas(filas, ahora)}
         agotadas={hayAgotadas(filas)}

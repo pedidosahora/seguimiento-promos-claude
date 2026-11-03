@@ -1,6 +1,6 @@
 import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
 import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
 import { useOrden, type Columna } from '../comun/orden'
@@ -37,6 +37,8 @@ const COLUMNAS: Columna<FilaPromo>[] = [
 export default function FichaConcesion() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  // Quien enlaza aquí pasa de dónde viene, para que «volver» diga su destino.
+  const desde = (useLocation().state as { desde?: { texto: string; ruta: string } } | null)?.desde
   const [concesion, setConcesion] = useState<Concesion | null>(null)
   const [filas, setFilas] = useState<FilaPromo[]>([])
   const [cargando, setCargando] = useState(true)
@@ -92,7 +94,7 @@ export default function FichaConcesion() {
   return (
     <section>
       <Link
-        to="/"
+        to={desde?.ruta ?? '/'}
         className="volver"
         onClick={(e) => {
           if (window.history.state?.idx > 0) {
@@ -101,7 +103,7 @@ export default function FichaConcesion() {
           }
         }}
       >
-        ← Volver
+        ← {desde?.texto || 'Inicio'}
       </Link>
       <h1>
         {concesion.nombre_comercial || concesion.razon_social}

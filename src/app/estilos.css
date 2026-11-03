@@ -203,3 +203,40 @@ html { scrollbar-gutter: stable; }
 .acceso .nota { margin: -8px 0 0; }
 .acceso-marca { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-primario); }
 .acceso-dev input { width: 100%; }
+
+/* Acabado 2: tabla de seguimiento, indicadores, filtros y coherencia */
+.contenido:has(.promo-cabecera) { max-width: 1440px; }
+.tabla-grid .ag-cell .etiqueta-estado { line-height: 20px; vertical-align: middle; }
+.indicadores-grupo { flex: 1; padding: 10px 14px 12px; }
+.indicadores-grupo dl { justify-content: space-between; gap: 12px; }
+.indicadores dt, .analisis-indicadores dt, .conteos dt { font-size: 12px; }
+.indicadores dd, .analisis-indicadores dd, .conteos dd { margin-top: 4px; font-size: 1.35rem; }
+.analisis-indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+.analisis-indicadores > div, .conteos > div { padding: 10px 14px 12px; }
+.etiqueta-estado.estado-promo-publicada { color: #15803d; background: #dcfce7; }
+.etiqueta-estado.estado-promo-borrador { color: var(--color-suave); background: #f1f5f9; }
+.etiqueta-estado.estado-promo-cerrada { color: #1d4ed8; background: #dbeafe; }
+.etiqueta-estado.estado-promo-archivada { color: var(--color-suave); background: var(--color-fondo); border: 1px solid var(--color-borde); }
+.tareas-por-kam th:first-child, .tareas-por-kam td:first-child { width: 28%; }
+.tareas-por-kam .enlace { display: inline-block; min-width: 28px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--color-primario) 10%, var(--color-superficie)); text-decoration: none; text-align: center; }
+.tareas-por-kam .enlace:hover { background: color-mix(in srgb, var(--color-primario) 20%, var(--color-superficie)); }
+.tareas-por-kam .cero { display: inline-block; min-width: 28px; text-align: center; color: var(--color-suave); opacity: 0.6; }
+.tarjetas-promo { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.tarjetas-promo li { padding: 12px 16px; }
+.tarjetas-promo a { font-size: 15px; }
+.barra-filtros { flex-wrap: wrap; align-items: flex-end; row-gap: 12px; padding: 12px 16px; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); }
+.barra-filtros label:not(.filtro-casilla) { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.barra-filtros select, .barra-filtros input:not([type="checkbox"]) { min-width: 130px; padding: 7px 10px; color: var(--color-texto); }
+.barra-filtros .filtro-casilla { align-self: center; }
+.filtros-resumen { display: flex; align-items: center; gap: 12px; margin-left: auto; align-self: center; }
+.filtros-resumen .boton.pequeno { margin-top: 0; }
+/* Cabeceras de dos líneas alineadas por abajo con las de una. */
+.tabla th { vertical-align: bottom; }
+.pasos { list-style: none; display: flex; align-items: center; gap: 8px; margin: 0 0 20px; padding: 0; }
+.pasos li { display: flex; align-items: center; gap: 8px; color: var(--color-suave); }
+.pasos li + li::before { content: ''; width: 32px; height: 1px; margin-right: 4px; background: var(--color-borde); }
+.paso-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 1px solid var(--color-borde); border-radius: 999px; background: var(--color-superficie); font-size: 12px; font-weight: 600; }
+.pasos li.actual { color: var(--color-texto); font-weight: 600; }
+.pasos li.actual .paso-num { background: var(--color-primario); border-color: var(--color-primario); color: var(--color-primario-texto); }
+.pasos li.hecho .paso-num { border-color: var(--color-primario); color: var(--color-primario); }
+.zona-archivo { flex-direction: column; gap: 8px; padding: 32px 16px; }

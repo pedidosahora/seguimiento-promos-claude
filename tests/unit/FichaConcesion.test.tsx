@@ -33,9 +33,9 @@ vi.mock('../../src/lib/supabase', () => {
 
 import FichaConcesion from '../../src/app/promocion/FichaConcesion'
 
-function montar() {
+function montar(entrada: string | { pathname: string; state: unknown } = '/concesion/7') {
   return render(
-    <MemoryRouter initialEntries={['/concesion/7']}>
+    <MemoryRouter initialEntries={[entrada]}>
       <Routes>
         <Route path="/concesion/:id" element={<FichaConcesion />} />
         <Route path="/" element={<p>Inicio</p>} />
@@ -65,10 +65,15 @@ describe('FichaConcesion', () => {
     expect(within(fila('ALFA')).getByText('20 %')).toBeInTheDocument()
   })
 
-  it('«← Volver» lleva a inicio cuando no hay historial previo', async () => {
+  it('«← Inicio» lleva a inicio cuando no hay historial previo ni origen', async () => {
     montar()
-    fireEvent.click(await screen.findByRole('link', { name: '← Volver' }))
+    fireEvent.click(await screen.findByRole('link', { name: '← Inicio' }))
     await waitFor(() => expect(screen.getByText('Inicio')).toBeInTheDocument())
+  })
+
+  it('con origen en el estado del enlace, «volver» nombra y enlaza ese destino', async () => {
+    montar({ pathname: '/concesion/7', state: { desde: { texto: 'TMICC-1', ruta: '/tmicc/TMICC-1' } } })
+    expect(await screen.findByRole('link', { name: '← TMICC-1' })).toHaveAttribute('href', '/tmicc/TMICC-1')
   })
 
   it('pulsar «% cupos» ordena por valor numérico; la tercera vez restaura el orden por defecto', async () => {

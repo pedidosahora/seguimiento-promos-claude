@@ -256,7 +256,18 @@ export default function Importar() {
   return (
     <section>
       <h1>Importar</h1>
-      <p className="nota">Paso {paso} de 3</p>
+      <ol className="pasos" aria-label={`Paso ${paso} de 3`}>
+        {['Archivo', 'Revisión', 'Resultado'].map((t, i) => (
+          <li
+            key={t}
+            className={i + 1 === paso ? 'actual' : i + 1 < paso ? 'hecho' : undefined}
+            aria-current={i + 1 === paso ? 'step' : undefined}
+          >
+            <span className="paso-num">{i + 1}</span>
+            {t}
+          </li>
+        ))}
+      </ol>
 
       {paso === 1 && (
         <form
@@ -303,6 +314,9 @@ export default function Importar() {
               setArchivo(e.dataTransfer.files?.[0] ?? null)
             }}
           >
+            <svg className="zona-icono" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+              <path d="M12 16V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <span>{archivo ? archivo.name : 'Arrastra el Excel aquí o pulsa para elegirlo'}</span>
             <input type="file" accept=".xlsx,.xls" onChange={(e) => setArchivo(e.target.files?.[0] ?? null)} />
           </label>

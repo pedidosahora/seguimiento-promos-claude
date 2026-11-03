@@ -69,7 +69,7 @@ export default function TareasPorKam({ filas, kams, ahora, onElegir }: Props) {
                     {fmtEntero(g.conteos[t.clave])}
                   </button>
                 ) : (
-                  0
+                  <span className="cero">0</span>
                 )}
               </td>
             ))}

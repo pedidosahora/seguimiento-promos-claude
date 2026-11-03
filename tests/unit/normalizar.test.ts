@@ -63,6 +63,11 @@ describe('normalizar', () => {
     expect(mapearEnvio('Sí')).toBe('enviado')
     expect(mapearEnvio(' SÍ ')).toBe('enviado')
   })
+
+  it('mapearEnvio acepta «Pendiente», la etiqueta con que exporta la app', () => {
+    expect(mapearEnvio('Pendiente')).toBe('pending')
+    expect(mapearEnvio('Pending')).toBe('pending')
+  })
 })
 
 describe('aFechaHoraISO', () => {

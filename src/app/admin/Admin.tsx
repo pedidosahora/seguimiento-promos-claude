@@ -71,7 +71,7 @@ function ListaAdminPromociones() {
                 <td>{ETIQUETA_ESPACIO[p.espacio]}</td>
                 <td>{p.mecanica ?? '—'}</td>
                 <td>{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
-                <td>{ETIQUETA_ESTADO_PROMOCION[p.estado]}</td>
+                <td><span className={`etiqueta-estado estado-promo-${p.estado}`}>{ETIQUETA_ESTADO_PROMOCION[p.estado]}</span></td>
                 <td className="acciones">
                   <Link className="boton secundario pequeno" to={`/admin/promociones/${p.id}`}>Editar</Link>
                   <Link className="boton secundario pequeno" to={`/admin/promociones/${p.id}/convocatoria`}>Convocatoria</Link>
@@ -88,6 +88,7 @@ function ListaAdminPromociones() {
 export default function Admin() {
   return (
     <div>
+      <h1>Administración</h1>
       <nav className="subnav">
         <NavLink to="/admin/promociones">Promociones</NavLink>
         <NavLink to="/admin/concesiones">Concesiones</NavLink>

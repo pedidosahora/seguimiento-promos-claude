@@ -106,7 +106,7 @@ export default function Analisis() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [intento, setIntento] = useState(0)
-  const [filtros, setFiltros] = useState<Filtros>(() => ({
+  const iniciales = (): Filtros => ({
     espacio: null,
     marca: null,
     estados: ['publicada', 'cerrada'],
@@ -115,7 +115,8 @@ export default function Analisis() {
     kamId: null,
     territorio: null,
     soloKamId: esKam && perfil ? perfil.id : null,
-  }))
+  })
+  const [filtros, setFiltros] = useState<Filtros>(iniciales)
   const [dimension, setDimension] = useState<Dimension>('promocion')
   const [indicador, setIndicador] = useState<ClaveIndicador>('gsv')
   const filasTabla = useRef<Grupo[]>([])
@@ -189,6 +190,7 @@ export default function Analisis() {
         filas={filas}
         puedeSoloMias={esKam}
         miId={perfil?.id ?? null}
+        onLimpiar={JSON.stringify(filtros) !== JSON.stringify(iniciales()) ? () => setFiltros(iniciales()) : undefined}
       />
       <Indicadores m={total} />
 

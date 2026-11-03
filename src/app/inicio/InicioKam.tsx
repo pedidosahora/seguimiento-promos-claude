@@ -80,6 +80,7 @@ export default function InicioKam() {
   const { filas, ahora } = datos
   return (
     <>
+      <h1>Inicio</h1>
       <Contadores
         conteos={contarTareas(filas, ahora)}
         agotadas={hayAgotadas(filas)}
@@ -103,7 +104,7 @@ export default function InicioKam() {
             <tbody>
               {concesionesOrdenadas.map((c) => (
                 <tr key={c.id}>
-                  <td><Link to={`/concesion/${c.id}`}>{c.nombre}</Link></td>
+                  <td><Link to={`/concesion/${c.id}`} state={{ desde: { texto: 'Inicio', ruta: '/' } }}>{c.nombre}</Link></td>
                   <td>
                     <div className="etiquetas">
                       {c.filas.map((f) => (

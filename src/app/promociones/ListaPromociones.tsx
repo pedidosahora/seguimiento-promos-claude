@@ -129,8 +129,7 @@ export default function ListaPromociones() {
   return (
     <section>
       <h1>{titulo}</h1>
-      {esTodos && <p className="nota">Vista de solo lectura.</p>}
-      <div className="filtros">
+      <div className="filtros barra-filtros">
         <label>
           Ciclo
           <select value={fCiclo} onChange={(e) => setFCiclo(e.target.value)}>
@@ -156,6 +155,22 @@ export default function ListaPromociones() {
             <option value="UFS">UFS</option>
           </select>
         </label>
+        <div className="filtros-resumen">
+          {!cargando && <span className="nota">{visibles.length === 1 ? '1 promoción' : `${visibles.length} promociones`}</span>}
+          {(fCiclo || fVigencia || fMarca) && (
+            <button
+              type="button"
+              className="boton secundario pequeno"
+              onClick={() => {
+                setFCiclo('')
+                setFVigencia('')
+                setFMarca('')
+              }}
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
       </div>
       {error && <p role="alert" className="error">{error}</p>}
       {cargando ? (

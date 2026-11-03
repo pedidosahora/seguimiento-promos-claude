@@ -132,6 +132,8 @@ const ENVIOS: Record<string, EstadoEnvio> = {
   enviado: 'enviado',
   si: 'enviado',
   pending: 'pending',
+  // Así se exporta desde la app; se acepta para poder reimportar un Excel exportado.
+  pendiente: 'pending',
   'no hay': 'no_hay',
 }
 

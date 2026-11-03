@@ -16,7 +16,7 @@ export const ETIQUETA_ESTADO: Record<EstadoSeguimiento, string> = {
 
 export const ETIQUETA_ENVIO: Record<EstadoEnvio, string> = {
   enviado: 'Enviado',
-  pending: 'Pending',
+  pending: 'Pendiente',
   no_hay: 'No hay',
 }
 
