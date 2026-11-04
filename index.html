@@ -4,6 +4,53 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Seguimiento de promociones</title>
+    <script>
+      // Justo al publicar puede llegar un HTML antiguo que pide archivos ya retirados, y la página se queda en blanco:
+      // se recarga sola un par de veces y, si sigue igual, avisa. Va aquí porque tiene que funcionar sin el código de la app.
+      (function () {
+        var CLAVE = 'recargas-tras-publicar'
+        var MAX_RECARGAS = 2
+        var ESPERA_MS = 3000
+        var fallo = false
+
+        function recargas() {
+          try {
+            return Number(sessionStorage.getItem(CLAVE)) || 0
+          } catch (e) {
+            return MAX_RECARGAS // sin almacenamiento no se puede contar: mejor avisar que recargar sin fin
+          }
+        }
+
+        function avisar() {
+          var raiz = document.getElementById('root')
+          if (raiz) raiz.textContent = 'Se está publicando una versión nueva. Recarga en unos segundos.'
+          else addEventListener('DOMContentLoaded', avisar)
+        }
+
+        addEventListener('error', function (e) {
+          var t = e.target
+          if (fallo || !t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return
+          if ((t.src || t.href || '').indexOf('/assets/') < 0) return
+          fallo = true
+          var n = recargas()
+          if (n >= MAX_RECARGAS) {
+            avisar()
+            return
+          }
+          sessionStorage.setItem(CLAVE, String(n + 1))
+          setTimeout(function () {
+            location.reload()
+          }, ESPERA_MS)
+        }, true)
+
+        addEventListener('load', function () {
+          if (fallo) return
+          try {
+            sessionStorage.removeItem(CLAVE)
+          } catch (e) {}
+        })
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
