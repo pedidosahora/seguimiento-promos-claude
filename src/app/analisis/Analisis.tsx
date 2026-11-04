@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject } from 'react'
 import { agrupar, filtrar, metricas, rellenarMeses, type Dimension, type FilaAnalisis, type Filtros, type Metricas } from '../../analisis/agregar'
+import { posicionesEnColumna } from '../../analisis/mapaCalor'
 import { fmtEntero, fmtImporte, fmtPct } from '../../dominio/formato'
 import { exportarComparativa, nombreArchivoAnalisis } from '../../exportar/analisis'
 import { descargar } from '../../exportar/seguimiento'
@@ -36,6 +37,9 @@ const INDICADORES: { clave: ClaveIndicador; texto: string; formato: (v: number |
 
 type Grupo = { clave: string; etiqueta: string; m: Metricas }
 
+/** Color máximo del mapa de calor: hasta aquí el texto oscuro se sigue leyendo bien. */
+const CALOR_MAX_PCT = 45
+
 const GRUPOS_COLUMNA = ['Participación', 'Conversión', 'Cupos y usos', 'Resultado'] as const
 
 const COLUMNAS_METRICA: {
@@ -66,12 +70,14 @@ function TablaComparativa({
   etiquetaDim,
   dimension,
   visibles,
+  mapaCalor,
 }: {
   grupos: Grupo[]
   etiquetaDim: string
   dimension: Dimension
   /** Recibe las filas en el orden que ve la usuaria, para exportarlas igual. */
   visibles: MutableRefObject<Grupo[]>
+  mapaCalor: boolean
 }) {
   // Agrupando por promoción, «Promociones» siempre vale 1: no aporta.
   const metricasVisibles = dimension === 'promocion' ? COLUMNAS_METRICA.filter((c) => c.clave !== 'promociones') : COLUMNAS_METRICA
@@ -83,6 +89,10 @@ function TablaComparativa({
   const { filas, orden, alternar } = useOrden(grupos, columnas)
   const cab = { orden, onAlternar: alternar }
   visibles.current = filas
+  // Cada columna se compara consigo misma: GSV y Usos no comparten escala.
+  const posicionesPorColumna = new Map(
+    mapaCalor ? metricasVisibles.map((c) => [c.clave, posicionesEnColumna(filas.map((f) => f.m[c.clave]))]) : [],
+  )
   // Cada grupo de columnas empieza con una línea vertical que lo separa del anterior.
   // y los grupos alternos llevan un fondo suave, para seguir la columna con la vista en una tabla tan ancha.
   const claseMetrica = (i: number) => {
@@ -96,7 +106,7 @@ function TablaComparativa({
   }
   return (
     <div className="tabla-scroll">
-      <table className="tabla tabla-analisis">
+      <table className={mapaCalor ? 'tabla tabla-analisis con-calor' : 'tabla tabla-analisis'}>
         <thead>
           <tr className="fila-grupos">
             <th className="col-fija" />
@@ -114,12 +124,21 @@ function TablaComparativa({
           </tr>
         </thead>
         <tbody>
-          {filas.map((g) => (
+          {filas.map((g, fila) => (
             <tr key={g.clave}>
               <td className="sin-corte col-fija" title={g.etiqueta}>{g.etiqueta}</td>
-              {metricasVisibles.map((c, i) => (
-                <td key={c.clave} className={claseNumero(g.m[c.clave], claseMetrica(i))}>{c.fmt(g.m[c.clave])}</td>
-              ))}
+              {metricasVisibles.map((c, i) => {
+                const posicion = posicionesPorColumna.get(c.clave)?.[fila]
+                return (
+                  <td
+                    key={c.clave}
+                    className={claseNumero(g.m[c.clave], posicion == null ? claseMetrica(i) : `${claseMetrica(i)} celda-calor`)}
+                    style={posicion == null ? undefined : ({ '--calor': `${Math.round(posicion * CALOR_MAX_PCT)}%` } as CSSProperties)}
+                  >
+                    {c.fmt(g.m[c.clave])}
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>
@@ -148,6 +167,7 @@ export default function Analisis() {
   const [filtros, setFiltros] = useState<Filtros>(iniciales)
   const [dimension, setDimension] = useState<Dimension>('promocion')
   const [indicador, setIndicador] = useState<ClaveIndicador>('gsv')
+  const [mapaCalor, setMapaCalor] = useState(false)
   const filasTabla = useRef<Grupo[]>([])
 
   useEffect(() => {
@@ -260,13 +280,27 @@ export default function Analisis() {
               formato={ind.formato}
               titulo={tituloGrafico}
             />
-            <h3>Detalle</h3>
+            <div className="detalle-cabecera">
+              <h3>Detalle</h3>
+              <div className="detalle-controles">
+                {mapaCalor && (
+                  <span className="calor-leyenda">
+                    Menor <span className="calor-escala" aria-hidden="true" /> Mayor, en cada columna
+                  </span>
+                )}
+                <label className="filtro-casilla">
+                  <input type="checkbox" checked={mapaCalor} onChange={(e) => setMapaCalor(e.target.checked)} />
+                  Mapa de calor
+                </label>
+              </div>
+            </div>
             <TablaComparativa
               key={`${dimension}-${indicador}`}
               grupos={grupos}
               etiquetaDim={etiquetaDim}
               dimension={dimension}
               visibles={filasTabla}
+              mapaCalor={mapaCalor}
             />
           </>
         )}

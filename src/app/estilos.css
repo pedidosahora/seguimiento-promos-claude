@@ -337,3 +337,17 @@ button.etiqueta-estado:hover { box-shadow: 0 0 0 1px currentColor; }
 .tabla-analisis .col-fija { padding-left: 12px; padding-right: 16px; }
 .tabla-analisis td.col-fija { font-weight: 500; }
 .tabla-analisis tbody tr:hover td, .tabla-analisis tbody tr:hover td.grupo-alterno, .tabla-analisis tbody tr:hover .col-fija { background-color: color-mix(in srgb, var(--color-primario) 7%, var(--color-superficie)); }
+
+/* Análisis: números centrados en su columna. */
+.tabla-analisis th.num, .tabla-analisis td.num { text-align: center; }
+.detalle-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 24px 0 12px; }
+.analisis-bloque .detalle-cabecera h3 { margin: 0; }
+.detalle-controles { display: flex; align-items: center; gap: 20px; font-size: 13px; }
+.detalle-controles .filtro-casilla { cursor: pointer; }
+.calor-leyenda { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-suave); }
+.calor-escala { width: 72px; height: 10px; border: 1px solid var(--color-borde); border-radius: 2px; background: linear-gradient(to right, var(--color-superficie), color-mix(in srgb, var(--color-primario) 45%, var(--color-superficie))); }
+/* Mapa de calor: un solo tono, más oscuro cuanto mayor es el valor dentro de la columna. */
+.tabla-analisis.con-calor td.grupo-alterno { background-color: var(--color-superficie); }
+.tabla-analisis.con-calor tbody td.celda-calor, .tabla-analisis.con-calor tbody tr:hover td.celda-calor { background-color: color-mix(in srgb, var(--color-primario) var(--calor), var(--color-superficie)); }
+.tabla-analisis.con-calor .dato-vacio { color: var(--color-texto); opacity: 1; }
+.tabla-analisis.con-calor tbody tr:hover td { box-shadow: inset 0 1px 0 var(--color-primario), inset 0 -1px 0 var(--color-primario); }

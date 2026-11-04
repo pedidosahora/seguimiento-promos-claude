@@ -170,6 +170,43 @@ describe('Analisis', () => {
     expect(celdas[cab.findIndex((x) => x.startsWith('Rechazadas'))]).toBe('2')
   })
 
+  it('mapa de calor: apagado por defecto; colorea por columna y se mantiene al reagrupar', async () => {
+    mocks.cargarFilasAnalisis.mockResolvedValue(DATOS)
+    const { container } = montar(admin)
+    await screen.findByText('Comparativa')
+    expect(container.querySelector('.celda-calor')).toBeNull()
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Mapa de calor' }))
+    const celda = (fila: string, columna: string) => {
+      const filas = within(screen.getByRole('table')).getAllByRole('row')
+      const i = within(filas[1]).getAllByRole('columnheader').findIndex((h) => h.textContent?.startsWith(columna))
+      return within(filas.find((r) => r.textContent?.includes(fila))!).getAllByRole('cell')[i]
+    }
+    expect(celda('PROMO-B', 'GSV').style.getPropertyValue('--calor')).toBe('45%')
+    expect(celda('PROMO-A', 'GSV').style.getPropertyValue('--calor')).toBe('0%')
+    // PROMO-A tiene más usos que PROMO-B: cada columna va con su propia escala.
+    expect(celda('PROMO-A', 'Usos').style.getPropertyValue('--calor')).toBe('45%')
+    expect(screen.getByText(/en cada columna/)).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Agrupar por'), { target: { value: 'kam' } })
+    expect(screen.getByRole('checkbox', { name: 'Mapa de calor' })).toBeChecked()
+    expect(container.querySelector('.celda-calor')).not.toBeNull()
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Mapa de calor' }))
+    expect(container.querySelector('.celda-calor')).toBeNull()
+    expect(screen.queryByText(/en cada columna/)).not.toBeInTheDocument()
+  })
+
+  it('mapa de calor: sin color si toda la columna vale lo mismo', async () => {
+    mocks.cargarFilasAnalisis.mockResolvedValue(DATOS)
+    montar(admin)
+    await screen.findByText('Comparativa')
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Mapa de calor' }))
+    const filas = within(screen.getByRole('table')).getAllByRole('row')
+    const i = within(filas[1]).getAllByRole('columnheader').findIndex((h) => h.textContent?.startsWith('Convocadas'))
+    expect(within(filas[2]).getAllByRole('cell')[i].style.getPropertyValue('--calor')).toBe('')
+  })
+
   it('agrupa las columnas y cada grupo abarca todas las suyas', async () => {
     mocks.cargarFilasAnalisis.mockResolvedValue([fila({ estado: 'acepta' })])
     montar(admin)
