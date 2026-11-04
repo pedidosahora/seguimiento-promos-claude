@@ -351,3 +351,26 @@ button.etiqueta-estado:hover { box-shadow: 0 0 0 1px currentColor; }
 .tabla-analisis.con-calor tbody td.celda-calor, .tabla-analisis.con-calor tbody tr:hover td.celda-calor { background-color: color-mix(in srgb, var(--color-primario) var(--calor), var(--color-superficie)); }
 .tabla-analisis.con-calor .dato-vacio { color: var(--color-texto); opacity: 1; }
 .tabla-analisis.con-calor tbody tr:hover td { box-shadow: inset 0 1px 0 var(--color-primario), inset 0 -1px 0 var(--color-primario); }
+
+/* Ventanas estrechas: el menú baja a su propia línea y nada empuja la página hacia los lados. */
+.marca, .usuario, .cabecera nav a { white-space: nowrap; }
+.usuario { flex-shrink: 0; }
+.evolucion { grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
+@media (max-width: 1100px) {
+  :root { --alto-cabecera: 96px; }
+  .cabecera { flex-wrap: wrap; align-content: center; gap: 4px 16px; padding: 6px 16px; }
+  .marca { flex: 1; }
+  .cabecera nav { order: 1; flex: 0 0 100%; overflow-x: auto; scrollbar-width: thin; }
+  .nav-grupo { flex-shrink: 0; }
+  .contenido { padding: 16px; }
+  .subnav { overflow-x: auto; }
+  .subnav a { flex-shrink: 0; white-space: nowrap; }
+  .pasos { flex-wrap: wrap; }
+  /* Cada tabla se desplaza dentro de sí misma; por eso su cabecera ya no se queda fija al bajar por la página. */
+  .tabla:not(.tabla-analisis) { display: block; width: fit-content; max-width: 100%; overflow-x: auto; }
+  .tabla th { top: 0; }
+}
+/* Indicadores de la promoción: bajan de línea en vez de cortarse. */
+.indicadores { flex-wrap: wrap; }
+.indicadores-grupo { flex: 1 1 auto; }
+.indicadores-grupo dl { flex-wrap: wrap; }
