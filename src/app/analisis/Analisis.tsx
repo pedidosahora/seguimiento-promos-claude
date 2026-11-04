@@ -107,7 +107,7 @@ function TablaComparativa({
         <tbody>
           {filas.map((g) => (
             <tr key={g.clave}>
-              <td className="sin-corte col-fija">{g.etiqueta}</td>
+              <td className="sin-corte col-fija" title={g.etiqueta}>{g.etiqueta}</td>
               {metricasVisibles.map((c, i) => (
                 <td key={c.clave} className={claseMetrica(i)}>{c.fmt(g.m[c.clave])}</td>
               ))}

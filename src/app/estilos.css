@@ -254,7 +254,7 @@ html { scrollbar-gutter: stable; }
 /* Análisis: bloques con aire y tabla agrupada */
 .contenido:has(.analisis) { max-width: 1440px; }
 .analisis .analisis-indicadores { margin: 16px 0 24px; }
-.analisis-bloque { margin-bottom: 24px; padding: 20px 24px 24px; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); }
+.analisis-bloque { margin-bottom: 24px; padding: 20px 16px 24px; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); }
 .analisis-bloque h2 { margin: 0; }
 .analisis-bloque h3 { margin: 24px 0 12px; font-size: 13px; font-weight: 600; color: var(--color-suave); }
 .analisis-bloque .titulo-seccion { flex-wrap: wrap; align-items: flex-end; margin-bottom: 0; }
@@ -266,12 +266,14 @@ html { scrollbar-gutter: stable; }
 .analisis .barra-fila:hover { background: var(--color-fondo); }
 .analisis .barra-pista { height: 14px; }
 .analisis .tabla-scroll { margin-bottom: 0; border-radius: var(--radio); }
-.tabla-analisis th, .tabla-analisis td { padding: 10px 8px; white-space: nowrap; }
+.tabla-analisis th, .tabla-analisis td { padding: 10px 6px; white-space: nowrap; }
 .tabla-analisis tbody tr:last-child td { border-bottom: 0; }
 .tabla-analisis .fila-grupos th { padding-bottom: 2px; border-bottom: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-.tabla-analisis .inicio-grupo { padding-left: 16px; border-left: 1px solid var(--color-borde); }
+.tabla-analisis .inicio-grupo { padding-left: 12px; border-left: 1px solid var(--color-borde); }
 /* La primera columna queda a la vista si la tabla necesita desplazarse (nombres largos de concesión). */
 .tabla-analisis .col-fija { position: sticky; left: 0; z-index: 1; padding-left: 12px; padding-right: 16px; background: var(--color-superficie); }
 .tabla-analisis th.col-fija { background: var(--color-fondo); }
 .tabla-analisis tbody tr:hover .col-fija { background: color-mix(in srgb, var(--color-primario) 4%, var(--color-superficie)); }
 .evolucion { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0 32px; }
+/* Nombres muy largos (concesiones): se cortan con «…» para que GSV quepa a 1366 px; el completo, en el title. */
+.tabla-analisis td.col-fija { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
