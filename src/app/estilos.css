@@ -245,3 +245,33 @@ html { scrollbar-gutter: stable; }
 .pasos li.actual .paso-num { background: var(--color-primario); border-color: var(--color-primario); color: var(--color-primario-texto); }
 .pasos li.hecho .paso-num { border-color: var(--color-primario); color: var(--color-primario); }
 .zona-archivo { flex-direction: column; gap: 8px; padding: 32px 16px; }
+
+/* Menú: cada grupo de secciones separado por una línea vertical. */
+.cabecera nav { align-items: center; gap: 0; }
+.nav-grupo { display: flex; gap: 4px; }
+.nav-grupo + .nav-grupo { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--color-borde); }
+
+/* Análisis: bloques con aire y tabla agrupada */
+.contenido:has(.analisis) { max-width: 1440px; }
+.analisis .analisis-indicadores { margin: 16px 0 24px; }
+.analisis-bloque { margin-bottom: 24px; padding: 20px 24px 24px; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio); }
+.analisis-bloque h2 { margin: 0; }
+.analisis-bloque h3 { margin: 24px 0 12px; font-size: 13px; font-weight: 600; color: var(--color-suave); }
+.analisis-bloque .titulo-seccion { flex-wrap: wrap; align-items: flex-end; margin-bottom: 0; }
+.analisis-controles { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.analisis-controles label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--color-suave); }
+.analisis-controles select { min-width: 150px; padding: 7px 10px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; font-size: 14px; color: var(--color-texto); background: var(--color-superficie); }
+.analisis .barras-h { gap: 4px; }
+.analisis .barra-fila { grid-template-columns: minmax(120px, 220px) 1fr 100px; gap: 12px; padding: 4px 8px; border-radius: 4px; }
+.analisis .barra-fila:hover { background: var(--color-fondo); }
+.analisis .barra-pista { height: 14px; }
+.analisis .tabla-scroll { margin-bottom: 0; border-radius: var(--radio); }
+.tabla-analisis th, .tabla-analisis td { padding: 10px 8px; white-space: nowrap; }
+.tabla-analisis tbody tr:last-child td { border-bottom: 0; }
+.tabla-analisis .fila-grupos th { padding-bottom: 2px; border-bottom: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.tabla-analisis .inicio-grupo { padding-left: 16px; border-left: 1px solid var(--color-borde); }
+/* La primera columna queda a la vista si la tabla necesita desplazarse (nombres largos de concesión). */
+.tabla-analisis .col-fija { position: sticky; left: 0; z-index: 1; padding-left: 12px; padding-right: 16px; background: var(--color-superficie); }
+.tabla-analisis th.col-fija { background: var(--color-fondo); }
+.tabla-analisis tbody tr:hover .col-fija { background: color-mix(in srgb, var(--color-primario) 4%, var(--color-superficie)); }
+.evolucion { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0 32px; }

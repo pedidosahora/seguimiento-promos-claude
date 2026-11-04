@@ -35,21 +35,28 @@ const INDICADORES: { clave: ClaveIndicador; texto: string; formato: (v: number |
 
 type Grupo = { clave: string; etiqueta: string; m: Metricas }
 
-const COLUMNAS_METRICA: { clave: keyof Metricas; texto: string; fmt: (v: number | null) => string }[] = [
-  { clave: 'promociones', texto: 'Promociones', fmt: fmtEntero },
-  { clave: 'convocadas', texto: 'Convocadas', fmt: fmtEntero },
-  { clave: 'presentadas', texto: 'Presentadas', fmt: fmtEntero },
-  { clave: 'aceptadas', texto: 'Aceptadas', fmt: fmtEntero },
-  { clave: 'activas', texto: 'Activas', fmt: fmtEntero },
-  { clave: 'pendientes', texto: 'Pendientes', fmt: fmtEntero },
-  { clave: 'rechazadas', texto: 'Rechazadas', fmt: fmtEntero },
-  { clave: 'pctAceptacion', texto: '% aceptación', fmt: fmtPct },
-  { clave: 'pctActivacion', texto: '% activación', fmt: fmtPct },
-  { clave: 'cupos', texto: 'Cupos', fmt: fmtEntero },
-  { clave: 'usos', texto: 'Usos', fmt: fmtEntero },
-  { clave: 'pctCupos', texto: '% cupos gastados', fmt: fmtPct },
-  { clave: 'gsv', texto: 'GSV', fmt: fmtImporte },
-  { clave: 'gsvUso', texto: 'GSV/uso', fmt: fmtImporte },
+const GRUPOS_COLUMNA = ['Participación', 'Conversión', 'Cupos y usos', 'Resultado'] as const
+
+const COLUMNAS_METRICA: {
+  clave: keyof Metricas
+  texto: string
+  grupo: (typeof GRUPOS_COLUMNA)[number]
+  fmt: (v: number | null) => string
+}[] = [
+  { clave: 'promociones', texto: 'Promociones', grupo: 'Participación', fmt: fmtEntero },
+  { clave: 'convocadas', texto: 'Convocadas', grupo: 'Participación', fmt: fmtEntero },
+  { clave: 'presentadas', texto: 'Presentadas', grupo: 'Participación', fmt: fmtEntero },
+  { clave: 'aceptadas', texto: 'Aceptadas', grupo: 'Participación', fmt: fmtEntero },
+  { clave: 'activas', texto: 'Activas', grupo: 'Participación', fmt: fmtEntero },
+  { clave: 'pendientes', texto: 'Pendientes', grupo: 'Participación', fmt: fmtEntero },
+  { clave: 'rechazadas', texto: 'Rechazadas', grupo: 'Participación', fmt: fmtEntero },
+  { clave: 'pctAceptacion', texto: '% aceptación', grupo: 'Conversión', fmt: fmtPct },
+  { clave: 'pctActivacion', texto: '% activación', grupo: 'Conversión', fmt: fmtPct },
+  { clave: 'cupos', texto: 'Cupos', grupo: 'Cupos y usos', fmt: fmtEntero },
+  { clave: 'usos', texto: 'Usos', grupo: 'Cupos y usos', fmt: fmtEntero },
+  { clave: 'pctCupos', texto: '% gastados', grupo: 'Cupos y usos', fmt: fmtPct },
+  { clave: 'gsv', texto: 'GSV', grupo: 'Resultado', fmt: fmtImporte },
+  { clave: 'gsvUso', texto: 'GSV/uso', grupo: 'Resultado', fmt: fmtImporte },
 ]
 
 /** Se monta con `key` por dimensión+indicador: al cambiarlos, el orden manual se reinicia. */
@@ -66,32 +73,43 @@ function TablaComparativa({
   visibles: MutableRefObject<Grupo[]>
 }) {
   // Agrupando por promoción, «Promociones» siempre vale 1: no aporta.
-  const metricas = dimension === 'promocion' ? COLUMNAS_METRICA.filter((c) => c.clave !== 'promociones') : COLUMNAS_METRICA
+  const metricasVisibles = dimension === 'promocion' ? COLUMNAS_METRICA.filter((c) => c.clave !== 'promociones') : COLUMNAS_METRICA
   const columnas: Columna<Grupo>[] = [
     // Por mes se ordena por la clave aaaa-mm (cronológico), no por la etiqueta; «sin fecha» queda siempre al final.
     { clave: 'etiqueta', valor: (g) => (dimension === 'mes' ? (g.clave === 'sin-fecha' ? null : g.clave) : g.etiqueta) },
-    ...metricas.map((c) => ({ clave: c.clave, valor: (g: Grupo) => g.m[c.clave] })),
+    ...metricasVisibles.map((c) => ({ clave: c.clave, valor: (g: Grupo) => g.m[c.clave] })),
   ]
   const { filas, orden, alternar } = useOrden(grupos, columnas)
   const cab = { orden, onAlternar: alternar }
   visibles.current = filas
+  // Cada grupo de columnas empieza con una línea vertical que lo separa del anterior.
+  const claseMetrica = (i: number) =>
+    i > 0 && metricasVisibles[i - 1].grupo !== metricasVisibles[i].grupo ? 'num inicio-grupo' : 'num'
   return (
     <div className="tabla-scroll">
-      <table className="tabla tabla-compacta">
+      <table className="tabla tabla-analisis">
         <thead>
+          <tr className="fila-grupos">
+            <th className="col-fija" />
+            {GRUPOS_COLUMNA.map((grupo, i) => (
+              <th key={grupo} colSpan={metricasVisibles.filter((c) => c.grupo === grupo).length} scope="colgroup" className={i > 0 ? 'inicio-grupo' : undefined}>
+                {grupo}
+              </th>
+            ))}
+          </tr>
           <tr>
-            <CabeceraOrdenable clave="etiqueta" {...cab}>{etiquetaDim}</CabeceraOrdenable>
-            {metricas.map((c) => (
-              <CabeceraOrdenable key={c.clave} clave={c.clave} className="num" {...cab}>{c.texto}</CabeceraOrdenable>
+            <CabeceraOrdenable clave="etiqueta" className="col-fija" {...cab}>{etiquetaDim}</CabeceraOrdenable>
+            {metricasVisibles.map((c, i) => (
+              <CabeceraOrdenable key={c.clave} clave={c.clave} className={claseMetrica(i)} {...cab}>{c.texto}</CabeceraOrdenable>
             ))}
           </tr>
         </thead>
         <tbody>
           {filas.map((g) => (
             <tr key={g.clave}>
-              <td className="sin-corte">{g.etiqueta}</td>
-              {metricas.map((c) => (
-                <td key={c.clave} className="num">{c.fmt(g.m[c.clave])}</td>
+              <td className="sin-corte col-fija">{g.etiqueta}</td>
+              {metricasVisibles.map((c, i) => (
+                <td key={c.clave} className={claseMetrica(i)}>{c.fmt(g.m[c.clave])}</td>
               ))}
             </tr>
           ))}
@@ -146,6 +164,8 @@ export default function Analisis() {
   const total = useMemo(() => metricas(visibles), [visibles])
   const ind = INDICADORES.find((i) => i.clave === indicador)!
   const [, etiquetaDim] = DIMENSIONES.find(([k]) => k === dimension)!
+  // «KAM» es una sigla: va en mayúsculas también dentro de la frase.
+  const tituloGrafico = `${ind.texto} por ${dimension === 'kam' ? etiquetaDim : etiquetaDim.toLowerCase()}`
 
   // Orden por defecto de la tabla: indicador elegido de mayor a menor (sin dato al final).
   const grupos = useMemo(() => {
@@ -196,62 +216,74 @@ export default function Analisis() {
       />
       <Indicadores m={total} />
 
-      <div className="titulo-seccion">
-        <h2>Comparativa</h2>
-        {grupos.length > 0 && (
-          <button className="boton secundario" onClick={exportar}>Exportar a Excel</button>
+      <div className="analisis-bloque">
+        <div className="titulo-seccion">
+          <h2>Comparativa</h2>
+          <div className="analisis-controles">
+            <label>
+              Agrupar por
+              <select value={dimension} onChange={(e) => setDimension(e.target.value as Dimension)}>
+                {DIMENSIONES.map(([k, t]) => (
+                  <option key={k} value={k}>{t}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Indicador del gráfico
+              <select value={indicador} onChange={(e) => setIndicador(e.target.value as ClaveIndicador)}>
+                {INDICADORES.map((i) => (
+                  <option key={i.clave} value={i.clave}>{i.texto}</option>
+                ))}
+              </select>
+            </label>
+            {grupos.length > 0 && (
+              <button className="boton secundario" onClick={exportar}>Exportar a Excel</button>
+            )}
+          </div>
+        </div>
+        {grupos.length === 0 ? (
+          <p className="grafico-vacio">{SIN_DATOS}</p>
+        ) : (
+          <>
+            <h3>{tituloGrafico}</h3>
+            <BarrasHorizontales
+              datos={grupos.map((g) => ({ clave: g.clave, etiqueta: g.etiqueta, valor: g.m[indicador] }))}
+              formato={ind.formato}
+              titulo={tituloGrafico}
+            />
+            <h3>Detalle</h3>
+            <TablaComparativa
+              key={`${dimension}-${indicador}`}
+              grupos={grupos}
+              etiquetaDim={etiquetaDim}
+              dimension={dimension}
+              visibles={filasTabla}
+            />
+          </>
         )}
       </div>
-      <div className="filtros">
-        <label>
-          Agrupar por
-          <select value={dimension} onChange={(e) => setDimension(e.target.value as Dimension)}>
-            {DIMENSIONES.map(([k, t]) => (
-              <option key={k} value={k}>{t}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Indicador del gráfico
-          <select value={indicador} onChange={(e) => setIndicador(e.target.value as ClaveIndicador)}>
-            {INDICADORES.map((i) => (
-              <option key={i.clave} value={i.clave}>{i.texto}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-      {grupos.length === 0 ? (
-        <p className="grafico-vacio">{SIN_DATOS}</p>
-      ) : (
-        <>
-          <BarrasHorizontales
-            datos={grupos.map((g) => ({ clave: g.clave, etiqueta: g.etiqueta, valor: g.m[indicador] }))}
-            formato={ind.formato}
-            titulo={`${ind.texto} por ${etiquetaDim.toLowerCase()}`}
-          />
-          <TablaComparativa
-            key={`${dimension}-${indicador}`}
-            grupos={grupos}
-            etiquetaDim={etiquetaDim}
-            dimension={dimension}
-            visibles={filasTabla}
-          />
-        </>
-      )}
 
-      <h2>Evolución mensual</h2>
-      <h3>GSV</h3>
-      <BarrasMensuales
-        datos={meses.map((g) => ({ mes: g.clave, etiqueta: g.etiqueta, valor: g.m.gsv }))}
-        formato={fmtImporte}
-        titulo="GSV por mes de inicio"
-      />
-      <h3>Usos</h3>
-      <BarrasMensuales
-        datos={meses.map((g) => ({ mes: g.clave, etiqueta: g.etiqueta, valor: g.m.usos }))}
-        formato={fmtEntero}
-        titulo="Usos por mes de inicio"
-      />
+      <div className="analisis-bloque">
+        <h2>Evolución mensual</h2>
+        <div className="evolucion">
+          <div>
+            <h3>GSV</h3>
+            <BarrasMensuales
+              datos={meses.map((g) => ({ mes: g.clave, etiqueta: g.etiqueta, valor: g.m.gsv }))}
+              formato={fmtImporte}
+              titulo="GSV por mes de inicio"
+            />
+          </div>
+          <div>
+            <h3>Usos</h3>
+            <BarrasMensuales
+              datos={meses.map((g) => ({ mes: g.clave, etiqueta: g.etiqueta, valor: g.m.usos }))}
+              formato={fmtEntero}
+              titulo="Usos por mes de inicio"
+            />
+          </div>
+        </div>
+      </div>
     </section>
   )
 }

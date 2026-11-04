@@ -50,7 +50,7 @@ const indicador = (t: string) =>
 const primeraColumna = () =>
   within(screen.getByRole('table'))
     .getAllByRole('row')
-    .slice(1)
+    .slice(2) // dos filas de cabecera: grupos y columnas
     .map((r) => within(r).getAllByRole('cell')[0].textContent)
 
 describe('Analisis', () => {
@@ -163,10 +163,22 @@ describe('Analisis', () => {
     montar(admin)
     await screen.findByText('Comparativa')
     const t = within(screen.getByRole('table'))
-    const cab = t.getAllByRole('columnheader').map((h) => h.textContent ?? '')
-    const celdas = within(t.getAllByRole('row')[1]).getAllByRole('cell').map((c) => c.textContent)
+    const filas = t.getAllByRole('row')
+    const cab = within(filas[1]).getAllByRole('columnheader').map((h) => h.textContent ?? '')
+    const celdas = within(filas[2]).getAllByRole('cell').map((c) => c.textContent)
     expect(celdas[cab.findIndex((x) => x.startsWith('Aceptadas'))]).toBe('1')
     expect(celdas[cab.findIndex((x) => x.startsWith('Rechazadas'))]).toBe('2')
+  })
+
+  it('agrupa las columnas y cada grupo abarca todas las suyas', async () => {
+    mocks.cargarFilasAnalisis.mockResolvedValue([fila({ estado: 'acepta' })])
+    montar(admin)
+    await screen.findByText('Comparativa')
+    const [grupos, columnas] = within(screen.getByRole('table')).getAllByRole('row')
+    const celdas = within(grupos).getAllByRole('columnheader')
+    expect(celdas.map((c) => c.textContent)).toEqual(['', 'Participación', 'Conversión', 'Cupos y usos', 'Resultado'])
+    const abarcadas = celdas.reduce((n, c) => n + Number(c.getAttribute('colspan') ?? 1), 0)
+    expect(abarcadas).toBe(within(columnas).getAllByRole('columnheader').length)
   })
 
   it('«Mes de inicio»: ordena por mes cronológico y «Sin fecha» al final', async () => {

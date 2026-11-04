@@ -11,6 +11,8 @@ type Props = {
 
 const COL_MIN = 52
 const COL_MAX = 120
+/** A partir de este ancho de columna cabe el importe de cada mes sin pisar el de al lado. */
+const COL_CON_VALOR = 72
 const ANCHO_MIN_BARRA = 22
 const ANCHO_DEF = 720
 const ALTO = 150
@@ -93,7 +95,7 @@ export default function BarrasMensuales({ datos, formato, titulo }: Props) {
               <title>{`${d.etiqueta}: ${formato(d.valor)}`}</title>
               <rect className="mes-zona" x={x0} y={0} width={col} height={TOTAL_ALTO} fill="transparent" />
               <path className="mes-barra" d={trazo(x, h, barra)} data-altura={h} />
-              {d === mayor && (
+              {(d === mayor || (col >= COL_CON_VALOR && d.valor > 0)) && (
                 <text className="mes-valor" x={xv} y={BASE - h - 6} textAnchor={anclaje}>
                   {formato(d.valor)}
                 </text>

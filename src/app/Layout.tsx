@@ -7,7 +7,6 @@ const ESPACIOS = [
   { ruta: '/ufs', texto: 'UFS' },
   { ruta: '/campanas', texto: 'Campañas' },
   { ruta: '/todos', texto: 'Todos' },
-  { ruta: '/analisis', texto: 'Análisis' },
 ]
 
 export default function Layout() {
@@ -18,12 +17,27 @@ export default function Layout() {
       <header className="cabecera">
         <strong className="marca">Seguimiento de promociones</strong>
         <nav>
-          <NavLink to="/" end>Inicio</NavLink>
-          {ESPACIOS.map((e) => (
-            <NavLink key={e.ruta} to={e.ruta}>{e.texto}</NavLink>
-          ))}
-          {esAdmin && <NavLink to="/importar">Importar</NavLink>}
-          {esAdmin && <NavLink to="/admin">Admin</NavLink>}
+          <div className="nav-grupo">
+            <NavLink to="/" end>Inicio</NavLink>
+          </div>
+          <div className="nav-grupo">
+            {ESPACIOS.map((e) => (
+              <NavLink key={e.ruta} to={e.ruta}>{e.texto}</NavLink>
+            ))}
+          </div>
+          <div className="nav-grupo">
+            <NavLink to="/analisis">Análisis</NavLink>
+          </div>
+          {esAdmin && (
+            <div className="nav-grupo">
+              <NavLink to="/importar">Importar</NavLink>
+            </div>
+          )}
+          {esAdmin && (
+            <div className="nav-grupo">
+              <NavLink to="/admin">Admin</NavLink>
+            </div>
+          )}
         </nav>
         <span className="usuario">
           {perfil?.nombre}
