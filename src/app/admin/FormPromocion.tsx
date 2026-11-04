@@ -200,7 +200,7 @@ export default function FormPromocion() {
             <button type="button" className="boton secundario" disabled={guardando} onClick={() => void guardar('publicada')}>Reabrir</button>
           )}
           {estado === 'cerrada' && (
-            <button type="button" className="boton secundario" disabled={guardando} onClick={() => void guardar('archivada')}>Archivar</button>
+            <button type="button" className="boton secundario peligro" disabled={guardando} onClick={() => void guardar('archivada')}>Archivar</button>
           )}
         </div>
       </form>

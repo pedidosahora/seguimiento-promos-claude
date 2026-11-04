@@ -147,7 +147,7 @@ export default function Permisos() {
               <tr key={p.id}>
                 <td>{nomPerfil(p.perfil_id)}</td><td>{destino(p)}</td>
                 <td>{p.caduca ? p.caduca.split('-').reverse().join('/') : 'Sin caducidad'}</td>
-                <td className="acciones"><button className="boton secundario pequeno" onClick={() => void quitar(p.id)}>Quitar</button></td>
+                <td className="acciones"><button className="boton secundario pequeno peligro" onClick={() => void quitar(p.id)}>Quitar</button></td>
               </tr>
             ))}
           </tbody>

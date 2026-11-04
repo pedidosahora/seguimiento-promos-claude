@@ -277,3 +277,40 @@ html { scrollbar-gutter: stable; }
 .evolucion { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 0 32px; }
 /* Nombres muy largos (concesiones): se cortan con «…» para que GSV quepa a 1366 px; el completo, en el title. */
 .tabla-analisis td.col-fija { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+
+/* Controles: todos los botones y desplegables comparten altura y estados. */
+:root { --alto-control: 36px; --alto-control-pequeno: 28px; --transicion-control: 0.12s ease; --color-desactivado: #8a94a1; }
+.boton, a.boton { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--alto-control); padding: 0 14px; border: 1px solid transparent; font-weight: 500; line-height: 1.2; white-space: nowrap; transition: background-color var(--transicion-control), border-color var(--transicion-control), color var(--transicion-control); }
+.boton:active { background: color-mix(in srgb, var(--color-primario) 76%, #000); }
+.boton.secundario { background: var(--color-superficie); border-color: color-mix(in srgb, var(--color-primario) 30%, var(--color-borde)); }
+.boton.secundario:active { background: color-mix(in srgb, var(--color-primario) 14%, var(--color-superficie)); }
+.boton.pequeno { min-height: var(--alto-control-pequeno); padding: 0 10px; font-size: 13px; margin-top: 0; }
+.boton:disabled, .boton:disabled:hover { opacity: 1; background: #e8ebef; border-color: transparent; color: var(--color-desactivado); }
+.boton.secundario:disabled, .boton.secundario:disabled:hover { background: var(--color-superficie); border-color: var(--color-borde); color: var(--color-desactivado); }
+/* Acciones que quitan algo: rojas, para no confundirlas con «Editar» al lado. */
+.boton.secundario.peligro { color: var(--color-error); border-color: color-mix(in srgb, var(--color-error) 30%, var(--color-borde)); }
+.boton.secundario.peligro:hover { background: color-mix(in srgb, var(--color-error) 7%, var(--color-superficie)); border-color: var(--color-error); }
+.boton.secundario.peligro:active { background: color-mix(in srgb, var(--color-error) 14%, var(--color-superficie)); }
+
+.contenido select { appearance: none; height: var(--alto-control); padding: 0 30px 0 10px; border: 1px solid var(--color-borde); border-radius: var(--radio); font: inherit; color: var(--color-texto); background: var(--color-superficie) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%235b6776' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center; cursor: pointer; transition: border-color var(--transicion-control), background-color var(--transicion-control); }
+.contenido select:hover:not(:disabled) { border-color: color-mix(in srgb, var(--color-primario) 55%, var(--color-borde)); }
+.contenido select:focus-visible { border-color: var(--color-primario); }
+.contenido select:disabled { background-color: var(--color-fondo); color: var(--color-suave); cursor: not-allowed; }
+.lista-tareas td select { height: var(--alto-control-pequeno); padding: 0 26px 0 8px; font-size: 13px; background: var(--color-superficie) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%235b6776' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 8px center; }
+/* Campos de fecha y búsqueda: misma altura que los desplegables de la barra de filtros. */
+.barra-filtros input:not([type="checkbox"]) { height: var(--alto-control); transition: border-color var(--transicion-control); }
+.barra-filtros input:not([type="checkbox"]):hover { border-color: color-mix(in srgb, var(--color-primario) 55%, var(--color-borde)); }
+
+/* Contadores de Inicio: el filtro activo se ve de un vistazo. */
+.contadores button { min-height: var(--alto-control); transition: background-color var(--transicion-control), border-color var(--transicion-control), color var(--transicion-control); }
+.contadores button:hover { border-color: var(--color-primario); }
+.contadores button.aviso:hover { border-color: var(--color-alerta); background: color-mix(in srgb, var(--color-alerta) 22%, var(--color-superficie)); }
+.contadores button.peligro:hover { border-color: var(--color-error); background: color-mix(in srgb, var(--color-error) 18%, var(--color-superficie)); }
+.contadores button[aria-pressed="true"], .contadores button[aria-pressed="true"]:hover { outline: 0; background: var(--color-primario); border-color: var(--color-primario); color: var(--color-primario-texto); }
+
+/* Estado editable en la lista de tareas: la flecha indica que se puede cambiar. */
+button.etiqueta-estado::after { content: ' ▾' / ''; }
+button.etiqueta-estado { transition: box-shadow var(--transicion-control); }
+button.etiqueta-estado:hover { box-shadow: 0 0 0 1px currentColor; }
+
+.cabecera nav a, .subnav a, .pestana { transition: background-color var(--transicion-control), color var(--transicion-control), border-color var(--transicion-control); }

@@ -178,7 +178,7 @@ export default function Concesiones() {
                 <td>{nombre(kams, c.kam_id)}</td><td>{nombre(terr, c.territorio_id)}</td>
                 <td className="acciones">
                   <button className="boton secundario pequeno" onClick={() => editar(c)}>Editar</button>
-                  <button className="boton secundario pequeno" onClick={() => void alternar(c)}>{c.activa ? 'Desactivar' : 'Activar'}</button>
+                  <button className={c.activa ? 'boton secundario pequeno peligro' : 'boton secundario pequeno'} onClick={() => void alternar(c)}>{c.activa ? 'Desactivar' : 'Activar'}</button>
                 </td>
               </tr>
             ))}
