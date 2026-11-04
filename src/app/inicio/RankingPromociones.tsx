@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ETIQUETA_ESPACIO } from '../../dominio/etiquetas'
 import { rutaPromocion, type FilaRanking } from './datos'
 import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { claseNumero } from '../comun/claseNumero'
 import { useOrden, type Columna } from '../comun/orden'
 
 const COLUMNAS: Columna<FilaRanking>[] = [
@@ -56,10 +57,10 @@ export default function RankingPromociones({ filas }: { filas: FilaRanking[] }) 
                 </div>
               )}
             </td>
-            <td className="num">{fmtEntero(f.usos)}</td>
-            <td className="num">{fmtEntero(f.cupos)}</td>
-            <td className="num">{fmtImporte(f.gsv)}</td>
-            <td className="num">{fmtEntero(f.activas)}</td>
+            <td className={claseNumero(f.usos)}>{fmtEntero(f.usos)}</td>
+            <td className={claseNumero(f.cupos)}>{fmtEntero(f.cupos)}</td>
+            <td className={claseNumero(f.gsv, 'num dato-clave')}>{fmtImporte(f.gsv)}</td>
+            <td className={claseNumero(f.activas)}>{fmtEntero(f.activas)}</td>
           </tr>
         ))}
       </tbody>

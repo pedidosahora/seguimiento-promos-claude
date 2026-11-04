@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../auth/useSesion'
 import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { claseNumero } from '../comun/claseNumero'
 import { useOrden, type Columna } from '../comun/orden'
 import { hoyISO as hoy } from '../../dominio/fechas'
 import {
@@ -209,13 +210,13 @@ export default function ListaPromociones() {
                   {esTodos && <td>{ETIQUETA_ESPACIO[p.espacio]}</td>}
                   <td>{p.mecanica ?? '—'}</td>
                   <td className="sin-corte">{fmtFecha(p.fecha_inicio)} – {fmtFecha(p.fecha_fin)}</td>
-                  <td className="num">{fmtEntero(r?.presentadas ?? 0)}</td>
-                  <td className="num">
+                  <td className={claseNumero(r?.presentadas)}>{fmtEntero(r?.presentadas ?? 0)}</td>
+                  <td className={claseNumero(r?.pct_aceptacion)}>
                     {fmtPct(r?.pct_aceptacion)}
                   </td>
-                  <td className="num">{fmtEntero(r?.activas ?? 0)}</td>
-                  <td className="num">{fmtEntero(r?.usos ?? 0)}</td>
-                  <td className="num">
+                  <td className={claseNumero(r?.activas)}>{fmtEntero(r?.activas ?? 0)}</td>
+                  <td className={claseNumero(r?.usos)}>{fmtEntero(r?.usos ?? 0)}</td>
+                  <td className={claseNumero(r?.gsv, 'num dato-clave')}>
                     {fmtImporte(r?.gsv ?? 0)}
                   </td>
                 </tr>

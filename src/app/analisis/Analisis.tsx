@@ -5,6 +5,7 @@ import { exportarComparativa, nombreArchivoAnalisis } from '../../exportar/anali
 import { descargar } from '../../exportar/seguimiento'
 import { usePerfil } from '../auth/useSesion'
 import { CabeceraOrdenable } from '../comun/CabeceraOrdenable'
+import { claseNumero } from '../comun/claseNumero'
 import { useOrden, type Columna } from '../comun/orden'
 import BarrasHorizontales, { SIN_DATOS } from './BarrasHorizontales'
 import BarrasMensuales from './BarrasMensuales'
@@ -83,8 +84,16 @@ function TablaComparativa({
   const cab = { orden, onAlternar: alternar }
   visibles.current = filas
   // Cada grupo de columnas empieza con una línea vertical que lo separa del anterior.
-  const claseMetrica = (i: number) =>
-    i > 0 && metricasVisibles[i - 1].grupo !== metricasVisibles[i].grupo ? 'num inicio-grupo' : 'num'
+  // y los grupos alternos llevan un fondo suave, para seguir la columna con la vista en una tabla tan ancha.
+  const claseMetrica = (i: number) => {
+    const c = metricasVisibles[i]
+    return [
+      'num',
+      i > 0 && metricasVisibles[i - 1].grupo !== c.grupo && 'inicio-grupo',
+      GRUPOS_COLUMNA.indexOf(c.grupo) % 2 === 1 && 'grupo-alterno',
+      c.clave === 'gsv' && 'dato-clave',
+    ].filter(Boolean).join(' ')
+  }
   return (
     <div className="tabla-scroll">
       <table className="tabla tabla-analisis">
@@ -92,7 +101,7 @@ function TablaComparativa({
           <tr className="fila-grupos">
             <th className="col-fija" />
             {GRUPOS_COLUMNA.map((grupo, i) => (
-              <th key={grupo} colSpan={metricasVisibles.filter((c) => c.grupo === grupo).length} scope="colgroup" className={i > 0 ? 'inicio-grupo' : undefined}>
+              <th key={grupo} colSpan={metricasVisibles.filter((c) => c.grupo === grupo).length} scope="colgroup" className={[i > 0 && 'inicio-grupo', i % 2 === 1 && 'grupo-alterno'].filter(Boolean).join(' ') || undefined}>
                 {grupo}
               </th>
             ))}
@@ -109,7 +118,7 @@ function TablaComparativa({
             <tr key={g.clave}>
               <td className="sin-corte col-fija" title={g.etiqueta}>{g.etiqueta}</td>
               {metricasVisibles.map((c, i) => (
-                <td key={c.clave} className={claseMetrica(i)}>{c.fmt(g.m[c.clave])}</td>
+                <td key={c.clave} className={claseNumero(g.m[c.clave], claseMetrica(i))}>{c.fmt(g.m[c.clave])}</td>
               ))}
             </tr>
           ))}
