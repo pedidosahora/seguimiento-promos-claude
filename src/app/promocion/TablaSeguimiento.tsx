@@ -6,6 +6,7 @@ import {
   ModuleRegistry,
   themeQuartz,
   type CellEditRequestEvent,
+  type CellEditingStartedEvent,
   type ColDef,
   type ICellRendererParams,
 } from 'ag-grid-community'
@@ -14,10 +15,9 @@ import { nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
 import {
   claseCelda,
   esEditable,
-  isoALocal,
-  localAIso,
+  diaAIso,
+  isoADia,
   textoFechaCorta,
-  textoFechaHora,
   textoGsvUso,
   textoPctCupos,
   type CampoEditable,
@@ -141,14 +141,10 @@ export default function TablaSeguimiento({
       width: 84,
       editable: editable(campo),
       cellClass: clase(campo),
-      // Sin cellDataType el editor devolvería solo la fecha y perdería la hora.
-      cellDataType: 'dateTimeString',
+      cellDataType: 'dateString',
       cellEditor: 'agDateStringCellEditor',
-      cellEditorParams: { includeTime: true },
-      valueGetter: (p) => isoALocal(p.data?.[campo] ?? null),
-      // En la celda solo dd/mm/aa para que quepa; la hora completa, en el tooltip.
-      valueFormatter: (p) => textoFechaCorta(localAIso((p.value as string | null) ?? null)),
-      tooltipValueGetter: (p) => (p.value ? textoFechaHora(localAIso(p.value as string)) : undefined),
+      valueGetter: (p) => isoADia(p.data?.[campo] ?? null),
+      valueFormatter: (p) => textoFechaCorta(diaAIso((p.value as string | null) ?? null)),
     })
 
     return [
@@ -221,10 +217,29 @@ export default function TablaSeguimiento({
     ]
   }, [editables, esAdmin, umbral, onAbrirFicha, ocultarKamTerritorio])
 
+  function abrirCalendario(e: CellEditingStartedEvent<FilaGrid>) {
+    if (!e.column.getColId().startsWith('fecha_')) return
+    requestAnimationFrame(() => {
+      const campo = document.querySelector<HTMLInputElement>('.ag-cell-inline-editing input[type="date"]')
+      if (!campo) return
+      // Elegir en el calendario guarda al momento. Al escribir no: cada dígito cambia la fecha y se guardaría a medias.
+      let escribiendo = false
+      campo.addEventListener('keydown', () => { escribiendo = true })
+      campo.addEventListener('change', () => { if (!escribiendo) e.api.stopEditing() })
+      try {
+        campo.showPicker?.()
+      } catch {
+        // Sin permiso del navegador: el campo sigue abierto y se puede escribir la fecha.
+      }
+    })
+  }
+
   function alEditar(e: CellEditRequestEvent<FilaGrid>) {
     const campo = e.colDef.colId as CampoEditable
     const esFecha = campo === 'fecha_aceptacion' || campo === 'fecha_activacion'
-    const valor = esFecha ? localAIso(e.newValue as string | null) : e.newValue
+    // Abrir una fecha y dejar el mismo día no guarda nada: así se conserva la hora de lo ya importado.
+    if (esFecha && e.newValue === e.oldValue) return
+    const valor = esFecha ? diaAIso(e.newValue as string | null) : e.newValue
     if (e.data) onEditar(e.data, campo, valor)
   }
 
@@ -239,6 +254,7 @@ export default function TablaSeguimiento({
         getRowId={(p) => p.data.id}
         readOnlyEdit
         onCellEditRequest={alEditar}
+        onCellEditingStarted={abrirCalendario}
         singleClickEdit
         stopEditingWhenCellsLoseFocus
         enterNavigatesVertically

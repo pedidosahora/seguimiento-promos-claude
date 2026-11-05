@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import {
   claseCelda,
+  diaAIso,
   esEditable,
+  isoADia,
   isoALocal,
   localAIso,
   textoFechaCorta,
@@ -86,6 +88,21 @@ describe('lógica de celdas', () => {
     // formato que devuelve el editor de fecha y hora con cellDataType dateTimeString
     expect(localAIso('2026-10-05T09:30:00')).toBe(new Date(2026, 9, 5, 9, 30, 0).toISOString())
     expect(isoALocal(new Date(2026, 9, 5, 9, 30, 0).toISOString())).toBe('2026-10-05T09:30:00')
+  })
+
+  it('fechas: el editor trabaja con el día local', () => {
+    expect(isoADia(new Date(2026, 9, 5, 23, 30).toISOString())).toBe('2026-10-05')
+    expect(isoADia(null)).toBeNull()
+  })
+
+  it('un día guardado es ese día a las 00:00 locales, sin cambiar de fecha por la zona horaria', () => {
+    expect(diaAIso('2026-10-05')).toBe(new Date(2026, 9, 5).toISOString())
+    expect(isoADia(diaAIso('2026-10-05'))).toBe('2026-10-05')
+    // Días del cambio de hora en Madrid.
+    expect(isoADia(diaAIso('2026-10-25'))).toBe('2026-10-25')
+    expect(isoADia(diaAIso('2026-03-29'))).toBe('2026-03-29')
+    expect(diaAIso(null)).toBeNull()
+    expect(diaAIso('')).toBeNull()
   })
 
   it('textoFechaCorta: dd/mm/aa en hora local; — sin fecha', () => {

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ETIQUETA_ENVIO, ETIQUETA_ESTADO } from '../../dominio/etiquetas'
 import { nivelAlertaCupos, pctCupos } from '../../dominio/calculos'
-import { textoFechaHora, textoPctCupos } from './celdas'
+import { textoFechaCorta, textoFechaHora, textoPctCupos } from './celdas'
 import type { FilaGrid } from './servicio'
 
 interface Comentario {
@@ -37,7 +37,7 @@ function textoValor(campo: string, v: unknown): string {
   if (v == null) return '—'
   if (campo === 'estado') return ETIQUETA_ESTADO[v as keyof typeof ETIQUETA_ESTADO] ?? String(v)
   if (campo === 'sms' || campo === 'email') return ETIQUETA_ENVIO[v as keyof typeof ETIQUETA_ENVIO] ?? String(v)
-  if (campo === 'fecha_aceptacion' || campo === 'fecha_activacion') return textoFechaHora(String(v))
+  if (campo === 'fecha_aceptacion' || campo === 'fecha_activacion') return textoFechaCorta(String(v))
   return String(v)
 }
 

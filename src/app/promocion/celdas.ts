@@ -96,6 +96,19 @@ export function localAIso(local: string | null): string | null {
   return Number.isNaN(d.getTime()) ? null : d.toISOString()
 }
 
+/** ISO (timestamptz) → 'aaaa-mm-dd' en hora local, formato del editor de fecha. */
+export function isoADia(iso: string | null): string | null {
+  return isoALocal(iso)?.slice(0, 10) ?? null
+}
+
+/** 'aaaa-mm-dd' → ISO UTC de ese día a las 00:00 locales, igual que el importador con una fecha sin hora. */
+export function diaAIso(dia: string | null): string | null {
+  if (!dia) return null
+  const [a, m, d] = dia.split('-').map(Number)
+  const fecha = new Date(a, m - 1, d)
+  return Number.isNaN(fecha.getTime()) ? null : fecha.toISOString()
+}
+
 /** Texto de una fecha y hora para mostrar. */
 export function textoFechaHora(iso: string | null): string {
   const l = isoALocal(iso)
@@ -104,7 +117,7 @@ export function textoFechaHora(iso: string | null): string {
   return `${f.split('-').reverse().join('/')} ${h.slice(0, 5)}`
 }
 
-/** Fecha corta (dd/mm/aa) para la tabla; la hora va en el tooltip. */
+/** Fecha corta (dd/mm/aa). */
 export function textoFechaCorta(iso: string | null): string {
   const l = isoALocal(iso)
   if (!l) return '—'
